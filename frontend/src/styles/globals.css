@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hebrew RTL Support */
+@layer base {
+  html {
+    font-family: 'Assistant', 'Heebo', system-ui, sans-serif;
+  }
+  
+  [dir="rtl"] {
+    text-align: right;
+  }
+  
+  [dir="ltr"] {
+    text-align: left;
+  }
+}
+
+/* Custom Components */
+@layer components {
+  .font-hebrew {
+    font-family: 'Assistant', 'Heebo', system-ui, sans-serif;
+  }
+  
+  /* RTL-aware spacing utilities */
+  .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+    margin-right: calc(var(--tw-space-x) * var(--tw-space-x-reverse));
+    margin-left: calc(var(--tw-space-x) * calc(1 - var(--tw-space-x-reverse)));
+  }
+  
+  /* Custom animations */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+  
+  /* Focus styles for better accessibility */
+  .focus-visible:focus {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+  }
+  
+  /* RTL-aware button styles */
+  [dir="rtl"] .btn-with-icon {
+    flex-direction: row-reverse;
+  }
+  
+  /* Form styles */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           transition-colors duration-200;
+  }
+  
+  [dir="rtl"] .form-input {
+    text-align: right;
+  }
+  
+  /* Modal backdrop blur */
+  .modal-backdrop {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* Accessibility improvements */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .bg-primary-500 {
+      @apply bg-blue-700;
+    }
+    
+    .text-gray-600 {
+      @apply text-gray-900;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-slide-up,
+    .animate-spin {
+      animation: none;
+    }
+    
+    .transition-all,
+    .transition-colors,
+    .transition-opacity {
+      transition: none;
+    }
+  }
+}
+
+/* Custom keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  * {
+    box-shadow: none !important;
+  }
+}

@@ -1389,4 +1389,106 @@ LOG_MAX_FILES=10  # Limit log file retention
 - **Alerting**: Set up alerts for critical service failures
 - **Backups**: Automate database and file backups
 
+## 12. Troubleshooting Common Issues
+
+### 12.1 Docker Networking Issues
+
+#### Problem: Frontend/API Not Accessible from Host
+**Symptoms:**
+- Containers appear healthy but HTTP requests timeout
+- `curl http://localhost:5173` hangs indefinitely
+- Browser cannot load the frontend despite container running
+
+**Root Cause:** iptables conflicts with Docker networking, often caused by UFW or custom firewall rules interfering with Docker's NAT chain creation.
+
+**Solution:**
+```bash
+# 1. Stop all containers
+docker-compose down
+
+# 2. Disable UFW to remove conflicting rules
+sudo ufw disable
+
+# 3. Switch to legacy iptables (avoids nftables conflicts)
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+
+# 4. Reset iptables rules
+sudo iptables -F
+sudo iptables -t nat -F
+sudo iptables -t mangle -F
+sudo iptables -X
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+
+# 5. Restart Docker to rebuild network chains
+sudo systemctl restart docker
+
+# 6. Restart the stack
+docker-compose up -d
+```
+
+#### Problem: Vite Configuration ESM Import Errors
+**Symptoms:**
+- `Error: Dynamic require of "file:///app/node_modules/tailwindcss/lib/index.js" is not supported`
+- Frontend container crashes during startup
+
+**Root Cause:** Mixing CommonJS `require()` statements with ESM modules in Vite configuration.
+
+**Solution:**
+```bash
+# Remove redundant PostCSS config from vite.config.js
+# Ensure postcss.config.js uses proper ESM format:
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+```
+
+#### Problem: TailwindCSS Not Compiling
+**Symptoms:**
+- CSS loads but styling is missing
+- `@apply` directives appear unprocessed
+- PostCSS errors in logs
+
+**Root Cause:** Syntax errors in TailwindCSS configuration file.
+
+**Solution:**
+```bash
+# Check for malformed JSON/JS in tailwind.config.js
+# Ensure proper closing braces and brackets
+# Remove any stray characters like extra `}"` at end of file
+```
+
+### 12.2 Container Health Check Failures
+
+#### Problem: Container Shows Unhealthy Status
+```bash
+# Check specific container logs
+docker-compose logs [service-name]
+
+# Test health endpoint manually
+docker-compose exec [service-name] curl -f http://localhost:[port]/health
+
+# Restart specific service
+docker-compose restart [service-name]
+```
+
+### 12.3 Database Connection Issues
+
+#### Problem: API Cannot Connect to PostgreSQL
+```bash
+# Check if PostgreSQL container is running
+docker-compose ps postgres
+
+# Test database connectivity
+docker-compose exec postgres psql -U trailguide -d trailguide_dev -c "SELECT 1;"
+
+# Check environment variables
+docker-compose exec api env | grep DB_
+```
+
 This comprehensive Docker setup ensures that TrailGuide PWA can be developed locally and deployed to production with consistency, reliability, and ease of management.

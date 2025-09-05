@@ -1,0 +1,267 @@
+{
+  "common": {
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "delete": "מחיקה",
+    "edit": "עריכה",
+    "close": "סגירה",
+    "back": "חזרה",
+    "next": "הבא",
+    "previous": "הקודם",
+    "complete": "סיום",
+    "start": "התחלה"
+  },
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "createGuide": "צור הכוונה",
+    "analytics": "נתונים",
+    "logout": "התנתקות"
+  },
+  "navigation": {
+    "dashboard": "לוח בקרה",
+    "createGuide": "צור הכוונה",
+    "myGuides": "ההכוונות שלי",
+    "logout": "התנתקות",
+    "settings": "הגדרות",
+    "home": "בית"
+  },
+  "language": {
+    "he": "עב",
+    "en": "אנ"
+  },
+  "app": {
+    "title": "TrailGuide - מערכת ניהול הכוונות",
+    "subtitle": "צור הכוונות חזותיות למרחבים לא ממופים",
+    "developmentMode": "🚧 מצב פיתוח: טען נתוני דוגמה לבדיקת תצוגה מקדימה",
+    "loadSampleData": "טען נתוני דוגמה",
+    "savedEvents": "אירועים שנשמרו",
+    "eventWithoutName": "אירוע ללא שם",
+    "stepsCount": "שלבים"
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "stats": {
+      "totalGuides": "סך הכוונות",
+      "activeGuides": "הכוונות פעילות", 
+      "totalViews": "סך צפיות",
+      "thisMonth": "החודש"
+    },
+    "quickActions": {
+      "title": "פעולות מהירות",
+      "createNew": "צור חדש",
+      "createNewDescription": "צור הכוונה חדשה",
+      "manageSettings": "נהל הגדרות",
+      "manageSettingsDescription": "ערוך הגדרות חשבון",
+      "viewAnalytics": "צפה בנתונים",
+      "viewAnalyticsDescription": "נתח ביצועים"
+    },
+    "recentGuides": {
+      "title": "הכוונות אחרונות"
+    },
+    "table": {
+      "actions": "פעולות",
+      "expiry": "תפוגה", 
+      "views": "צפיות",
+      "status": "סטטוס",
+      "guideName": "שם ההכוונה",
+      "created": "נוצר"
+    },
+    "actions": {
+      "view": "צפה",
+      "edit": "ערוך"
+    },
+    "createNewGuide": "צור הכוונה חדשה"
+  },
+  "languageSwitcher": {
+    "hebrew": "עב",
+    "english": "אנ"
+  },
+  "home": {
+    "hero": {
+      "title": "TrailGuide PWA",
+      "subtitle": "מערכת ניווט חזותית מתקדמת",
+      "description": "צור הכוונות חזותיות למרחבים לא ממופים בקלות. פתרון מקצועי לניווט באירועים, אתרי בנייה, ושווקים.",
+      "getStarted": "התחל עכשיו",
+      "learnMore": "למד עוד"
+    },
+    "features": {
+      "title": "למה לבחור ב-TrailGuide?",
+      "visual": {
+        "title": "ניווט חזותי",
+        "description": "השתמש בתמונות ותרשימים כדי להכווין משתמשים במרחבים מורכבים"
+      },
+      "mobile": {
+        "title": "מותאם לנייד",
+        "description": "עובד מושלם על כל המכשירים - סמארטפון, טאבלט או מחשב"
+      },
+      "offline": {
+        "title": "עובד אופליין",
+        "description": "המשתמשים יכולים לגשת להכוונות גם ללא חיבור לאינטרנט"
+      },
+      "hebrew": {
+        "title": "תמיכה בעברית",
+        "description": "ממשק מלא בעברית עם תמיכה ב-RTL ועיצוב מותאם"
+      }
+    },
+    "howItWorks": {
+      "title": "איך זה עובד?",
+      "step1": {
+        "title": "צור הכוונה",
+        "description": "הוסף שלבים עם תמונות ותיאורים ברורים"
+      },
+      "step2": {
+        "title": "שתף קישור",
+        "description": "קבל קישור ייחודי לשיתוף עם המשתמשים"
+      },
+      "step3": {
+        "title": "עקוב אחר השימוש",
+        "description": "ראה נתונים על כמה אנשים השתמשו בהכוונה"
+      }
+    }
+  },
+  "cta": {
+    "title": "מוכן להתחיל?",
+    "description": "צור את ההכוונה הראשונה שלך תוך דקות ספורות"
+  },
+  "auth": {
+    "loginTitle": "התחבר למערכת",
+    "loginSubtitle": "הזן את פרטי ההתחברות שלך",
+    "email": "כתובת אימייל",
+    "emailPlaceholder": "הזן את כתובת האימייל שלך",
+    "emailRequired": "נדרשת כתובת אימייל",
+    "emailInvalid": "כתובת אימייל לא תקינה",
+    "password": "סיסמה",
+    "passwordPlaceholder": "הזן את הסיסמה שלך",
+    "passwordRequired": "נדרשת סיסמה",
+    "passwordTooShort": "הסיסמה חייבת להיות באורך 6 תווים לפחות",
+    "rememberMe": "זכור אותי",
+    "forgotPassword": "שכחת סיסמה?",
+    "signIn": "התחבר",
+    "loginSuccess": "התחברת בהצלחה!",
+    "loginError": "שגיאה בהתחברות. אנא בדוק את הפרטים ונסה שוב.",
+    "logoutSuccess": "התנתקת בהצלחה!",
+    "logoutError": "שגיאה בהתנתקות",
+    "demoAccounts": "חשבונות לדוגמה"
+  },
+  "user": {
+    "profile": "פרופיל"
+  },
+  "app": {
+    "name": "TrailGuide",
+    "title": "TrailGuide - מערכת ניהול הכוונות",
+    "subtitle": "צור הכוונות חזותיות למרחבים לא ממופים",
+    "description": "מערכת ניווט חזותית מתקדמת למרחבים לא ממופים",
+    "developmentMode": "🚧 מצב פיתוח: טען נתוני דוגמה לבדיקת תצוגה מקדימה",
+    "loadSampleData": "טען נתוני דוגמה",
+    "savedEvents": "אירועים שנשמרו",
+    "eventWithoutName": "אירוע ללא שם",
+    "stepsCount": "שלבים"
+  },
+  "createGuide": {
+    "title": "צור הכוונה חדשה",
+    "editTitle": "ערוך הכוונה",
+    "basicInfo": {
+      "title": "מידע בסיסי",
+      "eventName": "שם האירוע",
+      "eventNamePlaceholder": "הזן שם לאירוע",
+      "description": "תיאור האירוע",
+      "descriptionPlaceholder": "תאר את האירוע בקצרה",
+      "location": "מקום",
+      "locationPlaceholder": "איפה מתקיים האירוע?",
+      "coverage": "כיסוי",
+      "status": "סטטוס",
+      "coverImage": "תמונת כריכה",
+      "dragDropImage": "גרור ושחרר תמונה כאן או לחץ לבחירה",
+      "imageFormats": "פורמטים נתמכים: JPEG, PNG, GIF, WebP",
+      "maxFileSize": "גודל מקסימלי: 5MB",
+      "imagePreview": "תצוגה מקדימה של התמונה",
+      "changeImage": "החלף תמונה",
+      "removeImage": "הסר תמונה"
+    },
+    "status": {
+      "published": "פורסם",
+      "draft": "טיוטה"
+    },
+    "steps": {
+      "title": "שלבי הכוונה",
+      "addStep": "הוסף שלב",
+      "uploadImage": "העלה תמונה",
+      "stepDescription": "תיאור השלב",
+      "stepPlaceholder": "תאר מה המשתמש צריך לעשות בשלב זה...",
+      "noStepsYet": "עדיין לא נוספו שלבים. הוסף את השלב הראשון כדי ליצור הכוונה."
+    },
+    "form": {
+      "creating": "יוצר הכוונה...",
+      "createEvent": "צור הכוונה",
+      "messages": {
+        "createSuccess": "ההכוונה נוצרה בהצלחה!",
+        "createError": "שגיאה ביצירת ההכוונה",
+        "nameExists": "שם ההכוונה כבר קיים",
+        "networkError": "שגיאת רשת. אנא נסה שוב.",
+        "uploadError": "שגיאה בהעלאת התמונה"
+      },
+      "validation": {
+        "eventNameRequired": "שם האירוע נדרש",
+        "eventNameTooLong": "שם האירוע ארוך מדי (מקסימום 100 תווים)",
+        "descriptionTooLong": "התיאור ארוך מדי (מקסימום 500 תווים)",
+        "locationTooLong": "המיקום ארוך מדי (מקסימום 200 תווים)",
+        "invalidFileType": "סוג קובץ לא נתמך. אנא בחר קובץ JPEG, PNG, GIF או WebP",
+        "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB"
+      }
+    },
+    "step1": {
+      "title": "מידע כללי",
+      "eventName": "שם האירוע",
+      "eventNamePlaceholder": "הזן שם לאירוע",
+      "expirationDate": "תאריך תפוגה",
+      "expirationHelp": "מתי ההכוונה תפוג?"
+    },
+    "step2": {
+      "title": "שלבי הכוונה",
+      "addStep": "הוסף שלב",
+      "stepDescription": "תיאור השלב",
+      "stepDescriptionPlaceholder": "תאר מה המשתמש צריך לעשות...",
+      "uploadImage": "העלה תמונה",
+      "imageAlt": "תיאור חלופי לתמונה",
+      "deleteStep": "מחק שלב",
+      "reorderSteps": "שנה סדר שלבים"
+    },
+    "step3": {
+      "title": "פעולות סופיות",
+      "preview": "תצוגה מקדימה",
+      "publish": "פרסם הכוונה"
+    },
+    "validation": {
+      "eventNameRequired": "שם האירוע נדרש",
+      "eventNameTooLong": "שם האירוע ארוך מדי (מקסימום 255 תווים)",
+      "expirationDateRequired": "תאריך תפוגה נדרש",
+      "expirationDatePast": "תאריך התפוגה לא יכול להיות בעבר",
+      "stepsRequired": "לפחות שלב אחד נדרש",
+      "stepDescriptionRequired": "תיאור השלב נדרש",
+      "stepDescriptionTooLong": "תיאור השלב ארוך מדי (מקסימום 1000 תווים)"
+    }
+  },
+  "preview": {
+    "title": "תצוגה מקדימה",
+    "backToEdit": "חזרה לעריכה",
+    "exitPreview": "יציאה מתצוגה מקדימה",
+    "stepCounter": "שלב {current} מתוך {total}",
+    "startNavigation": "התחל הכוונה",
+    "navigationComplete": "ההכוונה הושלמה בהצלחה!",
+    "restartNavigation": "התחל מחדש"
+  },
+  "errors": {
+    "generic": "אירעה שגיאה. אנא נסה שוב.",
+    "networkError": "שגיאת רשת. בדוק את החיבור לאינטרנט.",
+    "validationError": "נתונים לא תקינים. אנא בדוק את הטופס.",
+    "previewUnavailable": "תצוגה מקדימה לא זמינה. אנא השלם את הטופס תחילה.",
+    "pleaseFixErrors": "אנא תקן את השגיאות לפני הפרסום",
+    "noStepsAdded": "עדיין לא נוספו שלבים",
+    "step": "שלב",
+    "loadingImage": "טוען תמונה...",
+    "closeModal": "סגור"
+  }
+}

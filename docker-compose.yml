@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: trailguide-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trailguide_dev
+      POSTGRES_USER: trailguide
+      POSTGRES_PASSWORD: secure_dev_password_2024
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trailguide -d trailguide_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trailguide-network
+
+  # Redis Cache (for sessions and caching)
+  redis:
+    image: redis:7-alpine
+    container_name: trailguide-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_dev_password
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - trailguide-network
+
+  # API Backend (Node.js + Express)
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: trailguide-api
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=localhost
+      - DB_PORT=5432
+      - DB_NAME=trailguide_dev
+      - DB_USER=trailguide
+      - DB_PASSWORD=secure_dev_password_2024
+      - REDIS_URL=redis://redis_dev_password@localhost:6379
+      - JWT_SECRET=your-super-secure-jwt-secret-key-minimum-64-characters-for-production-security
+      - PORT=3000
+      - FRONTEND_URL=http://localhost:5173
+    volumes:
+      - ./api:/app
+      - api_node_modules:/app/node_modules
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (React + Vite PWA)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: trailguide-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_PUBLIC_URL=http://localhost:5173
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    networks:
+      - trailguide-network
+
+  # Development Tools Container
+  tools:
+    image: node:18-alpine
+    container_name: trailguide-tools
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: tail -f /dev/null
+    networks:
+      - trailguide-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_node_modules:
+    driver: local
+  frontend_node_modules:
+    driver: local
+
+networks:
+  trailguide-network:
+    driver: bridge

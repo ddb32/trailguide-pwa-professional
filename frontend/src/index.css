@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* =============================================================================
+   TAILWIND CSS BASE
+   ============================================================================= */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+   GLOBAL STYLES & RESET
+   ============================================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1a1a1a;
+  background-color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* =============================================================================
+   RTL SUPPORT
+   ============================================================================= */
+
+/* RTL Direction Classes */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* RTL-aware spacing utilities */
+.rtl .ml-auto { margin-right: auto; margin-left: unset; }
+.rtl .mr-auto { margin-left: auto; margin-right: unset; }
+.rtl .pl-4 { padding-right: 1rem; padding-left: unset; }
+.rtl .pr-4 { padding-left: 1rem; padding-right: unset; }
+
+/* RTL-aware flexbox */
+.rtl .flex-row-reverse { flex-direction: row; }
+.rtl .flex-row { flex-direction: row-reverse; }
+
+/* =============================================================================
+   HEBREW FONT CONFIGURATIONS
+   ============================================================================= */
+
+.font-heebo {
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Hebrew text optimization */
+[lang="he"], [dir="rtl"] {
+  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* =============================================================================
+   COMPONENT BASE STYLES
+   ============================================================================= */
+
+/* Button base styles */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+/* Input base styles */
+.input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+/* =============================================================================
+   LOADING & ANIMATION STYLES  
+   ============================================================================= */
+
+/* Loading spinner */
+.loading-spinner {
+  @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* =============================================================================
+   MOBILE-FIRST RESPONSIVE UTILITIES
+   ============================================================================= */
+
+/* Hide on mobile */
+@media (max-width: 767px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* Show only on mobile */
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* =============================================================================
+   PWA-SPECIFIC STYLES
+   ============================================================================= */
+
+/* Standalone PWA styles (when added to home screen) */
+@media (display-mode: standalone) {
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Add safe area padding for iOS */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* =============================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================================================= */
+
+/* Focus indicators */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    @apply bg-blue-800 border-2 border-blue-900;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Text utilities for Hebrew */
+.text-hebrew {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Heebo', sans-serif;
+}
+
+.text-english {
+  direction: ltr;
+  text-align: left;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Gradient backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}

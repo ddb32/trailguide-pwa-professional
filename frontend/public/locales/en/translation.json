@@ -1,0 +1,166 @@
+{
+  "app": {
+    "name": "TrailGuide",
+    "tagline": "Your Path Guide",
+    "description": "Visual navigation system for unmapped spaces"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "createGuide": "Create Guide",
+    "myGuides": "My Guides",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "common": {
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Finish",
+    "start": "Start",
+    "upload": "Upload",
+    "remove": "Remove",
+    "share": "Share",
+    "copy": "Copy"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to TrailGuide",
+      "subtitle": "Israel's First Visual Navigation System",
+      "description": "Create visual navigation guides for events, festivals and construction sites. Guide your guests step by step to their final destination.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Why Choose TrailGuide?",
+      "visual": {
+        "title": "Visual Guidance",
+        "description": "Clear images with short text instructions"
+      },
+      "mobile": {
+        "title": "Mobile Optimized",
+        "description": "Perfect experience on any mobile device"
+      },
+      "offline": {
+        "title": "Works Offline",
+        "description": "Guide loads once and works without internet connection"
+      },
+      "hebrew": {
+        "title": "Full Hebrew Support",
+        "description": "Complete Hebrew interface with right-to-left support"
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works?",
+      "step1": {
+        "title": "Create Guide",
+        "description": "Upload images and write short instructions for each step"
+      },
+      "step2": {
+        "title": "Share Link",
+        "description": "Get a unique link to share via WhatsApp, SMS or email"
+      },
+      "step3": {
+        "title": "Guests Arrive",
+        "description": "Users open the link and receive visual guidance"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeMessage": "Welcome, {{name}}",
+    "stats": {
+      "totalGuides": "Total Guides",
+      "activeGuides": "Active Guides",
+      "totalViews": "Total Views",
+      "thisMonth": "This Month"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "createNew": "Create New Guide",
+      "viewAnalytics": "View Analytics",
+      "manageSettings": "Manage Settings"
+    },
+    "recentGuides": {
+      "title": "Recent Guides",
+      "noGuides": "No guides yet",
+      "createFirst": "Create your first guide"
+    }
+  },
+  "createGuide": {
+    "title": "Create New Guide",
+    "editTitle": "Edit Guide",
+    "basicInfo": {
+      "title": "Basic Information",
+      "eventName": "Event Name",
+      "eventNamePlaceholder": "e.g., Summer Festival 2024",
+      "description": "Short Description",
+      "descriptionPlaceholder": "Brief description of the event or destination"
+    },
+    "steps": {
+      "title": "Guidance Steps",
+      "addStep": "Add Step",
+      "stepNumber": "Step {{number}}",
+      "uploadImage": "Upload Image",
+      "stepDescription": "Step Description",
+      "stepPlaceholder": "e.g., Turn left at the big tree",
+      "dragToReorder": "Drag to reorder"
+    },
+    "settings": {
+      "title": "Settings",
+      "expiration": "Guide Expiration",
+      "oneDay": "One Day",
+      "threeDays": "3 Days",
+      "oneWeek": "One Week",
+      "oneMonth": "One Month",
+      "custom": "Custom"
+    },
+    "preview": {
+      "title": "Preview",
+      "mobileView": "Mobile View"
+    },
+    "publish": {
+      "title": "Publish",
+      "publishGuide": "Publish Guide",
+      "generateLink": "Generate Link",
+      "copyLink": "Copy Link",
+      "shareOptions": "Share Options"
+    }
+  },
+  "guide": {
+    "step": "Step {{current}} of {{total}}",
+    "startNavigation": "Start Navigation",
+    "nextStep": "Next Step",
+    "prevStep": "Previous Step",
+    "completed": "You've reached your destination!",
+    "thankYou": "Thank you for using TrailGuide",
+    "backToStart": "Back to Start",
+    "shareGuide": "Share Guide"
+  },
+  "errors": {
+    "general": "An error occurred. Please try again.",
+    "network": "Network connection problem",
+    "notFound": "Page not found",
+    "notFoundMessage": "The page you requested could not be found. Perhaps the link is incorrect?",
+    "backToHome": "Back to Home",
+    "guideNotFound": "Guide not found",
+    "expired": "Guide has expired",
+    "uploadFailed": "File upload failed"
+  },
+  "success": {
+    "guideSaved": "Guide saved successfully",
+    "guidePublished": "Guide published successfully",
+    "linkCopied": "Link copied to clipboard",
+    "imageUploaded": "Image uploaded successfully"
+  }
+}

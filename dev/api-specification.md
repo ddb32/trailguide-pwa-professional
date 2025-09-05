@@ -1,5 +1,47 @@
 # API Specification - TrailGuide PWA MVP
 
+## 🎯 Implementation Status (Updated: September 2025)
+
+### ✅ **Implemented & Working**
+- **Authentication System**: Complete login/logout functionality with JWT tokens
+- **Health & Info Endpoints**: System status and API information endpoints  
+- **Security Middleware**: Rate limiting, CORS, security headers configured
+- **Hebrew RTL Support**: API responses with proper language detection
+- **Demo Users**: Test accounts created for immediate testing
+
+### ❌ **Not Yet Implemented** 
+- **Event/Guide Management**: CRUD operations for guides and events
+- **Step Management**: Adding and managing guide steps
+- **File Upload**: Image upload for step creation
+- **Public Guide Access**: End-user guide consumption endpoints
+- **Analytics**: Usage tracking and statistics endpoints
+
+### 🔗 **Working API Endpoints**
+```bash
+# Health check
+GET /api/v1/health
+
+# API information  
+GET /api/v1/info
+
+# Hebrew welcome message
+GET /api/v1/welcome (with Accept-Language: he)
+
+# Authentication
+POST /api/v1/auth/login
+POST /api/v1/auth/logout  
+GET /api/v1/auth/me
+```
+
+### 🧪 **Test Authentication**
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@example.com","password":"demo123"}'
+```
+
+---
+
 ## 1. Overview
 
 This document provides comprehensive API specifications for the TrailGuide PWA backend. The API follows RESTful principles with JSON request/response format, JWT-based authentication, and consistent error handling.
@@ -57,7 +99,7 @@ This document provides comprehensive API specifications for the TrailGuide PWA b
 
 ## 2. Authentication Endpoints
 
-### 2.1 User Login
+### 2.1 User Login ✅ **IMPLEMENTED**
 **POST** `/auth/login`
 
 Authenticate organizer and receive access/refresh tokens.
@@ -65,10 +107,23 @@ Authenticate organizer and receive access/refresh tokens.
 **Request Body:**
 ```json
 {
-  "username": "string (3-50 chars, required)",
-  "password": "string (8-100 chars, required)"
+  "email": "string (valid email, required)",
+  "password": "string (6+ chars, required)"
 }
 ```
+
+**Demo Accounts Available:**
+```json
+{
+  "email": "demo@example.com",
+  "password": "demo123"
+}
+```
+```json
+{
+  "email": "organizer@test.com", 
+  "password": "test123"
+}
 
 **Success Response (200):**
 ```json
@@ -122,7 +177,7 @@ Refresh expired access token using refresh token.
 - **401 Unauthorized**: Invalid or expired refresh token
 - **400 Bad Request**: Missing refresh token
 
-### 2.3 Logout
+### 2.3 Logout ✅ **IMPLEMENTED** 
 **POST** `/auth/logout`
 
 Invalidate current session tokens.
@@ -134,6 +189,27 @@ Invalidate current session tokens.
 {
   "success": true,
   "message": "Logged out successfully"
+}
+```
+
+### 2.4 Get Current User ✅ **IMPLEMENTED**
+**GET** `/auth/me`
+
+Get current authenticated user information.
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "username": "string",
+    "email": "string", 
+    "fullName": "string",
+    "createdAt": "timestamp"
+  }
 }
 ```
 

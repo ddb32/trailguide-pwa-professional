@@ -1,0 +1,276 @@
+{
+  "app": {
+    "name": "TrailGuide",
+    "tagline": "Your Path Guidance",
+    "description": "Visual navigation system for unmapped spaces"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "createGuide": "Create Guidance",
+    "myGuides": "My Guidance",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "common": {
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "continue": "Continue",
+    "finish": "Finish",
+    "start": "Start",
+    "upload": "Upload",
+    "remove": "Remove",
+    "share": "Share",
+    "copy": "Copy",
+    "underConstruction": "Under Construction",
+    "underDevelopment": "Under Development"
+  },
+  "status": {
+    "active": "Active",
+    "expired": "Expired",
+    "draft": "Draft",
+    "published": "Published",
+    "archived": "Archived"
+  },
+  "languageSwitcher": {
+    "english": "EN",
+    "hebrew": "עב",
+    "switchTo": "Switch to {{language}}"
+  },
+  "cta": {
+    "title": "Ready to Get Started?",
+    "description": "Create your first guidance now"
+  },
+  "guide": {
+    "viewTitle": "Guidance Number {{id}}",
+    "underDevelopment": "Guidance view page under development"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to TrailGuide",
+      "subtitle": "Israel's First Visual Navigation System",
+      "description": "Create visual navigation guidance for events, festivals and construction sites. Guide your guests step by step to their final destination.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Why Choose TrailGuide?",
+      "visual": {
+        "title": "Visual Guidance",
+        "description": "Clear images with short text instructions"
+      },
+      "mobile": {
+        "title": "Mobile Optimized",
+        "description": "Perfect experience on any mobile device"
+      },
+      "offline": {
+        "title": "Works Offline",
+        "description": "Guidance loads once and works without internet connection"
+      },
+      "hebrew": {
+        "title": "Full Hebrew Support",
+        "description": "Complete Hebrew interface with right-to-left support"
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works?",
+      "step1": {
+        "title": "Create Guidance",
+        "description": "Upload images and write short instructions for each step"
+      },
+      "step2": {
+        "title": "Share Link",
+        "description": "Get a unique link to share via WhatsApp, SMS or email"
+      },
+      "step3": {
+        "title": "Guests Arrive",
+        "description": "Users open the link and receive visual guidance"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeMessage": "Welcome, {{name}}",
+    "welcomeDescription": "Welcome to the TrailGuide dashboard. Here you can manage your guidance.",
+    "stats": {
+      "totalGuides": "Total Guidance",
+      "activeGuides": "Active Guidance",
+      "totalViews": "Total Views",
+      "thisMonth": "This Month"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "createNew": "Create New Guidance",
+      "createNewDescription": "Create new guidance",
+      "viewAnalytics": "View Analytics",
+      "viewAnalyticsDescription": "View usage analytics",
+      "manageSettings": "Manage Settings",
+      "manageSettingsDescription": "Manage account settings"
+    },
+    "recentGuides": {
+      "title": "Recent Guidance",
+      "noGuides": "No guidance yet",
+      "createFirst": "Create your first guidance"
+    },
+    "createNewGuide": "Create New Guidance",
+    "createFirstGuide": "Create First Guidance",
+    "table": {
+      "guideName": "Guidance Name",
+      "status": "Status",
+      "views": "Views",
+      "expiry": "Expiry",
+      "actions": "Actions",
+      "created": "Created"
+    },
+    "actions": {
+      "edit": "Edit",
+      "view": "View",
+      "delete": "Delete",
+      "share": "Share"
+    }
+  },
+  "createGuide": {
+    "title": "Create New Guidance",
+    "editTitle": "Edit Guidance",
+    "basicInfo": {
+      "title": "Basic Information",
+      "eventName": "Event Name",
+      "eventNamePlaceholder": "e.g., Summer Festival 2024",
+      "description": "Short Description",
+      "descriptionPlaceholder": "Brief description of the event or destination",
+      "location": "Location",
+      "locationPlaceholder": "e.g., Yarkon Park, Tel Aviv",
+      "status": "Status",
+      "coverImage": "Cover Image",
+      "uploadCoverImage": "Upload Cover Image",
+      "imagePreview": "Image Preview",
+      "removeImage": "Remove Image",
+      "changeImage": "Change Image",
+      "dragDropImage": "Drag image here or click to select",
+      "imageFormats": "Supported formats: JPG, PNG, GIF, WebP",
+      "maxFileSize": "Maximum size: 5MB"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "steps": {
+      "title": "Guidance Steps",
+      "addStep": "Add Step",
+      "stepNumber": "Step {{number}}",
+      "uploadImage": "Upload Image",
+      "stepDescription": "Step Description",
+      "stepPlaceholder": "e.g., Turn left at the big tree",
+      "dragToReorder": "Drag to reorder",
+      "noStepsYet": "No steps added yet. Add your first step to create guidance."
+    },
+    "settings": {
+      "title": "Settings",
+      "expiration": "Guidance Expiration",
+      "oneDay": "One Day",
+      "threeDays": "3 Days",
+      "oneWeek": "One Week",
+      "oneMonth": "One Month",
+      "custom": "Custom"
+    },
+    "preview": {
+      "title": "Preview",
+      "mobileView": "Mobile View"
+    },
+    "publish": {
+      "title": "Publish",
+      "publishGuide": "Publish Guidance",
+      "generateLink": "Generate Link",
+      "copyLink": "Copy Link",
+      "shareOptions": "Share Options"
+    },
+    "form": {
+      "createEvent": "Create Guidance",
+      "creating": "Creating guidance...",
+      "validation": {
+        "eventNameRequired": "Event name is required",
+        "eventNameTooLong": "Event name must be less than 255 characters",
+        "descriptionTooLong": "Description must be less than 1000 characters",
+        "locationTooLong": "Location must be less than 255 characters",
+        "invalidFileType": "Invalid file type. Only JPG, PNG, GIF, and WebP images are allowed",
+        "fileTooLarge": "File is too large. Maximum size is 5MB",
+        "invalidDate": "Invalid date"
+      },
+      "messages": {
+        "createSuccess": "Guidance created successfully!",
+        "createError": "Error creating guidance. Please try again",
+        "uploadError": "Error uploading image. Please try again",
+        "networkError": "Network error. Check your internet connection",
+        "nameExists": "A guidance with this name already exists. Please choose a different name"
+      }
+    }
+  },
+  "guide": {
+    "step": "Step {{current}} of {{total}}",
+    "startNavigation": "Start Navigation",
+    "nextStep": "Next Step",
+    "prevStep": "Previous Step",
+    "completed": "You've reached your destination!",
+    "thankYou": "Thank you for using TrailGuide",
+    "backToStart": "Back to Start",
+    "shareGuide": "Share Guidance"
+  },
+  "errors": {
+    "general": "An error occurred. Please try again.",
+    "network": "Network connection problem",
+    "notFound": "Page not found",
+    "notFoundMessage": "The page you requested could not be found. Perhaps the link is incorrect?",
+    "backToHome": "Back to Home",
+    "guideNotFound": "Guidance not found",
+    "expired": "Guidance has expired",
+    "uploadFailed": "File upload failed"
+  },
+  "success": {
+    "guideSaved": "Guidance saved successfully",
+    "guidePublished": "Guidance published successfully",
+    "linkCopied": "Link copied to clipboard",
+    "imageUploaded": "Image uploaded successfully"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email Address",
+    "password": "Password",
+    "username": "Username",
+    "fullName": "Full Name",
+    "submit": "Submit",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginError": "Login Error",
+    "invalidCredentials": "Invalid login credentials",
+    "emailRequired": "Email address is required",
+    "passwordRequired": "Password is required",
+    "emailInvalid": "Email address is invalid",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "loginSuccess": "Logged in successfully",
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account to continue",
+    "emailPlaceholder": "Enter your email address",
+    "passwordPlaceholder": "Enter your password",
+    "demoAccounts": "Demo Accounts",
+    "logoutSuccess": "Logged out successfully",
+    "logoutError": "Logout failed"
+  },
+  "user": {
+    "defaultName": "User",
+    "profile": "Profile",
+    "account": "Account"
+  }
+}

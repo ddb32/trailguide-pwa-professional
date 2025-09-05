@@ -1,0 +1,166 @@
+{
+  "app": {
+    "name": "טריילגייד",
+    "tagline": "מדריך השביל שלך",
+    "description": "מערכת ניווט חזותית עבור מרחבים לא ממופים"
+  },
+  "navigation": {
+    "home": "בית",
+    "dashboard": "לוח הבקרה", 
+    "createGuide": "צור מדריך",
+    "myGuides": "המדריכים שלי",
+    "settings": "הגדרות",
+    "logout": "התנתק"
+  },
+  "common": {
+    "next": "הבא",
+    "previous": "הקודם",
+    "save": "שמור",
+    "cancel": "ביטול",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "create": "צור",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "confirm": "אשר",
+    "back": "חזור",
+    "continue": "המשך",
+    "finish": "סיום",
+    "start": "התחל",
+    "upload": "העלה",
+    "remove": "הסר",
+    "share": "שתף",
+    "copy": "העתק"
+  },
+  "home": {
+    "hero": {
+      "title": "ברוכים הבאים לטריילגייד",
+      "subtitle": "מערכת הניווט החזותית הראשונה מסוגה בישראל",
+      "description": "צרו מדריכי ניווט חזותיים לאירועים, פסטיבלים ואתרי בנייה. הדריכו את האורחים שלכם צעד אחר צעד עד ליעד הסופי.",
+      "getStarted": "התחילו עכשיו",
+      "learnMore": "למדו עוד"
+    },
+    "features": {
+      "title": "למה לבחור בטריילגייד?",
+      "visual": {
+        "title": "הדרכה חזותית",
+        "description": "תמונות ברורות עם הוראות טקסט קצרות"
+      },
+      "mobile": {
+        "title": "מותאם לנייד",
+        "description": "חוויה מושלמת על כל מכשיר נייד"
+      },
+      "offline": {
+        "title": "עובד בלי אינטרנט",
+        "description": "המדריך נטען פעם אחת ועובד גם ללא חיבור לרשת"
+      },
+      "hebrew": {
+        "title": "תמיכה מלאה בעברית",
+        "description": "ממשק בעברית מלא עם תמיכה בכיוון מימין לשמאל"
+      }
+    },
+    "howItWorks": {
+      "title": "איך זה עובד?",
+      "step1": {
+        "title": "צרו מדריך",
+        "description": "העלו תמונות וכתבו הוראות קצרות לכל צעד"
+      },
+      "step2": {
+        "title": "שתפו קישור",
+        "description": "קבלו קישור ייחודי לשתף בווטסאפ, SMS או מייל"
+      },
+      "step3": {
+        "title": "האורחים מגיעים",
+        "description": "המשתמשים פותחים את הקישור ומקבלים הדרכה חזותית"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "לוח הבקרה",
+    "welcomeMessage": "ברוכים הבאים, {{name}}",
+    "stats": {
+      "totalGuides": "סה\"כ מדריכים",
+      "activeGuides": "מדריכים פעילים", 
+      "totalViews": "סה\"כ צפיות",
+      "thisMonth": "החודש"
+    },
+    "quickActions": {
+      "title": "פעולות מהירות",
+      "createNew": "צור מדריך חדש",
+      "viewAnalytics": "הצג סטטיסטיקות",
+      "manageSettings": "נהל הגדרות"
+    },
+    "recentGuides": {
+      "title": "מדריכים אחרונים",
+      "noGuides": "אין מדריכים עדיין",
+      "createFirst": "צרו את המדריך הראשון שלכם"
+    }
+  },
+  "createGuide": {
+    "title": "צור מדריך חדש",
+    "editTitle": "ערוך מדריך",
+    "basicInfo": {
+      "title": "פרטים בסיסיים",
+      "eventName": "שם האירוע",
+      "eventNamePlaceholder": "לדוגמה: פסטיבל הקיץ 2024",
+      "description": "תיאור קצר",
+      "descriptionPlaceholder": "תיאור קצר של האירוע או היעד"
+    },
+    "steps": {
+      "title": "צעדי ההדרכה",
+      "addStep": "הוסף צעד",
+      "stepNumber": "צעד {{number}}",
+      "uploadImage": "העלה תמונה",
+      "stepDescription": "תיאור הצעד",
+      "stepPlaceholder": "לדוגמה: פנו שמאלה ליד העץ הגדול",
+      "dragToReorder": "גררו כדי לשנות סדר"
+    },
+    "settings": {
+      "title": "הגדרות",
+      "expiration": "תוקף המדריך",
+      "oneDay": "יום אחד",
+      "threeDays": "3 ימים", 
+      "oneWeek": "שבוע",
+      "oneMonth": "חודש",
+      "custom": "מותאם אישית"
+    },
+    "preview": {
+      "title": "תצוגה מקדימה",
+      "mobileView": "תצוגת נייד"
+    },
+    "publish": {
+      "title": "פרסום",
+      "publishGuide": "פרסם מדריך",
+      "generateLink": "צור קישור",
+      "copyLink": "העתק קישור",
+      "shareOptions": "אפשרויות שיתוף"
+    }
+  },
+  "guide": {
+    "step": "צעד {{current}} מתוך {{total}}",
+    "startNavigation": "התחל ניווט", 
+    "nextStep": "הצעד הבא",
+    "prevStep": "הצעד הקודם",
+    "completed": "הגעתם ליעד!",
+    "thankYou": "תודה שהשתמשתם בטריילגייד",
+    "backToStart": "חזור להתחלה",
+    "shareGuide": "שתף את המדריך"
+  },
+  "errors": {
+    "general": "אירעה שגיאה. אנא נסו שוב.",
+    "network": "בעיה בחיבור לרשת",
+    "notFound": "הדף לא נמצא",
+    "notFoundMessage": "העמוד שביקשתם לא נמצא. אולי הקישור שגוי?",
+    "backToHome": "חזר לבית",
+    "guideNotFound": "המדריך לא נמצא",
+    "expired": "המדריך פג תוקף",
+    "uploadFailed": "העלאת הקובץ נכשלה"
+  },
+  "success": {
+    "guideSaved": "המדריך נשמר בהצלחה",
+    "guidePublished": "המדריך פורסם בהצלחה",
+    "linkCopied": "הקישור הועתק ללוח",
+    "imageUploaded": "התמונה הועלתה בהצלחה"
+  }
+}
