@@ -1,0 +1,199 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: trailguide-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trailguide_production
+      POSTGRES_USER: trailguide_prod
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - trailguide-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trailguide_prod -d trailguide_production"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Only expose to localhost in production for security
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  # Redis Cache (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: trailguide-redis-prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - trailguide-prod-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    # Only expose to localhost in production for security
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  # API Backend (Production)
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.prod
+    container_name: trailguide-api-prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=trailguide_production
+      - DB_USER=trailguide_prod
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_URL=redis://${REDIS_PASSWORD}@redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - SESSION_SECRET=${SESSION_SECRET}
+      - PORT=3000
+      - FRONTEND_URL=${FRONTEND_URL}
+      - CORS_ORIGIN=${FRONTEND_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - api_prod_cache:/app/.cache
+    networks:
+      - trailguide-prod-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (Production with built-in nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=${API_URL}
+        - VITE_PUBLIC_URL=${PUBLIC_URL}
+    container_name: trailguide-frontend-prod
+    restart: unless-stopped
+    networks:
+      - trailguide-prod-network
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # NGINX Reverse Proxy (Main entry point)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: trailguide-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/cache:/var/cache/nginx
+    networks:
+      - trailguide-prod-network
+    depends_on:
+      - frontend
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NGINX_HOST=${DOMAIN_NAME:-localhost}
+      - NGINX_PORT=80
+
+  # Certbot for SSL certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: trailguide-certbot
+    volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/certbot-webroot:/var/www/certbot
+    networks:
+      - trailguide-prod-network
+    profiles:
+      - ssl
+    command: >
+      certonly --webroot --webroot-path=/var/www/certbot
+      --email ${SSL_EMAIL:-admin@yourdomain.com}
+      --agree-tos --no-eff-email
+      -d ${DOMAIN_NAME:-yourdomain.com}
+
+  # Database backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: trailguide-backup
+    restart: "no"
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    networks:
+      - trailguide-prod-network
+    depends_on:
+      - postgres
+    profiles:
+      - backup
+    command: ["/backup.sh"]
+
+volumes:
+  postgres_prod_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
+  redis_prod_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
+  api_prod_cache:
+    driver: local
+
+networks:
+  trailguide-prod-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: trailguide-prod

@@ -1,0 +1,24 @@
+{
+  "errors": {
+    "fileRequired": "קובץ נדרש",
+    "invalidFileType": "סוג קובץ לא תקין. רק תמונות JPEG, PNG, GIF ו-WebP מותרות",
+    "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB",
+    "uploadFailed": "העלאת הקובץ נכשלה",
+    "processingFailed": "עיבוד הקובץ נכשל",
+    "saveFailed": "שמירת הקובץ נכשלה",
+    "deleteFailed": "מחיקת הקובץ נכשלה",
+    "notFound": "הקובץ לא נמצא",
+    "corruptedFile": "נראה שהקובץ פגום",
+    "unsupportedFormat": "פורמט קובץ לא נתמך"
+  },
+  "success": {
+    "uploadComplete": "הקובץ הועלה בהצלחה",
+    "deleteComplete": "הקובץ נמחק בהצלחה",
+    "processComplete": "הקובץ עובד בהצלחה"
+  },
+  "limits": {
+    "maxFileSize": "גודל מקסימלי לקובץ: 5MB",
+    "supportedFormats": "פורמטים נתמכים: JPEG, PNG, GIF, WebP",
+    "maxFiles": "מספר הקבצים המקסימלי חרג"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "errors": {
+    "fileRequired": "File is required",
+    "invalidFileType": "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed",
+    "fileTooLarge": "File size too large. Maximum size is 5MB",
+    "uploadFailed": "File upload failed",
+    "processingFailed": "File processing failed",
+    "saveFailed": "Failed to save file",
+    "deleteFailed": "Failed to delete file",
+    "notFound": "File not found",
+    "corruptedFile": "File appears to be corrupted",
+    "unsupportedFormat": "Unsupported file format"
+  },
+  "success": {
+    "uploadComplete": "File uploaded successfully",
+    "deleteComplete": "File deleted successfully",
+    "processComplete": "File processed successfully"
+  },
+  "limits": {
+    "maxFileSize": "Maximum file size: 5MB",
+    "supportedFormats": "Supported formats: JPEG, PNG, GIF, WebP",
+    "maxFiles": "Maximum number of files exceeded"
+  }
+}

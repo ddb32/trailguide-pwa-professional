@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param, validationResult } = require('express-validator');
 const { query, getClient } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { uploadStepImage, handleUploadError, deleteUploadedFile } = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -9,50 +10,50 @@ const router = express.Router();
 const stepValidation = [
   body('step_order')
     .isInt({ min: 1 })
-    .withMessage('Step order must be a positive integer'),
+    .withMessage((value, { req }) => req.t('validation:step.orderPositive')),
   body('description')
     .trim()
     .isLength({ min: 1, max: 500 })
-    .withMessage('Description must be between 1 and 500 characters'),
+    .withMessage((value, { req }) => req.t('validation:step.descriptionLength')),
   body('image_url')
     .optional()
     .isURL()
-    .withMessage('Image URL must be a valid URL'),
+    .withMessage((value, { req }) => req.t('validation:general.invalidFormat')),
   body('image_alt')
     .optional()
     .isLength({ max: 500 })
-    .withMessage('Image alt text must be less than 500 characters'),
+    .withMessage((value, { req }) => req.t('validation:general.valueTooLong')),
   body('metadata')
     .optional()
     .isObject()
-    .withMessage('Metadata must be an object')
+    .withMessage((value, { req }) => req.t('validation:general.invalidFormat'))
 ];
 
 const stepUpdateValidation = [
   body('step_order')
     .optional()
     .isInt({ min: 1 })
-    .withMessage('Step order must be a positive integer'),
+    .withMessage((value, { req }) => req.t('validation:step.orderPositive')),
   body('description')
     .optional()
     .trim()
     .isLength({ min: 1, max: 500 })
-    .withMessage('Description must be between 1 and 500 characters'),
+    .withMessage((value, { req }) => req.t('validation:step.descriptionLength')),
   body('image_url')
     .optional()
     .custom((value) => {
       if (value === null || value === '') return true; // Allow null/empty for removal
       return /^https?:\/\/.+/.test(value); // Simple URL validation
     })
-    .withMessage('Image URL must be a valid URL or null'),
+    .withMessage((value, { req }) => req.t('validation:general.invalidFormat')),
   body('image_alt')
     .optional()
     .isLength({ max: 500 })
-    .withMessage('Image alt text must be less than 500 characters'),
+    .withMessage((value, { req }) => req.t('validation:general.valueTooLong')),
   body('metadata')
     .optional()
     .isObject()
-    .withMessage('Metadata must be an object')
+    .withMessage((value, { req }) => req.t('validation:general.invalidFormat'))
 ];
 
 const uuidValidation = [
@@ -89,7 +90,7 @@ router.post('/:eventId/steps', authenticateToken, [...uuidValidation, ...stepVal
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
@@ -100,6 +101,9 @@ router.post('/:eventId/steps', authenticateToken, [...uuidValidation, ...stepVal
     const client = await getClient();
     try {
       await client.query('BEGIN');
+      
+      // Set statement timeout to prevent stuck transactions
+      await client.query('SET statement_timeout = 30000'); // 30 seconds
 
       // Verify event exists and belongs to user
       const eventResult = await client.query(
@@ -153,7 +157,7 @@ router.post('/:eventId/steps', authenticateToken, [...uuidValidation, ...stepVal
       res.status(201).json({
         success: true,
         data: stepResult.rows[0],
-        message: 'Step created successfully',
+        message: req.t('api:steps.createSuccess'),
         timestamp: new Date().toISOString()
       });
 
@@ -165,19 +169,63 @@ router.post('/:eventId/steps', authenticateToken, [...uuidValidation, ...stepVal
     }
 
   } catch (error) {
-    console.error('Create step error:', error);
+    console.error('Create step error:', {
+      eventId: req.params.eventId,
+      userId: req.user?.id,
+      message: error.message,
+      code: error.code,
+      constraint: error.constraint,
+      detail: error.detail
+    });
 
-    // Handle unique constraint violation
-    if (error.code === '23505') {
-      return res.status(400).json({
-        success: false,
-        message: 'A step with this order already exists'
-      });
+    // Enhanced error handling with comprehensive constraint violations
+    let errorMessage = 'Failed to create step';
+    let statusCode = 500;
+
+    // Handle specific database constraint violations
+    if (error.code === '23505') { // unique_violation
+      if (error.constraint === 'steps_event_id_step_order_key') {
+        errorMessage = 'A step with this order already exists in this guide';
+        statusCode = 409;
+      } else {
+        errorMessage = 'This step conflicts with an existing step';
+        statusCode = 409;
+      }
+    } else if (error.code === '23514') { // check_violation
+      if (error.constraint === 'step_order_positive') {
+        errorMessage = 'Step order must be a positive number';
+        statusCode = 400;
+      } else if (error.constraint === 'description_length') {
+        errorMessage = 'Step description must be between 1 and 500 characters';
+        statusCode = 400;
+      } else {
+        errorMessage = 'Step data does not meet requirements';
+        statusCode = 400;
+      }
+    } else if (error.code === '23503') { // foreign_key_violation
+      if (error.constraint === 'steps_event_id_fkey') {
+        errorMessage = 'Guide not found or access denied';
+        statusCode = 404;
+      } else {
+        errorMessage = 'Invalid reference data';
+        statusCode = 400;
+      }
+    } else if (error.code === '25001') { // serialization_failure
+      errorMessage = 'Database conflict occurred. Please try again';
+      statusCode = 503;
+    } else if (error.code === '57014') { // statement_timeout
+      errorMessage = 'Step creation took too long. Please try again';
+      statusCode = 408;
+    } else if (error.code === '08006') { // connection_failure
+      errorMessage = 'Database connection error. Please try again';
+      statusCode = 503;
     }
 
-    res.status(500).json({
+    res.status(statusCode).json({
       success: false,
-      message: 'Failed to create step'
+      message: errorMessage,
+      error_code: error.code || 'UNKNOWN_ERROR',
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -189,7 +237,7 @@ router.get('/:id', authenticateToken, uuidValidation, async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
@@ -226,7 +274,7 @@ router.get('/:id', authenticateToken, uuidValidation, async (req, res) => {
     res.status(200).json({
       success: true,
       data: stepResult.rows[0],
-      message: 'Step retrieved successfully',
+      message: req.t('api:steps.retrieveSuccess'),
       timestamp: new Date().toISOString()
     });
 
@@ -234,7 +282,7 @@ router.get('/:id', authenticateToken, uuidValidation, async (req, res) => {
     console.error('Get step error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve step'
+      message: req.t('api:steps.retrieveFailed')
     });
   }
 });
@@ -246,7 +294,7 @@ router.put('/:id', authenticateToken, [...uuidValidation, ...stepUpdateValidatio
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
@@ -270,7 +318,7 @@ router.put('/:id', authenticateToken, [...uuidValidation, ...stepUpdateValidatio
         await client.query('ROLLBACK');
         return res.status(404).json({
           success: false,
-          message: 'Step not found or access denied'
+          message: req.t('api:steps.notFound')
         });
       }
 
@@ -397,7 +445,7 @@ router.delete('/:id', authenticateToken, uuidValidation, async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
@@ -420,7 +468,7 @@ router.delete('/:id', authenticateToken, uuidValidation, async (req, res) => {
         await client.query('ROLLBACK');
         return res.status(404).json({
           success: false,
-          message: 'Step not found or access denied'
+          message: req.t('api:steps.notFound')
         });
       }
 
@@ -485,7 +533,7 @@ router.patch('/reorder', authenticateToken, [
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
@@ -576,6 +624,126 @@ router.patch('/reorder', authenticateToken, [
     res.status(500).json({
       success: false,
       message: 'Failed to reorder steps'
+    });
+  }
+});
+
+// POST /api/v1/steps/:id/image - Upload image for a specific step
+router.post('/:id/image', authenticateToken, [...uuidValidation, uploadStepImage, handleUploadError], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Clean up uploaded file if validation fails
+      if (req.file) {
+        deleteUploadedFile(req.file.filename);
+      }
+      return res.status(400).json({
+        success: false,
+        message: req.t('validation:general.validationFailed'),
+        errors: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided'
+      });
+    }
+
+    const client = await getClient();
+    try {
+      await client.query('BEGIN');
+
+      // Check if step exists and user has access
+      const stepResult = await client.query(`
+        SELECT s.id, s.event_id, s.image_url as current_image_url
+        FROM steps s
+        JOIN events e ON s.event_id = e.id
+        WHERE s.id = $1 AND e.organizer_id = $2
+      `, [id, req.user.id]);
+
+      if (stepResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        // Clean up uploaded file
+        deleteUploadedFile(req.file.filename);
+        return res.status(404).json({
+          success: false,
+          message: req.t('api:steps.notFound')
+        });
+      }
+
+      const step = stepResult.rows[0];
+      const imageUrl = `/api/v1/images/${req.file.filename}`;
+      const imageAlt = `Step ${step.id} image`;
+
+      // Update step with new image URL
+      const updateResult = await client.query(`
+        UPDATE steps 
+        SET 
+          image_url = $1, 
+          image_alt = $2,
+          updated_at = NOW()
+        WHERE id = $3
+        RETURNING 
+          id,
+          event_id,
+          step_order,
+          image_url,
+          image_alt,
+          description,
+          view_count,
+          completion_count,
+          metadata,
+          created_at,
+          updated_at
+      `, [imageUrl, imageAlt, id]);
+
+      await client.query('COMMIT');
+
+      // Clean up old image if it exists (handle both old and new URL patterns)
+      if (step.current_image_url) {
+        let oldFilename = null;
+        if (step.current_image_url.startsWith('/api/v1/uploads/')) {
+          oldFilename = step.current_image_url.replace('/api/v1/uploads/', '');
+        } else if (step.current_image_url.startsWith('/api/v1/images/')) {
+          oldFilename = step.current_image_url.replace('/api/v1/images/', '');
+        }
+        
+        if (oldFilename) {
+          deleteUploadedFile(oldFilename);
+        }
+      }
+
+      res.status(200).json({
+        success: true,
+        data: updateResult.rows[0],
+        message: 'Step image uploaded successfully',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (dbError) {
+      await client.query('ROLLBACK');
+      // Clean up uploaded file on database error
+      deleteUploadedFile(req.file.filename);
+      throw dbError;
+    } finally {
+      client.release();
+    }
+
+  } catch (error) {
+    console.error('Upload step image error:', error);
+    
+    // Clean up uploaded file on any error
+    if (req.file) {
+      deleteUploadedFile(req.file.filename);
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload step image'
     });
   }
 });

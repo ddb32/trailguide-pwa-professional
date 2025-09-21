@@ -1,0 +1,21 @@
+{
+  "errors": {
+    "internalError": "שגיאה פנימית בשרת",
+    "databaseError": "פעולת מסד הנתונים נכשלה",
+    "notFound": "המשאב לא נמצא",
+    "accessDenied": "הגישה נדחתה",
+    "unauthorized": "נדרש אימות",
+    "forbidden": "אין הרשאות מספיקות"
+  },
+  "success": {
+    "operationCompleted": "הפעולה הושלמה בהצלחה",
+    "dataRetrieved": "הנתונים נטענו בהצלחה",
+    "resourceCreated": "המשאב נוצר בהצלחה",
+    "resourceUpdated": "המשאב עודכן בהצלחה",
+    "resourceDeleted": "המשאב נמחק בהצלחה"
+  },
+  "rateLimiting": {
+    "tooManyRequests": "יותר מדי בקשות מכתובת זו, אנא נסה שוב מאוחר יותר",
+    "tooManyLoginAttempts": "יותר מדי ניסיונות התחברות, אנא נסה שוב מאוחר יותר"
+  }
+}

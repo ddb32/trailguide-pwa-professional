@@ -4,49 +4,39 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguageDirection } from '../../hooks/useLanguageDirection';
+import { Icon } from '../common/Icon';
 import i18n from '../../i18n/i18n';
-
-// Icons (using simple unicode icons for now - can be replaced with icon library)
-const Icons = {
-  menu: '☰',
-  close: '✕',
-  dashboard: '📊',
-  create: '➕',
-  guides: '📋',
-  settings: '⚙️',
-  logout: '🚪',
-  logo: '🧭'
-};
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const { t } = useTranslation();
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isAdmin } = useAuth();
   const { isRTL, conditionalClass, languageClasses } = useLanguageDirection();
   const location = useLocation();
   const navigate = useNavigate();
 
   const navigation = [
     {
-      name: t('navigation.dashboard'),
+      name: t('navigation.myGuides'),
       href: '/app/dashboard',
-      icon: Icons.dashboard,
+      icon: 'guides',
       current: location.pathname === '/app/dashboard'
     },
     {
       name: t('navigation.createGuide'),
       href: '/app/create',
-      icon: Icons.create,
+      icon: 'create',
       current: location.pathname === '/app/create'
     },
-    {
-      name: t('navigation.myGuides'),
-      href: '/app/dashboard',
-      icon: Icons.guides,
-      current: false
-    }
+    // Admin dashboard - only shown for admin users
+    ...(isAdmin ? [{
+      name: t('admin.dashboard.title'),
+      href: '/admin',
+      icon: 'adminDashboard',
+      current: location.pathname === '/admin'
+    }] : [])
   ];
 
   const handleLogout = async () => {
@@ -60,214 +50,174 @@ const Layout = () => {
     }
   };
 
-  const handleLanguageChange = (language) => {
-    i18n.changeLanguage(language);
-    setIsLanguageMenuOpen(false);
+  const handleLanguageChange = async (language) => {
+    try {
+      await i18n.changeLanguage(language);
+      // Add a subtle success feedback
+      const event = new CustomEvent('languageChanged', {
+        detail: { language, label: language === 'he' ? 'עברית' : 'English' }
+      });
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Failed to change language:', error);
+    } finally {
+      // Close menu with a slight delay for better UX
+      setTimeout(() => {
+        setIsLanguageMenuOpen(false);
+      }, 150);
+    }
   };
 
   return (
     <div className={`min-h-screen bg-gray-50 ${languageClasses}`}>
-      {/* Mobile sidebar overlay */}
+      {/* Mobile menu overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 md:hidden"
+        <div
+          className="fixed inset-0 z-40 md:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         >
-          <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-all duration-300"></div>
         </div>
       )}
 
-      {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 z-50 flex w-72 flex-col bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:translate-x-0
-        ${isRTL ? 'right-0' : 'left-0'}
-        ${sidebarOpen ? 'translate-x-0' : (isRTL ? 'translate-x-full' : '-translate-x-full')}
-        md:static md:z-auto md:shadow-none
-      `}>
-        {/* Sidebar header */}
-        <div className="flex h-16 items-center justify-between bg-blue-600 px-6">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl">{Icons.logo}</span>
-            <span className="text-xl font-bold text-white">
-              {t('app.name')}
-            </span>
-          </div>
-          
-          {/* Close button for mobile */}
-          <button
-            className="md:hidden text-white hover:text-blue-200 transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <span className="text-xl">{Icons.close}</span>
-          </button>
-        </div>
+      {/* Top Navigation Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Left side - Logo and Navigation */}
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-8`}>
+              {/* Logo */}
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
+                <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
+                  <Icon name="logo" size="md" className="text-white" ariaHidden />
+                </div>
+                <div className="hidden sm:block">
+                  <span className="text-lg font-bold text-gray-900">{t('app.name')}</span>
+                </div>
+              </div>
 
-        {/* Navigation */}
-        <nav className="mt-8 flex-1 space-y-1 px-4">
-          {navigation.map((item) => {
-            const isActive = item.current;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`
-                  group flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200
-                  ${isActive
-                    ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }
-                  ${isRTL ? 'flex-row-reverse space-x-reverse' : 'flex-row'}
-                `}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className={conditionalClass.ml('3')}>{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Sidebar footer */}
-        <div className="border-t border-gray-200 p-4">
-          <button
-            onClick={handleLogout}
-            className={`
-              group flex w-full items-center rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-all duration-200
-              ${isRTL ? 'flex-row-reverse space-x-reverse' : 'flex-row'}
-            `}
-          >
-            <span className="text-lg">{Icons.logout}</span>
-            <span className={conditionalClass.ml('3')}>{t('navigation.logout')}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className={`
-        flex flex-1 flex-col
-        ${isRTL ? 'md:mr-72' : 'md:ml-72'}
-      `}>
-        {/* Top bar */}
-        <div className="sticky top-0 z-10 bg-white shadow-sm">
-          <div className="flex h-16 items-center justify-between px-6">
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-xl">{Icons.menu}</span>
-            </button>
-
-            {/* Page title */}
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                {/* Dynamic title based on current route */}
-                {location.pathname === '/app/dashboard' && t('dashboard.title')}
-                {location.pathname === '/app/create' && t('createGuide.title')}
-                {location.pathname.includes('/app/edit') && t('createGuide.editTitle')}
-              </h1>
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex space-x-4">
+                {navigation.map((item) => {
+                  const isActive = item.current;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`
+                        flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                        ${isActive
+                          ? 'bg-primary-100 text-primary-700'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        }
+                      `}
+                    >
+                      <Icon
+                        name={item.icon}
+                        size="sm"
+                        className={`${isRTL ? 'ml-2' : 'mr-2'} ${isActive ? 'text-primary-600' : 'text-gray-500'}`}
+                        ariaHidden
+                      />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </nav>
             </div>
 
-            {/* Right side actions */}
-            <div className="flex items-center space-x-4">
-              {/* Language switcher */}
+            {/* Right side - User menu and language switcher */}
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-4`}>
+              {/* Mobile menu button */}
+              <button
+                className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+                onClick={() => setSidebarOpen(true)}
+                aria-label={t('common.menu')}
+              >
+                <Icon name="menu" size="md" ariaHidden />
+              </button>
+
+              {/*
+                LANGUAGE SWITCHER - TEMPORARILY HIDDEN FOR HEBREW-ONLY SYSTEM
+
+                Uncomment this section to restore multilingual functionality.
+                All language switching infrastructure is preserved and ready for reactivation.
+              */}
+              {/*
               <div className="relative">
                 <button
                   onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
-                  className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors flex items-center space-x-1"
-                  aria-expanded={isLanguageMenuOpen}
-                  aria-haspopup="true"
+                  className={`flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-200 hover:border-blue-300 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group ${isLanguageMenuOpen ? 'from-blue-100 to-blue-200 border-blue-300 shadow-md' : ''}`}
                 >
-                  <span>{i18n.language === 'he' ? t('languageSwitcher.hebrew') : t('languageSwitcher.english')}</span>
-                  <span className={`text-xs transform transition-transform duration-200 ${isLanguageMenuOpen ? 'rotate-180' : ''}`}>
-                    ▼
+                  <span className="text-sm font-semibold text-blue-700 group-hover:text-blue-800 min-w-[2rem]">
+                    {i18n.language === 'he' ? 'עב' : 'EN'}
                   </span>
                 </button>
 
-                {/* Language dropdown menu */}
+                {/* Enhanced Language dropdown */}
+                {/*
                 {isLanguageMenuOpen && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-10" 
-                      onClick={() => setIsLanguageMenuOpen(false)}
-                    ></div>
-                    <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-20 bg-white rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5`}>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsLanguageMenuOpen(false)}></div>
+                    <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-3 w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 backdrop-blur-sm animate-in slide-in-from-top-2 duration-200`}>
                       <button
                         onClick={() => handleLanguageChange('he')}
-                        className={`block w-full text-left px-3 py-2 text-sm transition-colors ${
-                          i18n.language === 'he' 
-                            ? 'bg-blue-50 text-blue-600 font-medium' 
-                            : 'text-gray-700 hover:bg-gray-100'
+                        className={`flex items-center w-full px-4 py-3 text-base font-medium transition-all duration-200 ${
+                          i18n.language === 'he'
+                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                         }`}
                       >
-                        עב
+                        <span className="text-lg mr-3">🇮🇱</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">עברית</div>
+                          <div className="text-xs text-gray-500">Hebrew</div>
+                        </div>
                       </button>
+
                       <button
                         onClick={() => handleLanguageChange('en')}
-                        className={`block w-full text-left px-3 py-2 text-sm transition-colors ${
-                          i18n.language === 'en' 
-                            ? 'bg-blue-50 text-blue-600 font-medium' 
-                            : 'text-gray-700 hover:bg-gray-100'
+                        className={`flex items-center w-full px-4 py-3 text-base font-medium transition-all duration-200 ${
+                          i18n.language === 'en'
+                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
+                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
                         }`}
                       >
-                        EN
+                        <span className="text-lg mr-3">🇺🇸</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">English</div>
+                          <div className="text-xs text-gray-500">English</div>
+                        </div>
                       </button>
                     </div>
                   </>
                 )}
               </div>
+              */}
 
               {/* User menu */}
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  aria-expanded={isUserMenuOpen}
-                  aria-haspopup="true"
+                  className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-200"
                 >
                   {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
                 </button>
 
-                {/* User dropdown menu */}
+                {/* User dropdown */}
                 {isUserMenuOpen && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-10" 
-                      onClick={() => setIsUserMenuOpen(false)}
-                    ></div>
-                    <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20 ring-1 ring-black ring-opacity-5`}>
-                      <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                        <div className="font-medium">{user?.fullName || user?.username}</div>
-                        <div className="text-gray-500 text-xs">{user?.email}</div>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsUserMenuOpen(false)}></div>
+                    <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20 border`}>
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <div className="text-sm font-medium text-gray-900">{user?.fullName || user?.username}</div>
+                        <div className="text-xs text-gray-600">{user?.email}</div>
                       </div>
-                      
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          navigate('/app/profile');
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        👤 {t('user.profile')}
-                      </button>
-                      
-                      <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false);
-                          navigate('/app/settings');
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                      >
-                        ⚙️ {t('navigation.settings')}
-                      </button>
-                      
-                      <hr className="my-1" />
-                      
                       <button
                         onClick={handleLogout}
-                        disabled={isLoading}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        🚪 {isLoading ? t('common.loading') : t('navigation.logout')}
+                        <Icon name="logout" size="sm" className="text-gray-500 mr-2" ariaHidden />
+                        {t('navigation.logout')}
                       </button>
                     </div>
                   </>
@@ -276,14 +226,83 @@ const Layout = () => {
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Main content area */}
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
+      {/* Mobile Navigation Menu */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="fixed inset-0 bg-gray-900/60" onClick={() => setSidebarOpen(false)}></div>
+          <div className={`fixed ${isRTL ? 'right-0' : 'left-0'} top-0 h-full w-72 bg-white shadow-xl transform transition-transform`}>
+            <div className="p-4 border-b">
+              <div className={`flex items-center justify-between`}>
+                <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
+                  <div className="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg">
+                    <Icon name="logo" size="md" className="text-white" ariaHidden />
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">{t('app.name')}</span>
+                </div>
+                <button onClick={() => setSidebarOpen(false)} className="p-2 text-gray-500 hover:text-gray-700 rounded-lg">
+                  <Icon name="close" size="md" ariaHidden />
+                </button>
+              </div>
+            </div>
+            <nav className="p-4 space-y-2">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium ${
+                    item.current ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon name={item.icon} size="sm" className={`${isRTL ? 'ml-2' : 'mr-2'}`} ariaHidden />
+                  {item.name}
+                </Link>
+              ))}
+
+              {/* Mobile Language Selector */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="px-3 py-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+                    {t('common.language', 'Language')}
+                  </p>
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => handleLanguageChange('he')}
+                      className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        i18n.language === 'he'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'
+                      }`}
+                    >
+                      <span className="text-base mr-3">🇮🇱</span>
+                      <span className="flex-1 text-left">עברית</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleLanguageChange('en')}
+                      className={`flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        i18n.language === 'en'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'
+                      }`}
+                    >
+                      <span className="text-base mr-3">🇺🇸</span>
+                      <span className="flex-1 text-left">English</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </nav>
           </div>
-        </main>
-      </div>
+        </div>
+      )}
+
+      {/* Main Content - Full Screen Layout */}
+      <main className="min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8 xl:px-12 py-6 lg:py-8">
+        <Outlet />
+      </main>
     </div>
   );
 };

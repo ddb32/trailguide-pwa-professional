@@ -4,18 +4,21 @@ import { useTranslation } from 'react-i18next';
 import { Toaster } from 'react-hot-toast';
 
 // Auth Context
-import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
+import { AuthProvider, ProtectedRoute, AdminRoute } from './contexts/AuthContext';
 
 // Layout Components
 import Layout from './components/Layout/Layout';
 
 // Pages
-import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CreateGuide from './pages/CreateGuide/CreateGuide';
 import ViewGuide from './pages/ViewGuide/ViewGuide';
+import PreviewGuide from './pages/PreviewGuide/PreviewGuide';
+import ExpiredGuide from './pages/ExpiredGuide/ExpiredGuide';
 import NotFound from './pages/NotFound/NotFound';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+
 
 // Hooks
 import { useLanguageDirection } from './hooks/useLanguageDirection';
@@ -35,7 +38,12 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
+      <Router 
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true
+        }}
+      >
         <div className="App min-h-screen bg-gray-50" dir={direction}>
         {/* Global Toast Notifications */}
         <Toaster
@@ -52,10 +60,11 @@ function App() {
         />
 
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
+            {/* Public Routes - Redirect root to login for trance party context */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/guide/:id" element={<ViewGuide />} />
+            <Route path="/guide/expired" element={<ExpiredGuide />} />
             
             {/* Protected Routes (with Layout) */}
             <Route path="/app" element={
@@ -67,7 +76,15 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="create" element={<CreateGuide />} />
               <Route path="edit/:id" element={<CreateGuide />} />
+              <Route path="preview/:id" element={<PreviewGuide />} />
             </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
 
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

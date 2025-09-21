@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 
 class AuthService {
   constructor() {
@@ -21,21 +21,64 @@ class AuthService {
     this.axiosInstance.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('token');
+        
+        // Enhanced token debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔐 Auth Debug - Request interceptor:', {
+            url: config.url,
+            method: config.method?.toUpperCase(),
+            hasToken: !!token,
+            tokenLength: token?.length || 0,
+            tokenPreview: token ? token.substring(0, 20) + '...' : 'None'
+          });
+        }
+        
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          console.warn('⚠️ No authentication token found for API request:', config.url);
         }
+        
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        console.error('❌ Request interceptor error:', error);
+        return Promise.reject(error);
+      }
     );
 
     this.axiosInstance.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Log successful responses in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Auth Debug - Response success:', {
+            url: response.config.url,
+            status: response.status,
+            hasData: !!response.data
+          });
+        }
+        return response;
+      },
       async (error) => {
         const originalRequest = error.config;
+        
+        // Enhanced 401 error debugging
+        if (error.response?.status === 401) {
+          console.error('🚨 Authentication Error (401):', {
+            url: originalRequest?.url,
+            method: originalRequest?.method?.toUpperCase(),
+            hasAuthHeader: !!originalRequest?.headers?.Authorization,
+            authHeader: originalRequest?.headers?.Authorization ? 
+              originalRequest.headers.Authorization.substring(0, 30) + '...' : 'Missing',
+            errorMessage: error.response?.data?.message || error.message,
+            retryAttempt: originalRequest._retry ? 'Yes' : 'No'
+          });
+        }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
+          
+          console.log('🔄 Attempting token refresh for 401 error...');
 
           try {
             const refreshToken = localStorage.getItem('refreshToken');
@@ -66,10 +109,6 @@ class AuthService {
         password: credentials.password,
         rememberMe: credentials.rememberMe || false
       });
-
-      if (response.data.token) {
-        this.updateLastLogin(response.data.user.id);
-      }
 
       return {
         success: true,
@@ -113,9 +152,21 @@ class AuthService {
 
   async getCurrentUser() {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return null; // No token, user not authenticated
+      }
+      
       const response = await this.axiosInstance.get('/auth/me');
       return response.data.user;
     } catch (error) {
+      // Handle authentication errors gracefully
+      if (error.response?.status === 401) {
+        // Token expired or invalid - clear storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        return null;
+      }
       throw new Error('Failed to get current user');
     }
   }

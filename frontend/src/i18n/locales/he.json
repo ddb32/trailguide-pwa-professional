@@ -10,9 +10,20 @@
     "close": "סגירה",
     "back": "חזרה",
     "next": "הבא",
+    "all": "הכל",
     "previous": "הקודם",
     "complete": "סיום",
-    "start": "התחלה"
+    "start": "התחלה",
+    "characters": "תווים",
+    "optional": "רשות",
+    "more": "עוד",
+    "menu": "תפריט",
+    "replace": "החלף",
+    "remove": "הסר",
+    "deleting": "מוחק...",
+    "search": "חיפוש",
+    "ok": "אישור",
+    "backToDashboard": "חזור לדשבורד"
   },
   "nav": {
     "dashboard": "לוח בקרה",
@@ -30,36 +41,52 @@
   },
   "language": {
     "he": "עב",
-    "en": "אנ"
+    "en": "אנ",
+    "current": "שפה"
   },
   "app": {
     "title": "TrailGuide - מערכת ניהול הכוונות",
     "subtitle": "צור הכוונות חזותיות למרחבים לא ממופים",
+    "description": "מערכת ניווט חזותית מתקדמת לחללים לא ממופים",
     "developmentMode": "🚧 מצב פיתוח: טען נתוני דוגמה לבדיקת תצוגה מקדימה",
-    "loadSampleData": "טען נתוני דוגמה",
     "savedEvents": "אירועים שנשמרו",
     "eventWithoutName": "אירוע ללא שם",
-    "stepsCount": "שלבים"
+    "stepsCount": "שלבים",
+    "name": "TrailGuide",
+    "tagline": "מערכת ניהול הכוונות"
   },
   "dashboard": {
     "title": "לוח בקרה",
+    "welcomeMessage": "שלום {{name}}! ברוך הבא למערכת TrailGuide",
+    "welcomeDescription": "כאן תוכל לנהל את ההכוונות שלך, לצפות בנתונים ולצור הכוונות חדשות במהירות ובקלות",
     "stats": {
       "totalGuides": "סך הכוונות",
       "activeGuides": "הכוונות פעילות", 
       "totalViews": "סך צפיות",
-      "thisMonth": "החודש"
-    },
-    "quickActions": {
-      "title": "פעולות מהירות",
-      "createNew": "צור חדש",
-      "createNewDescription": "צור הכוונה חדשה",
-      "manageSettings": "נהל הגדרות",
-      "manageSettingsDescription": "ערוך הגדרות חשבון",
-      "viewAnalytics": "צפה בנתונים",
-      "viewAnalyticsDescription": "נתח ביצועים"
+      "thisMonth": "החודש",
+      "feedbackReceived": "משוב שהתקבל",
+      "feedbackSummary": "סיכום משובים",
+      "feedbackSentiment": "משוב חיובי",
+      "negative": "שלילי",
+      "noFeedbackYet": "אין משובים עדיין",
+      "completionRate": "שיעור השלמה",
+      "active": "פעילות",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "positive": "חיובי",
+      "completions": "השלמות",
+      "lastUpdated": "עודכן לאחרונה",
+      "now": "כעת",
+      "change": {
+        "positive": "עלייה",
+        "negative": "ירידה", 
+        "neutral": "ללא שינוי"
+      }
     },
     "recentGuides": {
-      "title": "הכוונות אחרונות"
+      "title": "הכוונות אחרונות",
+      "subtitle": "נהל את ההכוונות שיצרת",
+      "noGuides": "אין הכוונות עדיין",
+      "createFirst": "צור את ההכוונה הראשונה שלך"
     },
     "table": {
       "actions": "פעולות",
@@ -67,13 +94,83 @@
       "views": "צפיות",
       "status": "סטטוס",
       "guideName": "שם ההכוונה",
-      "created": "נוצר"
+      "created": "נוצר",
+      "noExpiration": "ללא תפוגה",
+      "sortBy": "מיין לפי",
+      "filterBy": "סנן לפי",
+      "showMore": "הצג עוד",
+      "showLess": "הצג פחות",
+      "itemCount": "הכוונות",
+      "singleItem": "הכוונה",
+      "showingItems": "הצגת",
+      "noItems": "אין הכוונות להצגה",
+      "title": "ההכוונות שלי",
+      "createNew": "צור הכוונה חדשה",
+      "searchPlaceholder": "חפש הכוונות...",
+      "filterByStatus": "סנן לפי סטטוס",
+      "showingResults": "מציג {{count}} תוצאות",
+      "unnamedGuide": "הכוונה ללא שם",
+      "noSteps": "אין שלבים",
+      "stepsCount": "{{count}} שלבים",
+      "headers": {
+        "guideName": "שם ההכוונה",
+        "status": "סטטוס",
+        "views": "צפיות",
+        "expiry": "תפוגה",
+        "actions": "פעולות"
+      },
+      "actions": {
+        "view": "צפה",
+        "edit": "ערוך",
+        "delete": "מחק",
+        "copyLink": "העתק קישור"
+      },
+      "noData": {
+        "title": "אין הכוונות עדיין",
+        "description": "צור את ההכוונה הראשונה שלך כדי להתחיל",
+        "createFirst": "צור הכוונה ראשונה"
+      },
+      "unnamedGuide": "הכוונה ללא שם",
+      "viewsUnit": "צפיות",
+      "stepsUnit": "שלבים",
+      "stepsCount": "{{count}} שלבים",
+      "noDate": "ללא תאריך",
+      "labels": {
+        "created": "נוצר:",
+        "views": "צפיות:",
+        "remaining": "נשארו:",
+        "expired": "פג לפני:",
+        "noExpiration": "ללא תפוגה"
+      }
     },
     "actions": {
       "view": "צפה",
-      "edit": "ערוך"
+      "preview": "תצוגה מקדימה",
+      "edit": "ערוך",
+      "delete": "מחק",
+      "copyLink": "העתק קישור",
+      "copyLinkTooltip": "העתק קישור לשיתוף ההכוונה",
+      "linkCopied": "הקישור הועתק בהצלחה",
+      "copyLinkError": "שגיאה בהעתקת הקישור",
+      "confirmDelete": "אישור מחיקה",
+      "deleteSuccess": "ההכוונה נמחקה בהצלחה",
+      "deleteError": "שגיאה במחיקת ההכוונה"
     },
-    "createNewGuide": "צור הכוונה חדשה"
+    "preview": {
+      "organizerNotice": "תצוגה מקדימה למארגן - תמיד תוכל לצפות בהכוונות שלך, גם לאחר תפוגה"
+    },
+    "error": {
+      "loadFailed": "טעינת הנתונים נכשלה",
+      "tryAgain": "נסה שוב"
+    },
+    "createNewGuide": "צור הכוונה חדשה",
+    "createFirstGuide": "צור הכוונה ראשונה"
+  },
+  "status": {
+    "active": "פעיל",
+    "draft": "טיוטה",
+    "published": "פורסם",
+    "expired": "פג תוקף"
   },
   "languageSwitcher": {
     "hebrew": "עב",
@@ -133,6 +230,11 @@
     "emailPlaceholder": "הזן את כתובת האימייל שלך",
     "emailRequired": "נדרשת כתובת אימייל",
     "emailInvalid": "כתובת אימייל לא תקינה",
+    "usernameOrEmail": "שם משתמש או אימייל",
+    "usernameOrEmailPlaceholder": "הזן שם משתמש או כתובת אימייל",
+    "usernameOrEmailRequired": "נדרש שם משתמש או כתובת אימייל",
+    "usernameOrEmailMinLength": "שם משתמש או אימייל חייב להיות באורך 2 תווים לפחות",
+    "usernameOrEmailMaxLength": "שם משתמש או אימייל לא יכול להיות יותר מ-255 תווים",
     "password": "סיסמה",
     "passwordPlaceholder": "הזן את הסיסמה שלך",
     "passwordRequired": "נדרשת סיסמה",
@@ -143,28 +245,19 @@
     "loginSuccess": "התחברת בהצלחה!",
     "loginError": "שגיאה בהתחברות. אנא בדוק את הפרטים ונסה שוב.",
     "logoutSuccess": "התנתקת בהצלחה!",
-    "logoutError": "שגיאה בהתנתקות",
-    "demoAccounts": "חשבונות לדוגמה"
+    "logoutError": "שגיאה בהתנתקות"
   },
   "user": {
+    "defaultName": "משתמש",
     "profile": "פרופיל"
-  },
-  "app": {
-    "name": "TrailGuide",
-    "title": "TrailGuide - מערכת ניהול הכוונות",
-    "subtitle": "צור הכוונות חזותיות למרחבים לא ממופים",
-    "description": "מערכת ניווט חזותית מתקדמת למרחבים לא ממופים",
-    "developmentMode": "🚧 מצב פיתוח: טען נתוני דוגמה לבדיקת תצוגה מקדימה",
-    "loadSampleData": "טען נתוני דוגמה",
-    "savedEvents": "אירועים שנשמרו",
-    "eventWithoutName": "אירוע ללא שם",
-    "stepsCount": "שלבים"
   },
   "createGuide": {
     "title": "צור הכוונה חדשה",
+    "subtitle": "צור הכוונה חזותית מקצועית למרחב לא ממופה",
     "editTitle": "ערוך הכוונה",
     "basicInfo": {
       "title": "מידע בסיסי",
+      "subtitle": "מידע כללי על ההכוונה שלך",
       "eventName": "שם האירוע",
       "eventNamePlaceholder": "הזן שם לאירוע",
       "description": "תיאור האירוע",
@@ -179,29 +272,53 @@
       "maxFileSize": "גודל מקסימלי: 5MB",
       "imagePreview": "תצוגה מקדימה של התמונה",
       "changeImage": "החלף תמונה",
-      "removeImage": "הסר תמונה"
+      "removeImage": "הסר תמונה",
+      "noCoverImage": "אין תמונת כריכה"
     },
     "status": {
       "published": "פורסם",
-      "draft": "טיוטה"
+      "draft": "טיוטה",
+      "draftDescription": "שמור כטיוטה לעריכה מאוחרת",
+      "publishedDescription": "פרסם והפוך זמין למשתמשים"
     },
     "steps": {
       "title": "שלבי הכוונה",
+      "subtitle": "צור שלבי ניווט מפורטים עם תמונות והוראות",
       "addStep": "הוסף שלב",
       "uploadImage": "העלה תמונה",
       "stepDescription": "תיאור השלב",
       "stepPlaceholder": "תאר מה המשתמש צריך לעשות בשלב זה...",
-      "noStepsYet": "עדיין לא נוספו שלבים. הוסף את השלב הראשון כדי ליצור הכוונה."
+      "noStepsYet": "עדיין לא נוספו שלבים. הוסף את השלב הראשון כדי ליצור הכוונה.",
+      "addFirstStep": "הוסף את השלב הראשון כדי להתחיל ליצור הכוונה מקצועית"
+    },
+    "navigation": {
+      "title": "קישור ניווט",
+      "add": "הוסף ניווט",
+      "remove": "הסר ניווט",
+      "placeholder": "הזן כתובת או מיקום",
+      "description": "הוסף כתובת מיקום או קישור Waze כדי לעזור למשתתפים לנווט לשלב זה"
+    },
+    "imageUpload": {
+      "dragOrClick": "גרור ושחרר קובץ כאן או לחץ לבחירה",
+      "dropHere": "שחרר כאן",
+      "supportedFormats": "פורמטים נתמכים: JPEG, PNG, GIF, WebP",
+      "maxSize": "גודל מקסימלי: 5MB",
+      "previewAlt": "תצוגה מקדימה של התמונה"
     },
     "form": {
       "creating": "יוצר הכוונה...",
       "createEvent": "צור הכוונה",
+      "updateEvent": "עדכן הכוונה", 
+      "updating": "מעדכן...",
+      "eventNamePlaceholder": "הזן שם לאירוע",
       "messages": {
         "createSuccess": "ההכוונה נוצרה בהצלחה!",
         "createError": "שגיאה ביצירת ההכוונה",
         "nameExists": "שם ההכוונה כבר קיים",
         "networkError": "שגיאת רשת. אנא נסה שוב.",
-        "uploadError": "שגיאה בהעלאת התמונה"
+        "uploadError": "שגיאה בהעלאת התמונה",
+        "stepsCreated": "{{count}} שלבים נוצרו",
+        "stepsCreatedPartial": "{{created}}/{{total}} שלבים נוצרו"
       },
       "validation": {
         "eventNameRequired": "שם האירוע נדרש",
@@ -209,8 +326,16 @@
         "descriptionTooLong": "התיאור ארוך מדי (מקסימום 500 תווים)",
         "locationTooLong": "המיקום ארוך מדי (מקסימום 200 תווים)",
         "invalidFileType": "סוג קובץ לא נתמך. אנא בחר קובץ JPEG, PNG, GIF או WebP",
-        "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB"
+        "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB",
+        "statusRequired": "יש לבחור סטטוס"
       }
+    },
+    "imageUpload": {
+      "uploadSuccess": "התמונה הועלתה בהצלחה",
+      "dragOrClick": "גרור ושחרר קובץ כאן או לחץ לבחירה",
+      "supportedFormats": "פורמטים נתמכים: JPEG, PNG, GIF, WebP",
+      "maxSize": "גודל מקסימלי: 5MB",
+      "previewAlt": "תצוגה מקדימה של התמונה"
     },
     "step1": {
       "title": "מידע כללי",
@@ -234,6 +359,29 @@
       "preview": "תצוגה מקדימה",
       "publish": "פרסם הכוונה"
     },
+    "expiration": {
+      "title": "הגדרות תפוגה",
+      "subtitle": "בחר כמה זמן ההכוונה תהיה זמינה למשתתפים",
+      "defaultHours": "24 שעות (ברירת מחדל)",
+      "customHours": "משך זמן מותאם אישית",
+      "hoursLabel": "שעות",
+      "minHours": "מינימום: שעה אחת",
+      "maxHours": "מקסימום: 24 שעות",
+      "expiresAt": "פוגה בתאריך: {{date}}",
+      "remaining": "נשארו {{time}}",
+      "expired": "פגה לפני {{time}}",
+      "noExpiration": "לא הוגדר תאריך תפוגה",
+      "draftNoExpiration": "אין תפוגה (טיוטה)",
+      "expirationInfo": "המשתתפים לא יוכלו לגשת להכוונה לאחר תאריך התפוגה. המארגן ישמור על גישה מלאה.",
+      "someTime": "זמן מה"
+    },
+    "loading": {
+      "loadingGuide": "טוען הכוונה לעריכה...",
+      "loadingFailed": "טעינה נכשלה",
+      "loadingGeneral": "טוען הכוונה...",
+      "pleaseWait": "אנא המתן בזמן שאנחנו מכינים הכל עבורך...",
+      "formNotReady": "הטופס לא מוכן להגשה. אנא המתן עד שהטעינה תסתיים."
+    },
     "validation": {
       "eventNameRequired": "שם האירוע נדרש",
       "eventNameTooLong": "שם האירוע ארוך מדי (מקסימום 255 תווים)",
@@ -242,6 +390,9 @@
       "stepsRequired": "לפחות שלב אחד נדרש",
       "stepDescriptionRequired": "תיאור השלב נדרש",
       "stepDescriptionTooLong": "תיאור השלב ארוך מדי (מקסימום 1000 תווים)"
+    },
+    "preview": {
+      "title": "תצוגה מקדימה חיה"
     }
   },
   "preview": {
@@ -251,7 +402,17 @@
     "stepCounter": "שלב {current} מתוך {total}",
     "startNavigation": "התחל הכוונה",
     "navigationComplete": "ההכוונה הושלמה בהצלחה!",
-    "restartNavigation": "התחל מחדש"
+    "restartNavigation": "התחל מחדש",
+    "livePreviewDescription": "תצוגה מקדימה חיה של ההכוונה שלך",
+    "quickStats": "סטטיסטיקות מהירות",
+    "completedSteps": "שלבים מושלמים",
+    "completeness": "שלמות",
+    "tips": {
+      "title": "טיפים לשיפור",
+      "addImages": "הוסף תמונות לכל שלב",
+      "clearInstructions": "כתב הוראות ברורות",
+      "testNavigation": "בדוק את הניווט לפני פרסום"
+    }
   },
   "errors": {
     "generic": "אירעה שגיאה. אנא נסה שוב.",
@@ -262,6 +423,502 @@
     "noStepsAdded": "עדיין לא נוספו שלבים",
     "step": "שלב",
     "loadingImage": "טוען תמונה...",
-    "closeModal": "סגור"
+    "closeModal": "סגור",
+    "guideNotFound": "הכוונה לא נמצאה",
+    "notFoundMessage": "לא הצלחנו למצוא את ההכוונה שביקשת. אולי היא הוסרה או שהקישור לא תקין.",
+    "expired": "ההכוונה פגה תוקף",
+    "expiredTitle": "ההכוונה כבר לא זמינה",
+    "expiredMessage": "ההכוונה הזו פגה תוקף ואינה זמינה יותר למשתתפים.",
+    "expiredHelp": "אם אתה זקוק לגישה להכוונה זו, אנא צור קשר עם המארגן לקישור חדש.",
+    "backToHome": "חזרה לבית"
+  },
+  "guide": {
+    "viewTitle": "הצג הכוונה {{id}}",
+    "step": "שלב {{current}} מתוך {{total}}",
+    "startNavigation": "התחל ניווט",
+    "nextStep": "השלב הבא",
+    "prevStep": "השלב הקודם",
+    "completed": "הגעת ליעד שלך!",
+    "thankYou": "תודה שהשתמשת ב-TrailGuide",
+    "backToStart": "חזור להתחלה",
+    "shareGuide": "שתף הכוונה",
+    "stepsCount": "{{count}} שלבים",
+    "stepProgress": "{{current}}/{{total}}"
+  },
+  "viewGuide": {
+    "loading": {
+      "title": "טוען הכוונה",
+      "message": "מכין את חוויית הניווט שלך..."
+    },
+    "error": {
+      "notFound": "ההכוונה לא נמצאה",
+      "notFoundMessage": "ההכוונה שאתה מחפש אולי הועברה, נמחקה או אינה זמינה יותר.",
+      "goBack": "← חזור"
+    },
+    "welcome": {
+      "stepsTotal": "סך הכל {{count}} שלבים",
+      "stepSingular": "שלב",
+      "stepPlural": "שלבים",
+      "startNavigation": "🚀 התחל ניווט",
+      "features": {
+        "visualSteps": "שלבים חזותיים",
+        "turnByTurn": "ניווט שלב אחר שלב"
+      },
+      "tip": "💡 לחץ \"התחל ניווט\" כשאתה מוכן להתחיל במסע המודרך שלך"
+    },
+    "navigation": {
+      "stepProgress": "שלב {{current}} מתוך {{total}}",
+      "actionItems": "פעולות נדרשות:",
+      "openInNavigation": "פתח בניווט",
+      "previous": "← הקודם",
+      "nextStep": "השלב הבא ←",
+      "completeGuide": "סיום"
+    },
+    "completion": {
+      "congratulations": "מזל טוב!",
+      "message": "השלמת את ההכוונה בהצלחה"
+    },
+    "images": {
+      "guideCover": "עטיפת ההכוונה",
+      "visualPreviewNotAvailable": "תצוגה חזותית לא זמינה",
+      "visualGuide": "הכוונה חזותית",
+      "stepByStepNavigation": "ניווט שלב אחר שלב", 
+      "visualGuideStep": "שלב הכוונה חזותי {{number}}",
+      "imageTemporarilyUnavailable": "התמונה זמנית לא זמינה"
+    },
+    "languageSelector": {
+      "title": "בחר שפה",
+      "subtitle": "בחר את השפה המועדפת עליך להכוונה זו",
+      "english": "English",
+      "hebrew": "עברית",
+      "continue": "המשך"
+    }
+  },
+  "feedback": {
+    "completedGuide": "השלמת את ההכוונה!",
+    "helpUsImprove": "עזור לנו להשתפר על ידי שיתוף המשוב שלך",
+    "guideFeedback": {
+      "title": "דרג את ההכוונה הזאת",
+      "subtitle": "עזור לנו לשפר את ההכוונה הספציפית הזאת",
+      "wasGuideHelpful": "האם ההכוונה הזאת הייתה מועילה?",
+      "doYouLikeAppConcept": "האם אתה אוהב את הרעיון מאחורי האפליקציה הזו?",
+      "commentsPlaceholder": "ספר לנו איך נוכל לשפר את ההכוונה...",
+      "submitButton": "שלח משוב"
+    },
+    "founderFeedback": {
+      "title": "על TrailGuide",
+      "subtitle": "עזור לנו לשפר את החוויה הכללית",
+      "overallExperience": "איך הייתה החוויה הכללית שלך עם TrailGuide?",
+      "projectConcept": "מה דעתך על הרעיון של TrailGuide?",
+      "presentationStyle": "איך תדרג את האופן שבו ההכוונה מוצגת?",
+      "recommendToOthers": "האם תמליץ על TrailGuide לאחרים?",
+      "commentsPlaceholder": "שתף את המחשבות שלך על TrailGuide כפלטפורמה...",
+      "submitButton": "שלח משוב על הפרויקט",
+      "overallRating": "חוויה כללית",
+      "conceptRating": "רעיון הפרויקט",
+      "presentationRating": "סגנון הצגה",
+      "recommendRating": "המלצה"
+    },
+    "helpful": "מועילה",
+    "notHelpful": "לא מועילה",
+    "conceptLiked": "אוהב הרעיון",
+    "conceptDisliked": "לא אוהב הרעיון",
+    "excellent": "מעולה",
+    "good": "טוב",
+    "poor": "גרוע",
+    "yes": "כן",
+    "no": "לא",
+    "additionalComments": "הערות נוספות",
+    "skip": "דלג",
+    "submitting": "שולח...",
+    "guideReference": "הכוונה",
+    "feedbackSuccess": "תודה על המשוב!",
+    "feedbackError": "שליחת המשוב נכשלה. אנא נסה שוב.",
+    "error": {
+      "title": "שגיאה בשליחת משוב",
+      "generic": "שליחת המשוב נכשלה. אנא נסה שוב.",
+      "noFeedbackProvided": "אנא בחר לפחות דירוג אחד או הוסף הערה."
+    },
+    "previewMode": {
+      "notice": "תצוגה מקדימה - המשוב לא יישמר במערכת"
+    }
+  },
+  "validation": {
+    "singleError": "שגיאה אחת נמצאה:",
+    "multipleErrors": "{count} שגיאות נמצאו:",
+    "singleWarning": "אזהרה אחת:",
+    "multipleWarnings": "{count} אזהרות:",
+    "warnings": {
+      "noLocation": "מומלץ להוסיף מיקום לאירוע",
+      "noCoverImage": "מומלץ להוסיף תמונת כריכה",
+      "stepNoImage": "מומלץ להוסיף תמונה לשלב {stepNumber}"
+    }
+  },
+  "confirmations": {
+    "deleteGuide": "האם אתה בטוח שברצונך למחוק את ההכוונה '{{guideName}}'?",
+    "deleteWarning": "פעולה זו תמחק את ההכוונה ואת כל השלבים הקשורים אליה ללא אפשרות שחזור.",
+    "deleteConsequence": "פעולה זו לא ניתנת לביטול. כל המידע הקשור יימחק לצמיתות.",
+    "confirmDelete": "כן, מחק",
+    "cancelDelete": "ביטול"
+  },
+  "analytics": {
+    "dashboard": {
+      "title": "לוח בקרת אנליטיקה",
+      "subtitle": "תובנות מקיפות עבור המדריכים שלך"
+    },
+    "viewMode": {
+      "organizer": "תצוגת מארגן",
+      "entrepreneur": "אימות שוק"
+    },
+    "loading": {
+      "title": "טוען אנליטיקה",
+      "subtitle": "אוסף תובנות מהנתונים שלך..."
+    },
+    "stats": {
+      "totalGuides": "סך המדריכים",
+      "totalViews": "סך הצפיות",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "completionRate": "אחוז השלמה",
+      "deviceTypes": "סוגי מכשירים",
+      "published": "פורסמו",
+      "completions": "השלמות",
+      "devicesUsed": "מכשירים בשימוש",
+      "users": "משתמשים",
+      "completion": "השלמה"
+    },
+    "devices": {
+      "title": "אנליטיקת מכשירים"
+    },
+    "guides": {
+      "title": "ביצועי מדריכים",
+      "timeRange": "נתונים עבור {{range}}"
+    },
+    "table": {
+      "guideName": "שם המדריך",
+      "views": "צפיות",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "completionRate": "אחוז השלמה",
+      "actions": "פעולות"
+    },
+    "actions": {
+      "viewDetails": "הצג פרטים",
+      "exportData": "ייצא נתונים"
+    },
+    "funnel": {
+      "summary": "סיכום משפך",
+      "totalEntries": "כניסות כולל",
+      "conversions": "המרות",
+      "overallConversion": "המרה כוללת",
+      "dropOffs": "נושרים"
+    },
+    "insights": {
+      "strongMarketFit": "התאמה חזקה בין המוצר לשוק",
+      "highInterestLowConversion": "עניין גבוה - צריך לשפר המרה",
+      "excellentRetention": "שימור משתמשים מעולה",
+      "needsContentOptimization": "דרוש שיפור תוכן",
+      "collectingData": "אוסף נתונים להערכה"
+    },
+    "charts": {
+      "noData": "אין נתונים להצגה",
+      "noMarketData": "אין נתוני שוק זמינים"
+    },
+    "empty": {
+      "title": "אין נתוני אנליטיקה",
+      "description": "התחל ליצור מדריכים כדי לראות תובנות אנליטיקה כאן.",
+      "action": "רענן נתונים"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "לוח בקרת מנהל",
+      "subtitle": "נתוני פלטפורמה וניהול כללי",
+      "platformOverview": "סקירת פלטפורמה",
+      "liveData": "נתונים חיים"
+    },
+    "tabs": {
+      "overview": "סקירה כללית",
+      "ariaLabel": "לשוניות לוח בקרת מנהל"
+    },
+    "periods": {
+      "week": "7 ימים",
+      "month": "30 ימים", 
+      "quarter": "90 ימים",
+      "year": "365 ימים"
+    },
+    "stats": {
+      "totalGuides": "סך ההכוונות",
+      "activeGuides": "הכוונות פעילות",
+      "totalUsers": "סך המשתמשים",
+      "publishedGuides": "הכוונות פרסומות",
+      "totalViews": "סך הצפיות",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "completionRate": "אחוז השלמה",
+      "totalFeedback": "סך המשובים",
+      "active": "פעיל",
+      "published": "פורסם",
+      "completions": "השלמות",
+      "unique": "ייחודי",
+      "positive": "חיובי"
+    },
+    "insights": {
+      "businessTitle": "תובנות עסקיות",
+      "businessTrends": "מגמות עסקיות",
+      "businessRecommendations": "הזדמנויות צמיחה",
+      "richContent": "ספריית תוכן עשירה עם חומרי הכוונה מגוונים",
+      "contentGrowth": "ספריית תוכן גדלה עם מסלול התרחבות טוב",
+      "strongUserBase": "קהילת משתמשים חזקה ופעילה",
+      "growingUserBase": "בסיס משתמשים מתרחב עם מגמות צמיחה חיוביות",
+      "excellentFeedback": "שביעות רצון מעולה וציוני משוב של משתמשים",
+      "goodFeedback": "משוב טוב של משתמשים עם מקום לשיפור",
+      "improvingEngagement": "מדדי מעורבות מראים שיפור חיובי",
+      "bizRec1": "התמקדות באסטרטגיות שימור משתמשים לשמירה על צמיחה",
+      "bizRec2": "יישום אנליטיקה מתקדמת למודיעין עסקי",
+      "bizRec3": "חקירת פלחי שוק חדשים להתרחבות הפלטפורמה"
+    },
+    "feedback": {
+      "title": "ניתוח משובים",
+      "subtitle": "ניתוח משובי משתמשים עבור {{period}} הימים האחרונים",
+      "simpleSubtitle": "מה המשתמשים חושבים על ההכוונות",
+      "satisfactionRate": "שיעור שביעות רצון",
+      "totalResponses": "סך התגובות",
+      "thisWeek": "השבוע",
+      "recentComments": "תגובות אחרונות",
+      "noData": "אין נתוני משוב זמינים",
+      "guideFeedback": {
+        "title": "משוב על ההכוונות",
+        "subtitle": "תגובות 'האם ההכוונה הזאת הייתה מועילה?'",
+        "helpful": "מועיל",
+        "notHelpful": "לא מועיל",
+        "helpfulRate": "שיעור תועלת"
+      },
+      "conceptFeedback": {
+        "title": "משוב על הרעיון",
+        "subtitle": "תגובות 'האם אתה אוהב את הרעיון הכללי?'",
+        "likeIdea": "אוהב את הרעיון",
+        "dislikeIdea": "לא אוהב את הרעיון",
+        "approvalRate": "שיעור אישור הרעיון"
+      },
+      "recentComments": {
+        "title": "תגובות משוב אחרונות"
+      },
+      "labels": {
+        "helpful": "✅ מועיל",
+        "notHelpful": "❌ לא מועיל",
+        "likeIdea": "💡 אוהב רעיון",
+        "dislikeIdea": "💭 לא אוהב רעיון",
+        "guide": "הכוונה:"
+      },
+      "dualSystem": {
+        "title": "ניתוח משוב מפורט",
+        "subtitle": "משוב על איכות ההכוונות ותפיסת הרעיון",
+        "guideQuality": "איכות ההכוונות",
+        "conceptValidation": "תפיסת הרעיון",
+        "totalResponses": "סך התגובות",
+        "helpfulRate": "שיעור התועלת",
+        "conceptPositiveRate": "שיעור התמיכה ברעיון",
+        "noFeedbackYet": "אין משוב עדיין",
+        "fromResponses": "מתוך {{count}} תגובות",
+        "guideFeedbackTitle": "משוב על איכות ההכוונות",
+        "conceptFeedbackTitle": "משוב על רעיון האפליקציה"
+      },
+      "organizer": {
+        "title": "ביצועי ההכוונות לפי יוצר",
+        "subtitle": "ביצועי איכות ההכוונות לכל יוצר תוכן",
+        "performance": "ביצועי יוצרי התוכן",
+        "noGuides": "אין עדיין הכוונות עם משוב",
+        "guideName": "שם ההכוונה",
+        "organizerName": "יוצר התוכן",
+        "responseCount": "{{count}} תגובות",
+        "helpfulRate": "{{rate}}% מועיל",
+        "viewAllAnalytics": "צפה בכל הניתוחים",
+        "recentComments": "הערות אחרונות",
+        "noComments": "אין הערות עדיין"
+      },
+      "insights": {
+        "title": "תובנות ומסקנות",
+        "subtitle": "ניתוח חכם של הנתונים והמלצות לפעולה",
+        "pilotHealth": "מדדי בריאות הפיילוט",
+        "keyFindings": "ממצאים מרכזיים וצעדים הבאים",
+        "whatWorking": "מה עובד טוב",
+        "improvements": "תחומים לשיפור",
+        "recommendations": "המלצות לפעולה",
+        "healthScore": "ציון בריאות הפיילוט",
+        "recommendation": "המלצה",
+        "expandPilot": "הרחב את הפיילוט",
+        "improvePilot": "שפר את הפיילוט",
+        "reconsiderPilot": "שקול מחדש את הפיילוט",
+        "confidenceLevel": "רמת ביטחון: {{level}}%",
+        "noInsightsYet": "אין עדיין מספיק נתונים לתובנות",
+        "collectingData": "אוסף נתונים..."
+      },
+      "guide": {
+        "title": "ניתוח משובי הכוונה",
+        "subtitle": "משובי משתמשים על איכות ובהירות ההכוונה ({{count}} תגובות סה\"כ)",
+        "stats": {
+          "totalFeedback": "סך משובי ההכוונה",
+          "likeRate": "אחוז לייקים להכוונה",
+          "helpfulRate": "אחוז שימושיות ההכוונה",
+          "textFeedback": "הערות על ההכוונה"
+        }
+      },
+      "founder": {
+        "title": "ניתוח משובי הפרויקט", 
+        "subtitle": "משובי משתמשים על רעיון TrailGuide והגישה ({{count}} תגובות סה\"כ)",
+        "stats": {
+          "totalFeedback": "סך משובי הפרויקט",
+          "overallRating": "דירוג החוויה הכללית",
+          "conceptRating": "דירוג הרעיון",
+          "recommendationRate": "אחוז ההמלצות",
+          "textFeedback": "הערות על הפרויקט"
+        }
+      },
+      "recentFeedback": "משובים אחרונים",
+      "liked": "אהב",
+      "disliked": "לא אהב",
+      "helpful": "שימושי",
+      "notHelpful": "לא שימושי",
+      "excellent": "מעולה",
+      "good": "טוב",
+      "poor": "גרוע",
+      "yes": "כן",
+      "no": "לא",
+      "unknownGuide": "הכוונה לא ידועה",
+      "viewMore": "צפה בעוד"
+    },
+    "usage": {
+      "title": "ניתוח שימוש",
+      "subtitle": "דפוסי שימוש בפלטפורמה עבור {{period}} הימים האחרונים",
+      "noData": "אין נתוני שימוש זמינים",
+      "totalViews": "סך הצפיות",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "avgCompletionRate": "אחוז השלמה ממוצע",
+      "dailyTrend": "מגמת שימוש יומית",
+      "deviceDistribution": "התפלגות מכשירים",
+      "geographicDistribution": "התפלגות גיאוגרפית",
+      "overviewChart": "סקירת שימוש",
+      "usageCount": "מספר שימושים",
+      "count": "ספירה",
+      "views": "צפיות",
+      "visitors": "מבקרים",
+      "completions": "השלמות",
+      "deviceStats": "סטטיסטיקת מכשירים",
+      "topRegions": "אזורים מובילים",
+      "usage": "שימוש",
+      "insights": {
+        "title": "תובנות שימוש",
+        "trends": "מגמות שימוש",
+        "recommendations": "המלצות",
+        "highTraffic": "נפח תעבורה גבוה מצביע על אימוץ חזק של הפלטפורמה",
+        "growingTraffic": "תעבורה גדלה מראה על מגמות מעורבות חיוביות של משתמשים",
+        "goodEngagement": "שיעורי השלמה מעולים מצביעים על תוכן איכותי",
+        "improvementNeeded": "שיעורי השלמה מציעים הזדמנויות לייעול תוכן",
+        "mobileFirst": "דפוסי שימוש mobile-first - יש לייעל עבור חוויית נייד",
+        "desktopDominant": "שימוש דומיננטי בדסקטופ - כדאי לשקול הרחבה למובייל",
+        "rec1": "מעקב אחר זמני שיא השימוש לייעול ביצועי השרת",
+        "rec2": "ניתוח דפוסי מכשירים לשיפור החוויה החוצת-פלטפורמות",
+        "rec3": "מעקב אחר מגמות גיאוגרפיות להזדמנויות התרחבות אזורית"
+      }
+    },
+    "charts": {
+      "usage": {
+        "title": "ניתוח שימוש",
+        "subtitle": "מגמות ודפוסי שימוש בפלטפורמה"
+      },
+      "feedback": {
+        "title": "ניתוח משובים",
+        "subtitle": "מדדי משוב ושביעות רצון משתמשים"
+      }
+    },
+    "export": {
+      "title": "יצוא נתונים",
+      "subtitle": "יצוא נתוני אנליטיקה עבור {{period}} הימים האחרונים",
+      "summary": "סיכום יצוא",
+      "csv": {
+        "title": "יצוא CSV",
+        "description": "יצוא נתוני אנליטיקה כקובץ גליון אלקטרוני"
+      },
+      "json": {
+        "title": "יצוא JSON", 
+        "description": "יצוא נתוני אנליטיקה מובנים כקובץ JSON"
+      },
+      "download": "הורדה",
+      "exporting": "מייצא...",
+      "csvDownloaded": "קובץ CSV הורד בהצלחה",
+      "jsonDownloaded": "קובץ JSON הורד בהצלחה",
+      "error": "היצוא נכשל. אנא נסה שוב.",
+      "info": {
+        "title": "מידע על היצוא",
+        "csvContent": "CSV כולל ביצועי הכוונות ונתוני משוב",
+        "jsonContent": "JSON כולל אנליטיקה מלאה עם פירוטים מפורטים",
+        "privacy": "הנתונים המיוצאים לא כוללים מידע אישי על משתמשים",
+        "period": "הנתונים מכסים את {{days}} הימים האחרונים של פעילות הפלטפורמה"
+      }
+    },
+    "status": {
+      "active": "פעיל",
+      "inactive": "לא פעיל"
+    },
+    "health": {
+      "title": "מדדי בריאות הפיילוט",
+      "subtitle": "אינדיקטורים מקיפים לבריאות המערכת וביצועיה",
+      "overallHealth": "ציוני בריאות כלליים",
+      "overall": "כללי",
+      "engagement": "מעורבות",
+      "content": "תוכן",
+      "growth": "צמיחה",
+      "engagementMetrics": "מעורבות משתמשים",
+      "activeUsers": "משתמשים פעילים",
+      "daily": "יומי",
+      "avgSessionTime": "זמן ממוצע",
+      "completionRate": "שיעור השלמה",
+      "feedbackRate": "שיעור משוב",
+      "contentPerformance": "ביצועי תוכן",
+      "totalGuides": "סה״כ הכוונות",
+      "activeGuides": "הכוונות פעילות",
+      "avgRating": "דירוג ממוצע",
+      "topGuides": "הכוונות מובילות",
+      "noTopGuides": "אין עדיין הכוונות מובילות זמינות",
+      "issuesAndAlerts": "בעיות בריאות והתראות",
+      "allGood": "כל המערכות בריאות",
+      "noIssuesDetected": "לא זוהו בעיות בתקופת המעקב הנוכחית",
+      "currentValue": "נוכחי",
+      "threshold": "סף"
+    },
+    "pilot": {
+      "title": "מצב הפיילוט",
+      "subtitle": "איך התוכנית נראית כרגע",
+      "activeOrganizers": "מארגנים שיצרו הכוונות",
+      "totalOrganizers": "סך המארגנים",
+      "totalGuidesPublished": "סך ההכוונות שפורסמו",
+      "uniqueVisitors": "מבקרים ייחודיים",
+      "positiveFeedbackRate": "אחוז משוב חיובי",
+      "daysRunning": "ימי פעילות",
+      "status": "מצב פעיל",
+      "summary": "סיכום הפיילוט",
+      "summary1": "הפיילוט רץ בהצלחה עם מארגנים פעילים",
+      "summary2": "המשתמשים מגיבים בחיוב לרעיון",
+      "summary3": "המערכת יציבה ופועלת כמתוכנן",
+      "overview": {
+        "title": "סקירת הפיילוט",
+        "subtitle": "המדדים המרכזיים לבדיקת הצלחת המוצר"
+      },
+      "questions": {
+        "organizersCreating": "האם מארגנים יוצרים הכוונות?",
+        "peopleUsing": "האם אנשים משתמשים בהכוונות?",
+        "wasHelpful": "האם זה עזר?"
+      }
+    },
+    "common": {
+      "items": "פריטים",
+      "showing": "מציג {{shown}} מתוך {{total}}",
+      "more": "עוד"
+    },
+    "error": {
+      "loadFailed": "טעינת נתוני מנהל נכשלה",
+      "tryAgain": "נסה שוב"
+    },
+    "navigation": {
+      "backToDashboard": "חזור ללוח הבקרה"
+    }
   }
 }

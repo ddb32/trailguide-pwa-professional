@@ -10,10 +10,10 @@ const router = express.Router();
 const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: {
+  message: (req, res) => ({
     success: false,
-    message: 'Too many login attempts, please try again later'
-  },
+    message: req.t('common:rateLimiting.tooManyLoginAttempts')
+  }),
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -38,16 +38,17 @@ function generateTokens(user) {
 
 const loginValidation = [
   body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Valid email address is required'),
+    .notEmpty()
+    .withMessage((value, { req }) => req.t('validation:auth.usernameOrEmailRequired'))
+    .isLength({ min: 1, max: 255 })
+    .withMessage((value, { req }) => req.t('validation:general.valueTooLong')),
   body('password')
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
+    .withMessage((value, { req }) => req.t('validation:auth.passwordLength')),
   body('rememberMe')
     .optional()
     .isBoolean()
-    .withMessage('Remember me must be a boolean')
+    .withMessage((value, { req }) => req.t('validation:general.invalidFormat'))
 ];
 
 router.post('/login', loginRateLimit, loginValidation, async (req, res) => {
@@ -56,22 +57,35 @@ router.post('/login', loginRateLimit, loginValidation, async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: req.t('validation:general.validationFailed'),
         errors: errors.array()
       });
     }
 
-    const { email, password, rememberMe = false } = req.body;
+    const { email: loginIdentifier, password, rememberMe = false } = req.body;
 
+    // Try to find user by email OR username
     const userResult = await query(
-      'SELECT id, username, password_hash, email, full_name, is_active, last_login_at FROM users WHERE email = $1 AND is_active = true',
-      [email]
+      'SELECT id, username, password_hash, email, full_name, is_active, last_login_at, role FROM users WHERE (email = $1 OR username = $1) AND is_active = true',
+      [loginIdentifier]
     );
 
     if (userResult.rows.length === 0) {
+      // Record failed login attempt
+      if (req.recordFailure) {
+        req.recordFailure();
+      }
+
+      console.warn('🚨 Login attempt with invalid user:', {
+        loginIdentifier,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        timestamp: new Date().toISOString()
+      });
+
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: req.t('auth:login.failed')
       });
     }
 
@@ -79,11 +93,36 @@ router.post('/login', loginRateLimit, loginValidation, async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
+      // Record failed login attempt
+      if (req.recordFailure) {
+        req.recordFailure();
+      }
+
+      console.warn('🚨 Login attempt with invalid password:', {
+        userId: user.id,
+        username: user.username,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        timestamp: new Date().toISOString()
+      });
+
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: req.t('auth:login.failed')
       });
     }
+
+    // Clear failures on successful login
+    if (req.clearFailures) {
+      req.clearFailures();
+    }
+
+    console.log('✅ Successful login:', {
+      userId: user.id,
+      username: user.username,
+      ip: req.ip,
+      timestamp: new Date().toISOString()
+    });
 
     const { accessToken, refreshToken } = generateTokens(user);
 
@@ -116,12 +155,13 @@ router.post('/login', loginRateLimit, loginValidation, async (req, res) => {
         username: user.username,
         email: user.email,
         fullName: user.full_name,
-        lastLoginAt: user.last_login_at
+        lastLoginAt: user.last_login_at,
+        role: user.role
       };
 
       res.status(200).json({
         success: true,
-        message: 'Login successful',
+        message: req.t('auth:login.success'),
         user: userData,
         token: accessToken,
         refreshToken: refreshToken
@@ -217,9 +257,20 @@ router.post('/refresh', async (req, res) => {
 
 router.get('/me', async (req, res) => {
   try {
+    console.log('🔍 /auth/me request:', {
+      hasAuthHeader: !!req.headers.authorization,
+      authHeaderLength: req.headers.authorization?.length,
+      userAgent: req.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
+
     const token = req.headers.authorization?.replace('Bearer ', '');
     
     if (!token) {
+      console.error('❌ No token provided for /auth/me:', {
+        authHeader: req.headers.authorization,
+        hasAuthHeader: !!req.headers.authorization
+      });
       return res.status(401).json({
         success: false,
         message: 'No token provided'
@@ -228,12 +279,21 @@ router.get('/me', async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
+    console.log('✅ Token decoded successfully for /auth/me:', {
+      userId: decoded.userId,
+      username: decoded.username
+    });
+
     const userResult = await query(
-      'SELECT id, username, email, full_name, is_active, last_login_at, created_at FROM users WHERE id = $1 AND is_active = true',
+      'SELECT id, username, email, full_name, is_active, last_login_at, created_at, role FROM users WHERE id = $1 AND is_active = true',
       [decoded.userId]
     );
 
     if (userResult.rows.length === 0) {
+      console.error('❌ User not found for /auth/me:', {
+        userId: decoded.userId,
+        queryRowsReturned: userResult.rows.length
+      });
       return res.status(404).json({
         success: false,
         message: 'User not found'
@@ -250,11 +310,20 @@ router.get('/me', async (req, res) => {
         email: user.email,
         fullName: user.full_name,
         lastLoginAt: user.last_login_at,
-        createdAt: user.created_at
+        createdAt: user.created_at,
+        role: user.role
       }
     });
 
   } catch (error) {
+    console.error('❌ /auth/me error:', {
+      errorName: error.name,
+      errorMessage: error.message,
+      hasAuthHeader: !!req.headers.authorization,
+      authHeaderLength: req.headers.authorization?.length,
+      timestamp: new Date().toISOString()
+    });
+
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,

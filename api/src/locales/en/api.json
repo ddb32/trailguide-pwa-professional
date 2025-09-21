@@ -1,0 +1,60 @@
+{
+  "events": {
+    "createSuccess": "Event created successfully",
+    "updateSuccess": "Event updated successfully",
+    "deleteSuccess": "Event deleted successfully",
+    "retrieveSuccess": "Events retrieved successfully",
+    "retrieveFailed": "Failed to retrieve events",
+    "createFailed": "Failed to create event",
+    "updateFailed": "Failed to update event",
+    "deleteFailed": "Failed to delete event",
+    "notFound": "Event not found",
+    "accessDenied": "Access denied for this event",
+    "imageUpdateSuccess": "Event image updated successfully",
+    "imageUpdateFailed": "Failed to update event image",
+    "imageDeleteSuccess": "Event image deleted successfully",
+    "imageDeleteFailed": "Failed to delete event image"
+  },
+  "steps": {
+    "createSuccess": "Step created successfully",
+    "updateSuccess": "Step updated successfully",
+    "deleteSuccess": "Step deleted successfully",
+    "retrieveSuccess": "Steps retrieved successfully",
+    "retrieveFailed": "Failed to retrieve steps",
+    "createFailed": "Failed to create step",
+    "updateFailed": "Failed to update step",
+    "deleteFailed": "Failed to delete step",
+    "notFound": "Step not found",
+    "accessDenied": "Access denied for this step",
+    "imageUpdateSuccess": "Step image updated successfully",
+    "imageUpdateFailed": "Failed to update step image",
+    "imageDeleteSuccess": "Step image deleted successfully",
+    "imageDeleteFailed": "Failed to delete step image",
+    "orderUpdateSuccess": "Step order updated successfully",
+    "orderUpdateFailed": "Failed to update step order"
+  },
+  "guides": {
+    "retrieveSuccess": "Guide retrieved successfully",
+    "retrieveFailed": "Failed to retrieve guide",
+    "notFound": "Guide not found",
+    "expired": "Guide has expired",
+    "accessDenied": "Access denied for this guide"
+  },
+  "feedback": {
+    "submitSuccess": "Feedback submitted successfully",
+    "submitFailed": "Failed to submit feedback",
+    "retrieveSuccess": "Feedback retrieved successfully",
+    "retrieveFailed": "Failed to retrieve feedback"
+  },
+  "analytics": {
+    "retrieveSuccess": "Analytics data retrieved successfully",
+    "retrieveFailed": "Failed to retrieve analytics data",
+    "exportSuccess": "Data exported successfully",
+    "exportFailed": "Failed to export data"
+  },
+  "general": {
+    "endpointNotFound": "The requested API endpoint does not exist",
+    "serverError": "Internal server error occurred",
+    "systemReady": "System is ready for use"
+  }
+}

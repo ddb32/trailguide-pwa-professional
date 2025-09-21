@@ -1,8 +1,14 @@
 {
   "app": {
     "name": "TrailGuide",
+    "title": "TrailGuide - Guidance Management System",
     "tagline": "Your Path Guidance",
-    "description": "Visual navigation system for unmapped spaces"
+    "subtitle": "Create visual guidance for unmapped spaces",
+    "description": "Advanced visual navigation system for unmapped spaces",
+    "developmentMode": "🚧 Development mode: Load sample data for preview testing",
+    "savedEvents": "Saved Events",
+    "eventWithoutName": "Unnamed Event",
+    "stepsCount": "Steps"
   },
   "navigation": {
     "home": "Home",
@@ -10,6 +16,11 @@
     "createGuide": "Create Guidance",
     "myGuides": "My Guidance",
     "settings": "Settings",
+    "logout": "Logout"
+  },
+  "nav": {
+    "createGuide": "Create Guide",
+    "dashboard": "Dashboard",
     "logout": "Logout"
   },
   "common": {
@@ -23,6 +34,7 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "all": "All",
     "confirm": "Confirm",
     "back": "Back",
     "continue": "Continue",
@@ -32,12 +44,58 @@
     "remove": "Remove",
     "share": "Share",
     "copy": "Copy",
+    "optional": "Optional",
     "underConstruction": "Under Construction",
-    "underDevelopment": "Under Development"
+    "underDevelopment": "Under Development",
+    "language": "Language",
+    "items": "items",
+    "showing": "Showing {{shown}} of {{total}}",
+    "more": "more",
+    "characters": "characters",
+    "close": "Close",
+    "complete": "Complete",
+    "ok": "OK",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "preview": {
+    "title": "Preview",
+    "livePreviewDescription": "Live preview of your guidance",
+    "quickStats": "Quick Stats",
+    "completedSteps": "Completed Steps",
+    "completeness": "Completeness",
+    "backToEdit": "Back to Edit",
+    "exitPreview": "Exit Preview",
+    "stepCounter": "Step {current} of {total}",
+    "startNavigation": "Start Navigation",
+    "navigationComplete": "Navigation completed successfully!",
+    "restartNavigation": "Start Over",
+    "tips": {
+      "title": "Improvement Tips",
+      "addImages": "Add images to each step",
+      "clearInstructions": "Write clear instructions",
+      "testNavigation": "Test navigation before publishing"
+    }
+  },
+  "confirmations": {
+    "cancelDelete": "Cancel",
+    "confirmDelete": "Delete Guide",
+    "deleteGuide": "Delete Guide",
+    "deleteWarning": "This action cannot be undone. Are you sure you want to delete this guide?"
+  },
+  "errors": {
+    "closeModal": "Close",
+    "generic": "An error occurred",
+    "loadingImage": "Error loading image", 
+    "networkError": "Network error occurred",
+    "noStepsAdded": "No steps have been added yet",
+    "pleaseFixErrors": "Please fix the errors above",
+    "previewUnavailable": "Preview unavailable",
+    "step": "Step error",
+    "validationError": "Validation error"
   },
   "status": {
     "active": "Active",
-    "expired": "Expired",
+    "expired": "Expired", 
     "draft": "Draft",
     "published": "Published",
     "archived": "Archived"
@@ -45,7 +103,8 @@
   "languageSwitcher": {
     "english": "EN",
     "hebrew": "עב",
-    "switchTo": "Switch to {{language}}"
+    "switchTo": "Switch to {{language}}",
+    "current": "Language"
   },
   "cta": {
     "title": "Ready to Get Started?",
@@ -54,6 +113,55 @@
   "guide": {
     "viewTitle": "Guidance Number {{id}}",
     "underDevelopment": "Guidance view page under development"
+  },
+  "viewGuide": {
+    "loading": {
+      "title": "Loading Guide", 
+      "message": "Preparing your navigation experience..."
+    },
+    "error": {
+      "notFound": "Guide Not Found",
+      "notFoundMessage": "The guide you're looking for might have been moved, deleted, or is no longer available.",
+      "goBack": "← Go Back"
+    },
+    "welcome": {
+      "stepsTotal": "{{count}} Steps Total",
+      "stepSingular": "Step",
+      "stepPlural": "Steps", 
+      "startNavigation": "🚀 Start Navigation",
+      "features": {
+        "visualSteps": "Visual Steps",
+        "turnByTurn": "Turn-by-Turn"
+      },
+      "tip": "💡 Tap \"Start Navigation\" when you're ready to begin your guided journey"
+    },
+    "navigation": {
+      "stepProgress": "Step {{current}} of {{total}}",
+      "actionItems": "Action Items:",
+      "openInNavigation": "Open in Navigation",
+      "previous": "← Previous", 
+      "nextStep": "Next Step →",
+      "completeGuide": "Finish"
+    },
+    "completion": {
+      "congratulations": "Congratulations!",
+      "message": "You've completed this guide successfully"
+    },
+    "images": {
+      "guideCover": "Guide Cover",
+      "visualPreviewNotAvailable": "Visual preview not available",
+      "visualGuide": "Visual Guide", 
+      "stepByStepNavigation": "Step-by-step navigation",
+      "visualGuideStep": "Visual guide step {{number}}",
+      "imageTemporarilyUnavailable": "Image temporarily unavailable"
+    },
+    "languageSelector": {
+      "title": "Choose Language",
+      "subtitle": "Select your preferred language for this guide",
+      "english": "English",
+      "hebrew": "עברית",
+      "continue": "Continue"
+    }
   },
   "home": {
     "hero": {
@@ -98,27 +206,45 @@
       }
     }
   },
+  "language": {
+    "current": "Current Language",
+    "en": "English",
+    "he": "Hebrew"
+  },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Dashboard", 
+    "subtitle": "Create visual guidance for unmapped spaces",
+    "developmentMode": "🚧 Development mode: Load sample data for preview testing",
     "welcomeMessage": "Welcome, {{name}}",
-    "welcomeDescription": "Welcome to the TrailGuide dashboard. Here you can manage your guidance.",
+    "welcomeDescription": "Here you can manage your guidance, view data and create new guidance quickly and easily",
+    "stepsCount": "Steps",
     "stats": {
       "totalGuides": "Total Guidance",
       "activeGuides": "Active Guidance",
       "totalViews": "Total Views",
-      "thisMonth": "This Month"
-    },
-    "quickActions": {
-      "title": "Quick Actions",
-      "createNew": "Create New Guidance",
-      "createNewDescription": "Create new guidance",
-      "viewAnalytics": "View Analytics",
-      "viewAnalyticsDescription": "View usage analytics",
-      "manageSettings": "Manage Settings",
-      "manageSettingsDescription": "Manage account settings"
+      "thisMonth": "This Month",
+      "feedbackReceived": "Feedback Received",
+      "feedbackSummary": "Feedback Summary",
+      "feedbackSentiment": "Positive Feedback",
+      "negative": "negative",
+      "noFeedbackYet": "No feedback yet",
+      "completionRate": "Completion Rate",
+      "active": "active",
+      "uniqueVisitors": "unique visitors",
+      "positive": "positive", 
+      "completions": "completions",
+      "completion": "completion",
+      "lastUpdated": "Last Updated",
+      "now": "Now",
+      "change": {
+        "negative": "decreased",
+        "neutral": "no change", 
+        "positive": "increased"
+      }
     },
     "recentGuides": {
       "title": "Recent Guidance",
+      "subtitle": "Manage your created guides",
       "noGuides": "No guidance yet",
       "createFirst": "Create your first guidance"
     },
@@ -130,26 +256,87 @@
       "views": "Views",
       "expiry": "Expiry",
       "actions": "Actions",
-      "created": "Created"
+      "created": "Created",
+      "filterBy": "Filter By",
+      "itemCount": "items",
+      "noExpiration": "No expiration",
+      "noItems": "No items found",
+      "showLess": "Show Less",
+      "showMore": "Show More",
+      "showingItems": "Showing",
+      "singleItem": "item",
+      "sortBy": "Sort By",
+      "headers": {
+        "guideName": "Guidance Name",
+        "status": "Status",
+        "views": "Views",
+        "expiry": "Expiry",
+        "actions": "Actions"
+      },
+      "noData": {
+        "title": "No guides yet",
+        "description": "Create your first guide to get started",
+        "createFirst": "Create First Guide"
+      },
+      "unnamedGuide": "Unnamed Guide",
+      "viewsUnit": "views",
+      "stepsUnit": "steps",
+      "stepsCount": "{{count}} steps",
+      "noDate": "No date",
+      "labels": {
+        "created": "Created:",
+        "views": "Views:",
+        "remaining": "Remaining:",
+        "expired": "Expired:",
+        "noExpiration": "No expiration"
+      }
     },
     "actions": {
       "edit": "Edit",
       "view": "View",
+      "preview": "Preview",
       "delete": "Delete",
-      "share": "Share"
+      "share": "Share",
+      "confirmDelete": "Confirm Delete",
+      "copyLink": "Copy Link",
+      "copyLinkError": "Failed to copy link",
+      "copyLinkTooltip": "Copy sharing link",
+      "deleteError": "Error deleting guide",
+      "deleteSuccess": "Guide deleted successfully",
+      "linkCopied": "Link copied to clipboard"
+    },
+    "preview": {
+      "organizerNotice": "Organizer Preview - You can always view your guides, even after expiration"
+    },
+    "error": {
+      "loadFailed": "Failed to load dashboard data",
+      "tryAgain": "Try Again"
     }
   },
   "createGuide": {
     "title": "Create New Guidance",
+    "subtitle": "Create visual guidance for unmapped spaces", 
+    "developmentMode": "🚧 Development mode: Load sample data for preview testing",
+    "validation": {
+      "eventNameRequired": "Event name is required",
+      "eventNameTooLong": "Event name is too long",
+      "expirationDatePast": "Expiration date cannot be in the past",
+      "expirationDateRequired": "Expiration date is required",
+      "stepDescriptionRequired": "Step description is required",
+      "stepDescriptionTooLong": "Step description is too long",
+      "stepsRequired": "At least one step is required"
+    },
     "editTitle": "Edit Guidance",
     "basicInfo": {
       "title": "Basic Information",
+      "subtitle": "General information about your guidance",
       "eventName": "Event Name",
       "eventNamePlaceholder": "e.g., Summer Festival 2024",
       "description": "Short Description",
       "descriptionPlaceholder": "Brief description of the event or destination",
       "location": "Location",
       "locationPlaceholder": "e.g., Yarkon Park, Tel Aviv",
+      "coverage": "Coverage",
       "status": "Status",
       "coverImage": "Cover Image",
       "uploadCoverImage": "Upload Cover Image",
@@ -158,21 +345,27 @@
       "changeImage": "Change Image",
       "dragDropImage": "Drag image here or click to select",
       "imageFormats": "Supported formats: JPG, PNG, GIF, WebP",
-      "maxFileSize": "Maximum size: 5MB"
+      "maxFileSize": "Maximum size: 5MB",
+      "noCoverImage": "No cover image"
     },
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "draftDescription": "Save as draft for later editing",
+      "publishedDescription": "Publish and make available to users"
     },
     "steps": {
-      "title": "Guidance Steps",
+      "title": "Steps",
+      "subtitle": "Create detailed navigation steps with images and instructions",
       "addStep": "Add Step",
       "stepNumber": "Step {{number}}",
       "uploadImage": "Upload Image",
       "stepDescription": "Step Description",
       "stepPlaceholder": "e.g., Turn left at the big tree",
       "dragToReorder": "Drag to reorder",
-      "noStepsYet": "No steps added yet. Add your first step to create guidance."
+      "noStepsYet": "No steps added yet. Add your first step to create guidance.",
+      "addFirstStep": "Add the first step to start creating professional guidance",
+      "completedSteps": "Completed Steps"
     },
     "settings": {
       "title": "Settings",
@@ -183,9 +376,55 @@
       "oneMonth": "One Month",
       "custom": "Custom"
     },
+    "expiration": {
+      "title": "Expiration Settings",
+      "subtitle": "Choose how long your guide will be accessible to participants",
+      "defaultHours": "24 hours (default)",
+      "customHours": "Custom duration",
+      "hoursLabel": "Hours",
+      "minHours": "Minimum: 1 hour",
+      "maxHours": "Maximum: 24 hours",
+      "expiresAt": "Expires at: {{date}}",
+      "remaining": "{{time}} remaining",
+      "expired": "Expired {{time}} ago",
+      "noExpiration": "No expiration set",
+      "draftNoExpiration": "No expiration (Draft)",
+      "expirationInfo": "Participants will not be able to access the guide after the expiration date. Organizers retain full access.",
+      "someTime": "some time"
+    },
+    "loading": {
+      "loadingGuide": "Loading guide for editing...",
+      "loadingFailed": "Loading failed",
+      "loadingGeneral": "Loading guide...",
+      "pleaseWait": "Please wait while we prepare everything for you...",
+      "formNotReady": "Form is not ready for submission. Please wait for loading to complete."
+    },
     "preview": {
       "title": "Preview",
-      "mobileView": "Mobile View"
+      "backToEdit": "Back to Edit",
+      "exitPreview": "Exit Preview",
+      "stepCounter": "Step {current} of {total}",
+      "startNavigation": "Start Navigation",
+      "navigationComplete": "Navigation completed successfully!",
+      "restartNavigation": "Start Over",
+      "mobileView": "Mobile View",
+      "livePreviewDescription": "Live preview of your guidance",
+      "quickStats": "Quick Stats",
+      "completedSteps": "Completed Steps",
+      "completeness": "Completeness",
+      "previewUnavailable": "Preview unavailable. Please complete the form first.",
+      "tips": {
+        "title": "Improvement Tips",
+        "addImages": "Add images to each step",
+        "clearInstructions": "Write clear instructions",
+        "testNavigation": "Test navigation before publishing"
+      },
+      "improvementTips": {
+        "title": "Improvement Tips",
+        "addImages": "Add images to each step",
+        "clearInstructions": "Write clear instructions",
+        "testNavigation": "Test navigation before publishing"
+      }
     },
     "publish": {
       "title": "Publish",
@@ -197,6 +436,9 @@
     "form": {
       "createEvent": "Create Guidance",
       "creating": "Creating guidance...",
+      "updateEvent": "Update Guide",
+      "updating": "Updating...",
+      "eventNamePlaceholder": "Enter event name",
       "validation": {
         "eventNameRequired": "Event name is required",
         "eventNameTooLong": "Event name must be less than 255 characters",
@@ -204,15 +446,54 @@
         "locationTooLong": "Location must be less than 255 characters",
         "invalidFileType": "Invalid file type. Only JPG, PNG, GIF, and WebP images are allowed",
         "fileTooLarge": "File is too large. Maximum size is 5MB",
-        "invalidDate": "Invalid date"
+        "invalidDate": "Invalid date",
+        "statusRequired": "Status is required"
       },
       "messages": {
         "createSuccess": "Guidance created successfully!",
         "createError": "Error creating guidance. Please try again",
         "uploadError": "Error uploading image. Please try again",
         "networkError": "Network error. Check your internet connection",
-        "nameExists": "A guidance with this name already exists. Please choose a different name"
+        "nameExists": "A guidance with this name already exists. Please choose a different name",
+        "stepsCreated": "{{count}} steps created",
+        "stepsCreatedPartial": "{{created}}/{{total}} steps created"
       }
+    },
+    "imageUpload": {
+      "uploadSuccess": "Image uploaded successfully",
+      "dragOrClick": "Drag and drop an image here or click to select",
+      "supportedFormats": "Supported formats: JPEG, PNG, GIF, WebP",
+      "maxSize": "Maximum size: 5MB",
+      "previewAlt": "Image preview"
+    },
+    "step1": {
+      "title": "General Information",
+      "eventName": "Event Name",
+      "eventNamePlaceholder": "Enter event name",
+      "expirationDate": "Expiration Date",
+      "expirationHelp": "When will the guidance expire?"
+    },
+    "step2": {
+      "title": "Guidance Steps",
+      "addStep": "Add Step",
+      "stepDescription": "Step Description",
+      "stepDescriptionPlaceholder": "Describe what the user needs to do...",
+      "uploadImage": "Upload Image",
+      "imageAlt": "Alternative image description",
+      "deleteStep": "Delete Step",
+      "reorderSteps": "Reorder Steps"
+    },
+    "step3": {
+      "title": "Final Actions",
+      "preview": "Preview",
+      "publish": "Publish Guidance"
+    },
+    "navigation": {
+      "title": "Navigation Link",
+      "add": "Add Navigation",
+      "remove": "Remove Navigation", 
+      "placeholder": "Enter address or location",
+      "description": "Add a location address or Waze link to help participants navigate to this step"
     }
   },
   "guide": {
@@ -223,7 +504,9 @@
     "completed": "You've reached your destination!",
     "thankYou": "Thank you for using TrailGuide",
     "backToStart": "Back to Start",
-    "shareGuide": "Share Guidance"
+    "shareGuide": "Share Guidance",
+    "stepsCount": "{{count}} steps",
+    "stepProgress": "{{current}}/{{total}}"
   },
   "errors": {
     "general": "An error occurred. Please try again.",
@@ -233,6 +516,9 @@
     "backToHome": "Back to Home",
     "guideNotFound": "Guidance not found",
     "expired": "Guidance has expired",
+    "expiredTitle": "Guide No Longer Available",
+    "expiredMessage": "This guide has expired and is no longer accessible to participants.",
+    "expiredHelp": "If you need access to this guide, please contact the organizer for a new link.",
     "uploadFailed": "File upload failed"
   },
   "success": {
@@ -264,13 +550,462 @@
     "loginSubtitle": "Sign in to your account to continue",
     "emailPlaceholder": "Enter your email address",
     "passwordPlaceholder": "Enter your password",
-    "demoAccounts": "Demo Accounts",
     "logoutSuccess": "Logged out successfully",
-    "logoutError": "Logout failed"
+    "logoutError": "Logout failed",
+    "usernameOrEmail": "Username or Email",
+    "usernameOrEmailMaxLength": "Maximum 100 characters",
+    "usernameOrEmailMinLength": "Minimum 3 characters",
+    "usernameOrEmailPlaceholder": "Enter username or email",
+    "usernameOrEmailRequired": "Username or email is required"
   },
   "user": {
     "defaultName": "User",
     "profile": "Profile",
     "account": "Account"
+  },
+  "feedback": {
+    "completedGuide": "You've completed the guide!",
+    "helpUsImprove": "Help us improve by sharing your feedback",
+    "guideFeedback": {
+      "title": "Rate This Guide",
+      "subtitle": "Help us improve this specific guide",
+      "wasGuideHelpful": "Was this guide helpful?",
+      "doYouLikeAppConcept": "Do you like the concept behind this app?",
+      "commentsPlaceholder": "Tell us how we can improve this guide...",
+      "submitButton": "Submit Guide Feedback"
+    },
+    "founderFeedback": {
+      "title": "About TrailGuide",
+      "subtitle": "Help us improve the overall experience",
+      "overallExperience": "How was your overall experience with TrailGuide?",
+      "projectConcept": "What do you think of the TrailGuide concept?",
+      "presentationStyle": "How would you rate the way guidance is presented?",
+      "recommendToOthers": "Would you recommend TrailGuide to others?",
+      "commentsPlaceholder": "Share your thoughts about TrailGuide as a platform...",
+      "submitButton": "Submit Project Feedback",
+      "overallRating": "Overall Experience",
+      "conceptRating": "Project Concept",
+      "presentationRating": "Presentation Style",
+      "recommendRating": "Recommendation"
+    },
+    "helpful": "Helpful",
+    "notHelpful": "Not Helpful",
+    "conceptLiked": "Like the concept",
+    "conceptDisliked": "Don't like the concept",
+    "excellent": "Excellent",
+    "good": "Good",
+    "poor": "Poor",
+    "yes": "Yes",
+    "no": "No",
+    "additionalComments": "Additional comments",
+    "skip": "Skip",
+    "submitting": "Submitting...",
+    "guideReference": "Guide",
+    "feedbackSuccess": "Thank you for your feedback!",
+    "feedbackError": "Failed to submit feedback. Please try again.",
+    "error": {
+      "title": "Feedback Submission Error",
+      "generic": "Failed to submit feedback. Please try again.",
+      "noFeedbackProvided": "Please select at least one rating or add a comment."
+    },
+    "previewMode": {
+      "notice": "Preview Mode - Feedback will not be saved to the system"
+    }
+  },
+  "validation": {
+    "singleError": "1 error found:",
+    "multipleErrors": "{{count}} errors found:",
+    "singleWarning": "1 suggestion:",
+    "multipleWarnings": "{{count}} suggestions:",
+    "warnings": {
+      "noLocation": "Consider adding a location to help participants find the event",
+      "noCoverImage": "Consider adding a cover image to make the guide more attractive",
+      "stepNoImage": "Step {{stepNumber}} would benefit from an image for better guidance"
+    }
+  },
+  "analytics": {
+    "dashboard": {
+      "title": "Analytics Dashboard",
+      "subtitle": "Comprehensive insights for your guides"
+    },
+    "viewMode": {
+      "organizer": "Organizer View",
+      "entrepreneur": "Market Validation"
+    },
+    "loading": {
+      "title": "Loading Analytics",
+      "subtitle": "Gathering insights from your data..."
+    },
+    "stats": {
+      "totalGuides": "Total Guides",
+      "totalViews": "Total Views",
+      "uniqueVisitors": "Unique Visitors",
+      "completionRate": "Completion Rate",
+      "deviceTypes": "Device Types",
+      "published": "published",
+      "completions": "completions",
+      "devicesUsed": "devices used",
+      "users": "users",
+      "completion": "completion"
+    },
+    "devices": {
+      "title": "Device Analytics"
+    },
+    "guides": {
+      "title": "Guide Performance",
+      "timeRange": "Data for {{range}}"
+    },
+    "table": {
+      "guideName": "Guide Name",
+      "views": "Views",
+      "uniqueVisitors": "Unique Visitors",
+      "completionRate": "Completion Rate",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDetails": "View Details",
+      "exportData": "Export Data"
+    },
+    "funnel": {
+      "summary": "Funnel Summary",
+      "totalEntries": "Total Entries",
+      "conversions": "Conversions",
+      "overallConversion": "Overall Conversion",
+      "dropOffs": "Drop-offs"
+    },
+    "insights": {
+      "strongMarketFit": "Strong product-market fit detected",
+      "highInterestLowConversion": "High interest - conversion optimization needed",
+      "excellentRetention": "Excellent user retention",
+      "needsContentOptimization": "Content optimization required",
+      "collectingData": "Collecting data for assessment"
+    },
+    "charts": {
+      "noData": "No data available",
+      "noMarketData": "No market data available"
+    },
+    "empty": {
+      "title": "No Analytics Data",
+      "description": "Start creating guides to see analytics insights here.",
+      "action": "Refresh Data"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Platform-wide analytics and management",
+      "platformOverview": "Platform Overview",
+      "liveData": "Live Data"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "ariaLabel": "Admin dashboard tabs"
+    },
+    "feedback": {
+      "title": "Feedback Analytics",
+      "subtitle": "Last {{period}} days - {{count}} total feedback submissions",
+      "simpleSubtitle": "What users think about the guides",
+      "satisfactionRate": "Satisfaction Rate",
+      "totalResponses": "Total Responses",
+      "thisWeek": "This Week",
+      "recentComments": "Recent Comments",
+      "noData": "No feedback data available for this period",
+      "guideFeedback": {
+        "title": "Guide Feedback",
+        "subtitle": "\"Was this guide helpful?\" responses",
+        "helpful": "Helpful",
+        "notHelpful": "Not Helpful",
+        "helpfulRate": "Helpful Rate"
+      },
+      "conceptFeedback": {
+        "title": "Concept Feedback",
+        "subtitle": "\"Do you like the overall idea?\" responses",
+        "likeIdea": "Like the Idea",
+        "dislikeIdea": "Don't Like the Idea",
+        "approvalRate": "Concept Approval Rate"
+      },
+      "recentComments": {
+        "title": "Recent Feedback Comments"
+      },
+      "labels": {
+        "helpful": "✅ Helpful",
+        "notHelpful": "❌ Not Helpful",
+        "likeIdea": "💡 Like Idea",
+        "dislikeIdea": "💭 Dislike Idea",
+        "guide": "Guide:"
+      },
+      "dualSystem": {
+        "title": "Detailed Feedback Analysis",
+        "subtitle": "Feedback on guide quality and concept validation",
+        "guideQuality": "Guide Quality",
+        "conceptValidation": "Concept Validation",
+        "totalResponses": "Total Responses",
+        "helpfulRate": "Helpful Rate",
+        "conceptPositiveRate": "Concept Positive Rate",
+        "noFeedbackYet": "No feedback yet",
+        "fromResponses": "from {{count}} responses",
+        "guideFeedbackTitle": "Guide Quality Feedback",
+        "conceptFeedbackTitle": "App Concept Feedback"
+      },
+      "organizer": {
+        "title": "Guide Performance by Organizer",
+        "subtitle": "Guide quality performance for each content creator",
+        "performance": "Content Creator Performance",
+        "noGuides": "No guides with feedback yet",
+        "guideName": "Guide Name",
+        "organizerName": "Content Creator",
+        "responseCount": "{{count}} responses",
+        "helpfulRate": "{{rate}}% helpful",
+        "viewAllAnalytics": "View All Analytics",
+        "recentComments": "Recent Comments",
+        "noComments": "No comments yet"
+      },
+      "insights": {
+        "title": "Insights & Conclusions",
+        "subtitle": "Smart analysis of data and actionable recommendations",
+        "pilotHealth": "Pilot Health Metrics",
+        "keyFindings": "Key Findings & Next Steps",
+        "whatWorking": "What's Working",
+        "improvements": "Areas for Improvement",
+        "recommendations": "Recommended Actions",
+        "healthScore": "Pilot Health Score",
+        "recommendation": "Recommendation",
+        "expandPilot": "Expand the Pilot",
+        "improvePilot": "Improve the Pilot",
+        "reconsiderPilot": "Reconsider the Pilot",
+        "confidenceLevel": "Confidence Level: {{level}}%",
+        "noInsightsYet": "Not enough data for insights yet",
+        "collectingData": "Collecting data..."
+      },
+      "dualTypes": {
+        "title": "Feedback Types",
+        "guide": "Guide Feedback", 
+        "founder": "Founder Feedback",
+        "guideDescription": "Quality and clarity of specific guides",
+        "founderDescription": "Overall TrailGuide concept and approach"
+      },
+      "stats": {
+        "totalFeedback": "Total Feedback",
+        "guideFeedback": "Guide Feedback",
+        "founderFeedback": "Founder Feedback",
+        "likeRate": "Like Rate",
+        "helpfulRate": "Helpful Rate",
+        "textFeedback": "Text Feedback",
+        "overallRating": "Overall Rating",
+        "conceptRating": "Concept Rating",
+        "presentationRating": "Presentation Rating",
+        "recommendRate": "Recommend Rate"
+      },
+      "recentFeedback": "Recent Feedback",
+      "unknownGuide": "Unknown Guide",
+      "liked": "Liked",
+      "disliked": "Disliked",
+      "helpful": "Helpful",
+      "notHelpful": "Not Helpful",
+      "viewMore": "View More"
+    },
+    "periods": {
+      "week": "7 Days",
+      "month": "30 Days", 
+      "quarter": "90 Days",
+      "year": "365 Days"
+    },
+    "stats": {
+      "totalGuides": "Total Guides",
+      "activeGuides": "Active Guides",
+      "publishedGuides": "Published Guides",
+      "totalViews": "Total Views",
+      "uniqueVisitors": "Unique Visitors",
+      "completionRate": "Completion Rate",
+      "totalFeedback": "Total Feedback",
+      "active": "active",
+      "published": "published",
+      "completions": "completions",
+      "unique": "unique",
+      "positive": "positive"
+    },
+    "insights": {
+      "businessTitle": "Business Insights",
+      "businessTrends": "Business Trends",
+      "businessRecommendations": "Growth Opportunities",
+      "richContent": "Rich content library with diverse guidance materials",
+      "contentGrowth": "Content library growing with good expansion trajectory",
+      "strongUserBase": "Strong and active user community",
+      "growingUserBase": "Expanding user base with positive growth trends",
+      "excellentFeedback": "Excellent user satisfaction and feedback scores",
+      "goodFeedback": "Good user feedback with room for improvement",
+      "improvingEngagement": "Engagement metrics showing positive improvement",
+      "bizRec1": "Focus on user retention strategies to maintain growth",
+      "bizRec2": "Implement advanced analytics for business intelligence",
+      "bizRec3": "Explore new market segments for platform expansion"
+    },
+    "feedback": {
+      "title": "Feedback Analytics",
+      "subtitle": "User feedback analysis for last {{period}} days",
+      "noData": "No feedback data available",
+      "guide": {
+        "title": "Guide Feedback Analytics",
+        "subtitle": "User feedback on guide quality and clarity ({{count}} total responses)",
+        "stats": {
+          "totalFeedback": "Total Guide Feedback",
+          "likeRate": "Guide Like Rate",
+          "helpfulRate": "Guide Helpful Rate",
+          "textFeedback": "Guide Comments"
+        }
+      },
+      "founder": {
+        "title": "Project Feedback Analytics", 
+        "subtitle": "User feedback on TrailGuide concept and approach ({{count}} total responses)",
+        "stats": {
+          "totalFeedback": "Total Project Feedback",
+          "overallRating": "Overall Experience Rating",
+          "conceptRating": "Concept Rating",
+          "recommendationRate": "Recommendation Rate",
+          "textFeedback": "Project Comments"
+        }
+      },
+      "recentFeedback": "Recent Feedback",
+      "liked": "Liked",
+      "disliked": "Disliked",
+      "helpful": "Helpful",
+      "notHelpful": "Not Helpful",
+      "excellent": "Excellent",
+      "good": "Good",
+      "poor": "Poor",
+      "yes": "Yes",
+      "no": "No",
+      "unknownGuide": "Unknown Guide",
+      "viewMore": "View More"
+    },
+    "usage": {
+      "title": "Usage Analytics",
+      "subtitle": "Platform usage patterns for last {{period}} days",
+      "noData": "No usage data available",
+      "totalViews": "Total Views",
+      "uniqueVisitors": "Unique Visitors",
+      "avgCompletionRate": "Avg Completion Rate",
+      "dailyTrend": "Daily Usage Trend",
+      "deviceDistribution": "Device Distribution",
+      "geographicDistribution": "Geographic Distribution",
+      "overviewChart": "Usage Overview",
+      "usageCount": "Usage Count",
+      "count": "Count",
+      "views": "Views",
+      "visitors": "Visitors",
+      "completions": "Completions",
+      "deviceStats": "Device Statistics",
+      "topRegions": "Top Regions",
+      "usage": "Usage",
+      "insights": {
+        "title": "Usage Insights",
+        "trends": "Usage Trends",
+        "recommendations": "Recommendations",
+        "highTraffic": "High traffic volume indicates strong platform adoption",
+        "growingTraffic": "Growing traffic shows positive user engagement trends",
+        "goodEngagement": "Excellent completion rates indicate quality content",
+        "improvementNeeded": "Completion rates suggest content optimization opportunities",
+        "mobileFirst": "Mobile-first usage patterns - optimize for mobile experience",
+        "desktopDominant": "Desktop-dominant usage - consider mobile expansion",
+        "rec1": "Monitor peak usage times to optimize server performance",
+        "rec2": "Analyze device patterns to improve cross-platform experience",
+        "rec3": "Track geographic trends for regional expansion opportunities"
+      }
+    },
+    "charts": {
+      "usage": {
+        "title": "Usage Analytics",
+        "subtitle": "Platform usage trends and patterns"
+      },
+      "feedback": {
+        "title": "Feedback Analytics",
+        "subtitle": "User feedback and satisfaction metrics"
+      }
+    },
+    "export": {
+      "title": "Data Export",
+      "subtitle": "Export platform analytics data for last {{period}} days",
+      "summary": "Export Summary",
+      "csv": {
+        "title": "CSV Export",
+        "description": "Export analytics data as spreadsheet-compatible CSV file"
+      },
+      "json": {
+        "title": "JSON Export", 
+        "description": "Export structured analytics data as JSON file"
+      },
+      "download": "Download",
+      "exporting": "Exporting...",
+      "csvDownloaded": "CSV file downloaded successfully",
+      "jsonDownloaded": "JSON file downloaded successfully",
+      "error": "Export failed. Please try again.",
+      "info": {
+        "title": "Export Information",
+        "csvContent": "CSV includes guide performance and feedback data",
+        "jsonContent": "JSON includes complete analytics with detailed breakdowns",
+        "privacy": "Exported data excludes personal user information",
+        "period": "Data covers the last {{days}} days of platform activity"
+      }
+    },
+    "health": {
+      "title": "Pilot Health Metrics",
+      "subtitle": "Comprehensive system health and performance indicators",
+      "overallHealth": "Overall Health Scores",
+      "overall": "Overall",
+      "engagement": "Engagement",
+      "content": "Content",
+      "growth": "Growth",
+      "engagementMetrics": "User Engagement",
+      "activeUsers": "Active Users",
+      "daily": "Daily",
+      "avgSessionTime": "Avg Session",
+      "completionRate": "Completion Rate",
+      "feedbackRate": "Feedback Rate",
+      "contentPerformance": "Content Performance",
+      "totalGuides": "Total Guides",
+      "activeGuides": "Active Guides",
+      "avgRating": "Avg Rating",
+      "topGuides": "Top Performing Guides",
+      "noTopGuides": "No top guides available yet",
+      "issuesAndAlerts": "Health Issues & Alerts",
+      "allGood": "All Systems Healthy",
+      "noIssuesDetected": "No issues detected in the current monitoring period",
+      "currentValue": "Current",
+      "threshold": "Threshold"
+    },
+    "pilot": {
+      "title": "Pilot Status",
+      "subtitle": "How the program is doing right now",
+      "activeOrganizers": "Organizers Who Created Guides",
+      "totalOrganizers": "Total Organizers",
+      "totalGuidesPublished": "Total Guides Published",
+      "uniqueVisitors": "Unique Visitors",
+      "positiveFeedbackRate": "Positive Feedback Rate",
+      "daysRunning": "Days Running",
+      "status": "Active Status",
+      "summary": "Pilot Summary",
+      "summary1": "Pilot running successfully with active organizers",
+      "summary2": "Users responding positively to the concept",
+      "summary3": "System stable and working as planned",
+      "overview": {
+        "title": "Pilot Overview",
+        "subtitle": "Key metrics to assess product success"
+      },
+      "questions": {
+        "organizersCreating": "Are organizers creating guides?",
+        "peopleUsing": "Are people actually using the guides?",
+        "wasHelpful": "Was it helpful?"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "error": {
+      "loadFailed": "Failed to load admin data",
+      "tryAgain": "Try Again"
+    },
+    "navigation": {
+      "backToDashboard": "Back to Dashboard"
+    }
   }
 }

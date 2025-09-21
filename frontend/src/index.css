@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* =============================================================================
    TAILWIND CSS BASE
@@ -6,6 +6,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =============================================================================
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ============================================================================= */
+
+:root {
+  /* Primary Brand Colors */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+
+  /* Success Colors */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  /* Warning Colors */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  /* Error Colors */
+  --color-error-50: #fef2f2;
+  --color-error-100: #fee2e2;
+  --color-error-500: #ef4444;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+
+  /* Semantic Color Aliases */
+  --color-brand: var(--color-primary-600);
+  --color-brand-hover: var(--color-primary-700);
+  --color-danger: var(--color-error-600);
+  --color-danger-hover: var(--color-error-700);
+}
 
 /* =============================================================================
    GLOBAL STYLES & RESET
@@ -24,13 +69,15 @@ html {
 
 body {
   height: 100%;
-  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #1a1a1a;
   background-color: #f8fafc;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
@@ -67,14 +114,31 @@ body {
    HEBREW FONT CONFIGURATIONS
    ============================================================================= */
 
-.font-heebo {
-  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+/* Professional Font Families */
+.font-inter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Hebrew text optimization */
+.font-heebo {
+  font-family: 'Heebo', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', Consolas, monospace;
+}
+
+/* Enhanced Hebrew text optimization */
 [lang="he"], [dir="rtl"] {
-  font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-feature-settings: "kern" 1, "liga" 1;
+  font-family: 'Heebo', 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "ss01" 1;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: proportional-nums;
+}
+
+/* English/LTR text optimization */
+[lang="en"], [dir="ltr"] {
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   text-rendering: optimizeLegibility;
 }
 
@@ -82,26 +146,59 @@ body {
    COMPONENT BASE STYLES
    ============================================================================= */
 
-/* Button base styles */
+/* Button base styles using new semantic colors */
 .btn {
   @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
 }
 
 .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+  @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 active:bg-primary-800;
 }
 
 .btn-secondary {
-  @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+  @apply bg-secondary-200 text-secondary-900 hover:bg-secondary-300 focus:ring-secondary-500 active:bg-secondary-400;
+}
+
+.btn-success {
+  @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500 active:bg-success-800;
+}
+
+.btn-warning {
+  @apply bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500 active:bg-warning-800;
 }
 
 .btn-danger {
-  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  @apply bg-error-600 text-white hover:bg-error-700 focus:ring-error-500 active:bg-error-800;
 }
 
-/* Input base styles */
+.btn-info {
+  @apply bg-info-600 text-white hover:bg-info-700 focus:ring-info-500 active:bg-info-800;
+}
+
+/* Ghost button variants */
+.btn-ghost {
+  @apply bg-transparent text-secondary-700 hover:bg-secondary-100 focus:ring-secondary-500 active:bg-secondary-200;
+}
+
+.btn-ghost-primary {
+  @apply bg-transparent text-primary-700 hover:bg-primary-50 focus:ring-primary-500 active:bg-primary-100;
+}
+
+/* Input base styles using semantic colors */
 .input {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  @apply w-full px-3 py-2 border border-secondary-300 rounded-lg text-sm placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+}
+
+.input-success {
+  @apply border-success-300 focus:ring-success-500 focus:border-success-500;
+}
+
+.input-warning {
+  @apply border-warning-300 focus:ring-warning-500 focus:border-warning-500;
+}
+
+.input-error {
+  @apply border-error-300 focus:ring-error-500 focus:border-error-500 bg-error-50;
 }
 
 /* Card styles */
@@ -110,46 +207,678 @@ body {
 }
 
 /* =============================================================================
+   PROFESSIONAL TYPOGRAPHY SYSTEM
+   ============================================================================= */
+
+/* Heading Hierarchy */
+.heading-1 {
+  @apply text-4xl lg:text-6xl font-bold leading-tight tracking-tight;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heading-2 {
+  @apply text-3xl lg:text-5xl font-bold leading-tight tracking-tight;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heading-3 {
+  @apply text-2xl lg:text-4xl font-bold leading-snug tracking-tight;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heading-4 {
+  @apply text-xl lg:text-3xl font-semibold leading-snug tracking-normal;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heading-5 {
+  @apply text-lg lg:text-2xl font-semibold leading-normal tracking-normal;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heading-6 {
+  @apply text-base lg:text-xl font-semibold leading-normal tracking-normal;
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* RTL Heading Adjustments */
+[dir="rtl"] .heading-1,
+[dir="rtl"] .heading-2,
+[dir="rtl"] .heading-3,
+[dir="rtl"] .heading-4,
+[dir="rtl"] .heading-5,
+[dir="rtl"] .heading-6 {
+  font-family: 'Heebo', 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600; /* Slightly lighter for Hebrew readability */
+}
+
+/* Body Text Hierarchy */
+.text-lead {
+  @apply text-lg lg:text-xl leading-relaxed font-normal;
+  color: theme('colors.secondary.700');
+}
+
+.text-body-lg {
+  @apply text-base lg:text-lg leading-normal font-normal;
+  color: theme('colors.secondary.800');
+}
+
+.text-body {
+  @apply text-sm lg:text-base leading-normal font-normal;
+  color: theme('colors.secondary.900');
+}
+
+.text-body-sm {
+  @apply text-xs lg:text-sm leading-normal font-normal;
+  color: theme('colors.secondary.600');
+}
+
+/* Specialized Typography */
+.text-caption {
+  @apply text-xs leading-normal font-normal;
+  color: theme('colors.secondary.500');
+}
+
+.text-label {
+  @apply text-sm font-medium leading-normal;
+  color: theme('colors.secondary.800');
+}
+
+.text-button {
+  @apply text-sm lg:text-base font-medium leading-none tracking-wide;
+}
+
+.text-overline {
+  @apply text-xs font-semibold leading-normal tracking-wide uppercase;
+  color: theme('colors.secondary.600');
+}
+
+/* Reading Optimized Text */
+.text-prose {
+  @apply text-base lg:text-lg leading-relaxed font-normal;
+  color: theme('colors.secondary.800');
+  font-family: 'Inter', 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[dir="rtl"] .text-prose {
+  font-family: 'Heebo', 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.75; /* Slightly more spacing for Hebrew */
+}
+
+/* =============================================================================
    LOADING & ANIMATION STYLES  
    ============================================================================= */
 
-/* Loading spinner */
+/* Loading spinner with hardware acceleration */
 .loading-spinner {
   @apply inline-block w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
-/* Fade in animation */
+/* Hardware acceleration utilities */
+.transform-gpu {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.animate-gpu {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Shimmer animation for skeletons */
+.shimmer-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-animation::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+  will-change: transform;
+}
+
+/* Background size utilities for gradients */
+.bg-size-200 {
+  background-size: 200% 100%;
+}
+
+.bg-pos-neg-100 {
+  background-position: -100% 0;
+}
+
+/* Enhanced fade in animation with hardware acceleration */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translate3d(0, 10px, 0); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate3d(0, 0, 0); 
+  }
 }
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+  will-change: transform, opacity;
 }
 
-/* =============================================================================
-   MOBILE-FIRST RESPONSIVE UTILITIES
-   ============================================================================= */
+/* Stagger animation utilities */
+.animate-stagger-1 {
+  animation-delay: 50ms;
+}
 
-/* Hide on mobile */
-@media (max-width: 767px) {
-  .hidden-mobile {
-    display: none !important;
+.animate-stagger-2 {
+  animation-delay: 100ms;
+}
+
+.animate-stagger-3 {
+  animation-delay: 150ms;
+}
+
+.animate-stagger-4 {
+  animation-delay: 200ms;
+}
+
+.animate-stagger-5 {
+  animation-delay: 250ms;
+}
+
+/* Button press animation */
+.btn-press {
+  transform: scale(0.98);
+  transition: transform 50ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Enhanced button ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple-expand 600ms linear;
+  background-color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Dark theme ripple for dark buttons */
+button.bg-gradient-to-r.from-primary-600 .ripple,
+button.bg-gradient-to-r.from-red-600 .ripple {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Light theme ripple for light buttons */
+button.bg-gradient-to-r.from-gray-100 .ripple,
+button.bg-transparent .ripple {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
 }
 
-/* Show only on mobile */
+/* Button interaction enhancements */
+button:active .ripple {
+  animation-duration: 300ms;
+}
+
+/* Ensure button content stays above ripple */
+button > *:not(.ripple) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Form element animations */
+@keyframes shake-subtle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes pulse-warning {
+  0%, 100% { border-color: currentColor; opacity: 1; }
+  50% { border-color: rgb(245 158 11); opacity: 0.8; }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes glow-success {
+  0%, 100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+  50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+}
+
+@keyframes slide-in-up {
+  0% { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* CSS utility classes for form animations */
+.animate-shake-subtle {
+  animation: shake-subtle 500ms ease-in-out;
+}
+
+.animate-pulse-warning {
+  animation: pulse-warning 1500ms ease-in-out infinite;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2000ms ease-in-out infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 200ms ease-out;
+}
+
+.animate-glow-success {
+  animation: glow-success 2000ms ease-in-out infinite;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 300ms ease-out;
+}
+
+/* Card hover animations */
+.card-hover {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.card-hover:hover {
+  transform: translate3d(0, -2px, 0) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Smooth scroll behavior */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Focus ring utilities */
+.focus-ring {
+  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.focus-ring:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* =============================================================================
+   ENHANCED RESPONSIVE UTILITIES
+   ============================================================================= */
+
+/* Enhanced breakpoint utilities */
+.container-responsive {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Responsive visibility utilities */
+.hidden-mobile {
+  display: none !important;
+}
+
 @media (min-width: 768px) {
+  .hidden-mobile {
+    display: block !important;
+  }
   .mobile-only {
     display: none !important;
   }
 }
 
-/* Touch-friendly interactive elements */
+.tablet-only {
+  display: none !important;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tablet-only {
+    display: block !important;
+  }
+}
+
+.desktop-only {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: block !important;
+  }
+}
+
+/* Enhanced touch-friendly interactive elements */
 @media (hover: none) and (pointer: coarse) {
   .btn {
     @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Larger touch targets for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem;
+  }
+  
+  /* Enhanced mobile interactions */
+  .mobile-interactive {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  /* Mobile-optimized form inputs */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Enhanced mobile form interactions */
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: scale(1.01);
+    transition: all 200ms ease-out;
+  }
+  
+  /* Mobile-optimized buttons and interactive elements */
+  button, [role="button"], .touch-target {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better mobile tap states */
+  button:active, [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 100ms ease-out;
+  }
+}
+
+/* Responsive typography scaling */
+.responsive-text-xs { font-size: clamp(0.75rem, 0.5rem + 0.5vw, 0.875rem); }
+.responsive-text-sm { font-size: clamp(0.875rem, 0.75rem + 0.5vw, 1rem); }
+.responsive-text-base { font-size: clamp(1rem, 0.875rem + 0.5vw, 1.125rem); }
+.responsive-text-lg { font-size: clamp(1.125rem, 1rem + 0.5vw, 1.25rem); }
+.responsive-text-xl { font-size: clamp(1.25rem, 1.125rem + 0.5vw, 1.5rem); }
+.responsive-text-2xl { font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem); }
+.responsive-text-3xl { font-size: clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem); }
+.responsive-text-4xl { font-size: clamp(2.25rem, 2rem + 2vw, 3rem); }
+
+/* Responsive spacing utilities */
+.responsive-spacing-sm { padding: clamp(0.5rem, 2vw, 1rem); }
+.responsive-spacing-md { padding: clamp(1rem, 3vw, 1.5rem); }
+.responsive-spacing-lg { padding: clamp(1.5rem, 4vw, 2rem); }
+.responsive-spacing-xl { padding: clamp(2rem, 5vw, 3rem); }
+
+/* Desktop-only hover enhancements */
+@media (hover: hover) and (pointer: fine) {
+  /* Enhanced card hover effects */
+  .hover-lift {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Advanced button hover states */
+  .hover-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hover-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 600ms;
+  }
+  
+  .hover-glow:hover::before {
+    transform: translateX(100%);
+  }
+  
+  /* Desktop tooltip enhancements */
+  .tooltip-hover {
+    position: relative;
+  }
+  
+  .tooltip-hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 200ms ease-out;
+    z-index: 50;
+  }
+  
+  .tooltip-hover:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  
+  /* Enhanced focus states for keyboard users */
+  .focus-enhanced:focus-visible {
+    outline: 2px solid theme('colors.primary.500');
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Advanced link hover effects */
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+  
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: currentColor;
+    transition: width 300ms ease-out;
+  }
+  
+  .link-underline:hover::after {
+    width: 100%;
+  }
+}
+
+/* =============================================================================
+   WIDE SCREEN OPTIMIZATIONS
+   ============================================================================= */
+
+/* Ultra-wide screen layout optimizations */
+@media (min-width: 1920px) {
+  /* Constrain content width on very large screens */
+  .container-ultra-wide {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Enhanced grid layouts for large screens */
+  .grid-ultra-wide {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2rem;
+  }
+  
+  /* Better typography scaling for large screens */
+  .heading-ultra {
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    line-height: 1.2;
+  }
+  
+  .text-ultra {
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+    line-height: 1.6;
+  }
+}
+
+/* Enhanced layout for wide screens */
+@media (min-width: 1440px) {
+  /* Improve sidebar layout on wide screens */
+  .sidebar-wide {
+    width: 280px;
+  }
+  
+  /* Better content distribution */
+  .content-wide {
+    margin-left: 280px;
+    max-width: calc(100vw - 280px);
+  }
+  
+  /* Enhanced card layouts */
+  .card-grid-wide {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* =============================================================================
+   RTL RESPONSIVE OPTIMIZATIONS  
+   ============================================================================= */
+
+/* RTL-specific responsive utilities */
+[dir="rtl"] .responsive-padding-start {
+  padding-right: clamp(1rem, 3vw, 2rem);
+}
+
+[dir="ltr"] .responsive-padding-start {
+  padding-left: clamp(1rem, 3vw, 2rem);
+}
+
+[dir="rtl"] .responsive-margin-start {
+  margin-right: clamp(0.5rem, 2vw, 1rem);
+}
+
+[dir="ltr"] .responsive-margin-start {
+  margin-left: clamp(0.5rem, 2vw, 1rem);
+}
+
+/* RTL grid layout adjustments */
+[dir="rtl"] .grid-rtl-responsive {
+  direction: rtl;
+}
+
+[dir="rtl"] .grid-rtl-responsive > * {
+  text-align: right;
+}
+
+/* RTL flex utilities for all breakpoints */
+@media (min-width: 480px) {
+  [dir="rtl"] .xs\:flex-rtl-row-reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+@media (min-width: 768px) {
+  [dir="rtl"] .md\:flex-rtl-row-reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .lg\:flex-rtl-row-reverse {
+    flex-direction: row-reverse;
+  }
+}
+
+/* RTL responsive typography alignment */
+[dir="rtl"] .responsive-text-align {
+  text-align: right;
+}
+
+[dir="ltr"] .responsive-text-align {
+  text-align: left;
+}
+
+/* Mobile-first RTL spacing */
+@media (max-width: 767px) {
+  [dir="rtl"] .mobile-rtl-spacing {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  [dir="rtl"] .tablet-rtl-spacing {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  [dir="rtl"] .desktop-rtl-spacing {
+    padding-right: 3rem;
+    padding-left: 3rem;
   }
 }
 
@@ -191,7 +920,7 @@ body {
   }
 }
 
-/* Reduced motion support */
+/* Enhanced reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -199,12 +928,130 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable shimmer animations */
+  .shimmer-animation::after {
+    animation: none !important;
+  }
+
+  /* Disable ripple effects for reduced motion */
+  .ripple {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Disable form animations for reduced motion */
+  .animate-shake-subtle,
+  .animate-pulse-warning,
+  .animate-pulse-gentle,
+  .animate-bounce-gentle,
+  .animate-glow-success,
+  .animate-slide-in-up {
+    animation: none !important;
+  }
+  
+  /* Disable transforms for motion-sensitive users */
+  .transform-gpu {
+    transform: none !important;
+  }
+  
+  /* Keep essential transitions but make them instant */
+  .btn,
+  .card-hover,
+  .focus-ring {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Motion-safe animations (only run when user has no motion preference or prefers motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-safe-animate {
+    animation: inherit;
+    transition: inherit;
+  }
+  
+  .motion-safe-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+  
+  .motion-safe-bounce {
+    animation: bounceIn 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .motion-safe-fade-in {
+    animation: fadeIn 200ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  
+  .motion-safe-slide-up {
+    animation: slideUp 300ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* =============================================================================
+   DESKTOP LAYOUT FIXES
+   ============================================================================= */
+
+/* Fix desktop layout alignment by removing top spacing from first child in main content */
+@media (min-width: 1024px) {
+  main > div > div:first-child {
+    margin-top: 0 !important;
+  }
+  
+  /* Alternative selector for nested structures */
+  main .space-y-12 > *:first-child,
+  main .space-y-8 > *:first-child {
+    margin-top: 0 !important;
   }
 }
 
 /* =============================================================================
    UTILITY CLASSES
    ============================================================================= */
+
+/* Semantic Color Utility Classes */
+.bg-brand { @apply bg-primary-600; }
+.bg-brand-light { @apply bg-primary-50; }
+.bg-brand-hover { @apply bg-primary-700; }
+
+.text-brand { @apply text-primary-600; }
+.text-brand-light { @apply text-primary-400; }
+.text-brand-dark { @apply text-primary-800; }
+
+.border-brand { @apply border-primary-600; }
+.border-brand-light { @apply border-primary-200; }
+
+.bg-success-light { @apply bg-success-50; }
+.bg-warning-light { @apply bg-warning-50; }
+.bg-error-light { @apply bg-error-50; }
+.bg-info-light { @apply bg-info-50; }
+
+.text-success-dark { @apply text-success-800; }
+.text-warning-dark { @apply text-warning-800; }
+.text-error-dark { @apply text-error-800; }
+.text-info-dark { @apply text-info-800; }
+
+/* Status Badge Utility Classes */
+.badge-success {
+  @apply bg-success-100 text-success-800 border border-success-200 px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
+
+.badge-warning {
+  @apply bg-warning-100 text-warning-800 border border-warning-200 px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
+
+.badge-error {
+  @apply bg-error-100 text-error-800 border border-error-200 px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
+
+.badge-info {
+  @apply bg-info-100 text-info-800 border border-info-200 px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
+
+.badge-neutral {
+  @apply bg-secondary-100 text-secondary-800 border border-secondary-200 px-2.5 py-0.5 text-xs font-medium rounded-full;
+}
 
 /* Text utilities for Hebrew */
 .text-hebrew {
@@ -219,11 +1066,264 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* Gradient backgrounds */
+/* Professional Gradient Backgrounds */
 .gradient-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, theme('colors.primary.500') 0%, theme('colors.primary.700') 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, theme('colors.secondary.100') 0%, theme('colors.secondary.300') 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, theme('colors.success.500') 0%, theme('colors.success.700') 100%);
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, theme('colors.primary.400') 0%, theme('colors.info.600') 100%);
+}
+
+.gradient-card-hover {
+  background: linear-gradient(135deg, theme('colors.primary.50') 0%, theme('colors.info.50') 100%);
+}
+
+/* =============================================================================
+   SIDEBAR SCROLLBAR STYLES
+   ============================================================================= */
+
+/* Webkit scrollbar for sidebar navigation */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* =============================================================================
+   VIEWGUIDE ENHANCEMENTS
+   ============================================================================= */
+
+/* Compact Card Styles for ViewGuide */
+.guide-card-compact {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.guide-card-content {
+  @apply p-4 sm:p-6 space-y-4;
+}
+
+/* Enhanced Image Containers */
+.guide-image-container {
+  @apply w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden shadow-md;
+  aspect-ratio: 4/3;
+  min-height: 200px;
+  max-height: 300px;
+}
+
+.guide-image-compact {
+  @apply w-full h-full object-cover transition-all duration-300;
+}
+
+.guide-image-compact:hover {
+  transform: scale(1.02);
+}
+
+/* Compact Typography System for ViewGuide */
+.guide-title-compact {
+  @apply text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight;
+}
+
+.guide-subtitle-compact {
+  @apply text-sm sm:text-base text-gray-600 leading-relaxed;
+}
+
+.guide-step-title {
+  @apply text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight;
+}
+
+.guide-step-description {
+  @apply text-sm sm:text-base lg:text-lg text-gray-700 leading-relaxed;
+}
+
+/* Enhanced Button Styles for ViewGuide */
+.guide-button-primary {
+  @apply px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base sm:text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-200 shadow-md;
+  transform: scale(1);
+}
+
+.guide-button-primary:hover {
+  transform: scale(1.02);
+}
+
+.guide-button-secondary {
+  @apply px-3 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-200;
+}
+
+.guide-button-compact {
+  @apply px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 shadow-sm;
+  transform: scale(1);
+}
+
+.guide-button-compact:hover {
+  transform: scale(1.02);
+}
+
+/* Compact Navigation Styles */
+.guide-navigation-compact {
+  @apply bg-white rounded-lg shadow-sm border border-gray-100 p-3;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Enhanced Progress Bar */
+.guide-progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.guide-progress-fill {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full transition-all duration-500 ease-out;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Compact Feature Tags */
+.guide-feature-tag {
+  @apply flex items-center space-x-2 text-gray-600 rounded-lg p-2;
+}
+
+.guide-feature-tag-green {
+  @apply bg-green-50 border border-green-100;
+}
+
+.guide-feature-tag-purple {
+  @apply bg-purple-50 border border-purple-100;
+}
+
+.guide-feature-icon {
+  @apply w-6 h-6 rounded-md flex items-center justify-center;
+}
+
+.guide-feature-icon-green {
+  @apply bg-green-100 text-green-600;
+}
+
+.guide-feature-icon-purple {
+  @apply bg-purple-100 text-purple-600;
+}
+
+/* Enhanced Completion Styles */
+.guide-completion-compact {
+  @apply bg-green-50 border border-green-200 rounded-lg p-4;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.1) 100%);
+}
+
+/* Compact Action Items */
+.guide-action-items-compact {
+  @apply space-y-2;
+}
+
+.guide-action-item {
+  @apply flex items-start text-sm text-gray-700 leading-relaxed;
+}
+
+.guide-action-bullet {
+  @apply text-blue-600 text-sm font-bold;
+  margin-top: 2px;
+}
+
+/* Enhanced Shadows and Depth */
+.guide-shadow-soft {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.guide-shadow-medium {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Grid for ViewGuide */
+.guide-grid-welcome {
+  @apply lg:grid lg:grid-cols-5 lg:gap-0;
+}
+
+.guide-grid-step {
+  @apply lg:grid lg:grid-cols-5 lg:gap-6;
+}
+
+/* Enhanced Background Gradients */
+.guide-bg-welcome {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #dbeafe 50%, #e0e7ff 75%, #f1f5f9 100%);
+}
+
+.guide-bg-step {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+/* Mobile-First Optimizations */
+@media (max-width: 768px) {
+  .guide-card-compact {
+    @apply rounded-lg;
+    margin: 0 -4px;
+  }
+
+  .guide-image-container {
+    min-height: 180px;
+    max-height: 220px;
+  }
+
+  .guide-title-compact {
+    @apply text-lg;
+  }
+
+  .guide-step-title {
+    @apply text-base;
+  }
+}
+
+/* Enhanced Mobile Touch Targets */
+@media (hover: none) and (pointer: coarse) {
+  .guide-button-primary,
+  .guide-button-secondary,
+  .guide-button-compact {
+    min-height: 40px;
+    min-width: 40px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .guide-image-compact {
+    touch-action: manipulation;
+  }
+}
+
+/* Reduced Motion Support for ViewGuide */
+@media (prefers-reduced-motion: reduce) {
+  .guide-image-compact,
+  .guide-button-primary,
+  .guide-button-compact {
+    transform: none !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .guide-progress-fill {
+    transition-duration: 0.01ms !important;
+  }
 }

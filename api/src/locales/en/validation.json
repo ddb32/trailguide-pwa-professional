@@ -1,0 +1,39 @@
+{
+  "event": {
+    "nameRequired": "Event name is required",
+    "nameLength": "Event name must be between 1 and 255 characters",
+    "descriptionLength": "Description must be less than 1000 characters",
+    "locationLength": "Location must be less than 255 characters",
+    "statusInvalid": "Invalid status",
+    "expirationDateInvalid": "Expiration date must be a valid ISO 8601 date",
+    "expirationHoursRange": "Expiration hours must be between 1 and 24",
+    "idInvalid": "Invalid event ID format"
+  },
+  "step": {
+    "orderRequired": "Step order is required",
+    "orderPositive": "Step order must be a positive integer",
+    "descriptionRequired": "Step description is required",
+    "descriptionLength": "Step description must be less than 1000 characters",
+    "imageRequired": "Step image is required",
+    "navigationLength": "Navigation must be less than 500 characters"
+  },
+  "auth": {
+    "usernameOrEmailRequired": "Username or email is required",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be at least 6 characters long",
+    "emailInvalid": "Invalid email format"
+  },
+  "file": {
+    "typeInvalid": "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed",
+    "sizeTooLarge": "File size too large. Maximum size is 5MB",
+    "required": "File is required",
+    "uploadFailed": "File upload failed"
+  },
+  "general": {
+    "validationFailed": "Validation failed",
+    "fieldRequired": "This field is required",
+    "invalidFormat": "Invalid format",
+    "valueTooLong": "Value is too long",
+    "valueTooShort": "Value is too short"
+  }
+}

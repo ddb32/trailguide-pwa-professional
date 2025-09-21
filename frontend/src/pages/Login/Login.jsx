@@ -5,6 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguageDirection } from '../../hooks/useLanguageDirection';
+import { Input } from '../../components/common/Input/Input';
+import { Checkbox } from '../../components/common/Checkbox/Checkbox';
+import { Button } from '../../components/common/Button/Button';
+import { FormField } from '../../components/common/FormField/FormField';
+import { Icon } from '../../components/common/Icon';
 import i18n from '../../i18n/i18n';
 
 const Login = () => {
@@ -138,106 +143,72 @@ const Login = () => {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label 
-                  htmlFor="email" 
-                  className={`block text-sm font-medium text-gray-700 mb-2 ${conditionalClass.textLeft}`}
-                >
-                  {t('auth.email')}
-                </label>
-                <div className="relative">
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    className={`
-                      w-full px-4 py-3 border border-gray-300 rounded-lg 
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      placeholder-gray-400 transition-all duration-200
-                      ${conditionalClass.textLeft}
-                      ${errors.email ? 'border-red-500 focus:ring-red-500' : ''}
-                    `}
-                    placeholder={t('auth.emailPlaceholder')}
-                    {...register('email', {
-                      required: t('auth.emailRequired'),
-                      pattern: {
-                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: t('auth.emailInvalid')
-                      }
-                    })}
-                  />
-                  <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                    <span className="text-gray-400 text-sm">@</span>
-                  </div>
-                </div>
-                {errors.email && (
-                  <p className={`mt-2 text-sm text-red-600 ${conditionalClass.textLeft}`}>
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+              {/* Username/Email Field */}
+              <FormField
+                label={t('auth.usernameOrEmail')}
+                error={errors.email?.message}
+              >
+                <Input
+                  type="text"
+                  autoComplete="username email"
+                  placeholder={t('auth.usernameOrEmailPlaceholder')}
+                  {...register('email', {
+                    required: t('auth.usernameOrEmailRequired'),
+                    minLength: {
+                      value: 2,
+                      message: t('auth.usernameOrEmailMinLength')
+                    },
+                    maxLength: {
+                      value: 255,
+                      message: t('auth.usernameOrEmailMaxLength')
+                    }
+                  })}
+                  state={errors.email ? 'error' : 'default'}
+                  endIcon={<Icon name="user" size="sm" />}
+                  size="lg"
+                  floatingLabel={false}
+                />
+              </FormField>
 
               {/* Password Field */}
-              <div>
-                <label 
-                  htmlFor="password" 
-                  className={`block text-sm font-medium text-gray-700 mb-2 ${conditionalClass.textLeft}`}
-                >
-                  {t('auth.password')}
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    className={`
-                      w-full px-4 py-3 border border-gray-300 rounded-lg
-                      focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                      placeholder-gray-400 transition-all duration-200
-                      ${conditionalClass.textLeft}
-                      ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}
-                    `}
-                    placeholder={t('auth.passwordPlaceholder')}
-                    {...register('password', {
-                      required: t('auth.passwordRequired'),
-                      minLength: {
-                        value: 6,
-                        message: t('auth.passwordTooShort')
-                      }
-                    })}
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600`}
-                  >
-                    <span className="text-sm">
-                      {showPassword ? '🙈' : '👁️'}
-                    </span>
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className={`mt-2 text-sm text-red-600 ${conditionalClass.textLeft}`}>
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
+              <FormField
+                label={t('auth.password')}
+                error={errors.password?.message}
+              >
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder={t('auth.passwordPlaceholder')}
+                  {...register('password', {
+                    required: t('auth.passwordRequired'),
+                    minLength: {
+                      value: 6,
+                      message: t('auth.passwordTooShort')
+                    }
+                  })}
+                  state={errors.password ? 'error' : 'default'}
+                  endIcon={
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <Icon name={showPassword ? 'eye-slash' : 'eye'} size="sm" />
+                    </button>
+                  }
+                  size="lg"
+                  floatingLabel={false}
+                />
+              </FormField>
 
               {/* Remember Me */}
               <div className={`flex items-center justify-between ${conditionalClass.flexRow}`}>
-                <div className={`flex items-center ${conditionalClass.flexRow}`}>
-                  <input
-                    id="remember-me"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className={`${conditionalClass.ml('2')} block text-sm text-gray-700`}>
-                    {t('auth.rememberMe')}
-                  </label>
-                </div>
+                <Checkbox
+                  label={t('auth.rememberMe')}
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  size="sm"
+                />
 
                 <div className="text-sm">
                   <a 
@@ -255,48 +226,20 @@ const Login = () => {
 
               {/* Submit Button */}
               <div>
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  loading={isSubmitting || isLoading}
                   disabled={isSubmitting || isLoading}
-                  className={`
-                    w-full flex justify-center py-3 px-4 border border-transparent 
-                    rounded-lg shadow-sm text-sm font-medium text-white 
-                    bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 
-                    focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200
-                    disabled:bg-gray-400 disabled:cursor-not-allowed
-                    ${isSubmitting || isLoading ? 'opacity-50' : ''}
-                  `}
+                  icon={<Icon name="sign-in" size="sm" />}
+                  iconPosition="left"
                 >
-                  {isSubmitting || isLoading ? (
-                    <div className={`flex items-center ${conditionalClass.flexRow}`}>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span className={conditionalClass.ml('2')}>
-                        {t('common.loading')}
-                      </span>
-                    </div>
-                  ) : (
-                    t('auth.signIn')
-                  )}
-                </button>
+                  {t('auth.signIn')}
+                </Button>
               </div>
 
-              {/* Demo Users Info */}
-              <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className={`text-sm font-medium text-yellow-800 mb-3 ${conditionalClass.textLeft}`}>
-                  {t('auth.demoAccounts')}:
-                </h4>
-                <div className="space-y-2 text-xs text-yellow-700">
-                  <div className={`${conditionalClass.textLeft}`}>
-                    <strong>admin@trailguide.app</strong> / AdminPass123!
-                  </div>
-                  <div className={`${conditionalClass.textLeft}`}>
-                    <strong>organizer1@example.com</strong> / OrganizerPass1!
-                  </div>
-                  <div className={`${conditionalClass.textLeft}`}>
-                    <strong>organizer2@example.com</strong> / OrganizerPass2!
-                  </div>
-                </div>
-              </div>
             </form>
 
             {/* Footer */}

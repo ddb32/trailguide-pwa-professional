@@ -30,6 +30,12 @@ export default defineConfig({
       }
     })
   ],
+  optimizeDeps: {
+    include: [
+      '@heroicons/react/24/outline',
+      '@heroicons/react/24/solid'
+    ]
+  },
   server: {
     host: '0.0.0.0',
     port: 5173,

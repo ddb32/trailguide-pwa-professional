@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { adminService } from '../services/adminService';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +10,9 @@ const initialState = {
   token: null,
   isAuthenticated: false,
   isLoading: true,
-  error: null
+  error: null,
+  isAdmin: false,
+  adminAccessChecked: false
 };
 
 function authReducer(state, action) {
@@ -28,7 +31,9 @@ function authReducer(state, action) {
         token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
-        error: null
+        error: null,
+        isAdmin: action.payload.isAdmin || false,
+        adminAccessChecked: action.payload.adminAccessChecked || false
       };
     
     case 'LOGIN_ERROR':
@@ -48,7 +53,9 @@ function authReducer(state, action) {
         token: null,
         isAuthenticated: false,
         isLoading: false,
-        error: null
+        error: null,
+        isAdmin: false,
+        adminAccessChecked: false
       };
     
     case 'CLEAR_ERROR':
@@ -61,6 +68,13 @@ function authReducer(state, action) {
       return {
         ...state,
         user: { ...state.user, ...action.payload }
+      };
+
+    case 'SET_ADMIN_ACCESS':
+      return {
+        ...state,
+        isAdmin: action.payload.isAdmin,
+        adminAccessChecked: true
       };
     
     default:
@@ -87,9 +101,17 @@ export function AuthProvider({ children }) {
 
       const user = await authService.getCurrentUser();
       if (user) {
+        // Check admin status from user role field
+        const isAdmin = user.role === 'admin';
+
         dispatch({ 
           type: 'LOGIN_SUCCESS', 
-          payload: { user, token } 
+          payload: { 
+            user, 
+            token, 
+            isAdmin, 
+            adminAccessChecked: true 
+          } 
         });
       } else {
         localStorage.removeItem('token');
@@ -114,13 +136,26 @@ export function AuthProvider({ children }) {
         localStorage.setItem('refreshToken', response.refreshToken);
       }
 
+      // Check admin status from user role field
+      const isAdmin = response.user.role === 'admin';
+
       dispatch({ 
         type: 'LOGIN_SUCCESS', 
         payload: { 
           user: response.user, 
-          token: response.token 
+          token: response.token,
+          isAdmin,
+          adminAccessChecked: true
         } 
       });
+
+      // Update last login timestamp now that token is stored
+      try {
+        await authService.updateLastLogin(response.user.id);
+      } catch (error) {
+        // Non-critical error, don't fail the login
+        console.warn('Failed to update last login timestamp:', error);
+      }
 
       return { success: true };
     } catch (error) {
@@ -156,13 +191,30 @@ export function AuthProvider({ children }) {
     dispatch({ type: 'UPDATE_USER', payload: userData });
   };
 
+  const checkAdminAccess = async () => {
+    if (!state.isAuthenticated || !state.user) return false;
+    
+    // Check admin status from user role field (already loaded)
+    const isAdmin = state.user.role === 'admin';
+    
+    if (!state.adminAccessChecked) {
+      dispatch({ 
+        type: 'SET_ADMIN_ACCESS', 
+        payload: { isAdmin } 
+      });
+    }
+    
+    return isAdmin;
+  };
+
   const value = {
     ...state,
     login,
     logout,
     clearError,
     updateUser,
-    checkAuthStatus
+    checkAuthStatus,
+    checkAdminAccess
   };
 
   return (
@@ -202,6 +254,46 @@ export function ProtectedRoute({ children }) {
   }
 
   if (!isAuthenticated) {
+    return null;
+  }
+
+  return children;
+}
+
+export function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin, isLoading, adminAccessChecked, checkAdminAccess } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    if (isAuthenticated && !adminAccessChecked) {
+      // Check admin access if not already checked
+      checkAdminAccess();
+      return;
+    }
+
+    if (adminAccessChecked && !isAdmin) {
+      // User is authenticated but not admin
+      navigate('/app/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, isLoading, adminAccessChecked, navigate, checkAdminAccess]);
+
+  if (isLoading || !adminAccessChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isAdmin) {
     return null;
   }
 

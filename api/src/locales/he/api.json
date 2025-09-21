@@ -1,0 +1,60 @@
+{
+  "events": {
+    "createSuccess": "האירוע נוצר בהצלחה",
+    "updateSuccess": "האירוע עודכן בהצלחה",
+    "deleteSuccess": "האירוע נמחק בהצלחה",
+    "retrieveSuccess": "האירועים נטענו בהצלחה",
+    "retrieveFailed": "טעינת האירועים נכשלה",
+    "createFailed": "יצירת האירוע נכשלה",
+    "updateFailed": "עדכון האירוע נכשל",
+    "deleteFailed": "מחיקת האירוע נכשלה",
+    "notFound": "האירוע לא נמצא",
+    "accessDenied": "הגישה לאירוע זה נדחתה",
+    "imageUpdateSuccess": "תמונת האירוע עודכנה בהצלחה",
+    "imageUpdateFailed": "עדכון תמונת האירוע נכשל",
+    "imageDeleteSuccess": "תמונת האירוע נמחקה בהצלחה",
+    "imageDeleteFailed": "מחיקת תמונת האירוע נכשלה"
+  },
+  "steps": {
+    "createSuccess": "השלב נוצר בהצלחה",
+    "updateSuccess": "השלב עודכן בהצלחה",
+    "deleteSuccess": "השלב נמחק בהצלחה",
+    "retrieveSuccess": "השלבים נטענו בהצלחה",
+    "retrieveFailed": "טעינת השלבים נכשלה",
+    "createFailed": "יצירת השלב נכשלה",
+    "updateFailed": "עדכון השלב נכשל",
+    "deleteFailed": "מחיקת השלב נכשלה",
+    "notFound": "השלב לא נמצא",
+    "accessDenied": "הגישה לשלב זה נדחתה",
+    "imageUpdateSuccess": "תמונת השלב עודכנה בהצלחה",
+    "imageUpdateFailed": "עדכון תמונת השלב נכשל",
+    "imageDeleteSuccess": "תמונת השלב נמחקה בהצלחה",
+    "imageDeleteFailed": "מחיקת תמונת השלב נכשלה",
+    "orderUpdateSuccess": "סדר השלבים עודכן בהצלחה",
+    "orderUpdateFailed": "עדכון סדר השלבים נכשל"
+  },
+  "guides": {
+    "retrieveSuccess": "ההכוונה נטענה בהצלחה",
+    "retrieveFailed": "טעינת ההכוונה נכשלה",
+    "notFound": "ההכוונה לא נמצאה",
+    "expired": "ההכוונה פגה תוקף",
+    "accessDenied": "הגישה להכוונה זו נדחתה"
+  },
+  "feedback": {
+    "submitSuccess": "המשוב נשלח בהצלחה",
+    "submitFailed": "שליחת המשוב נכשלה",
+    "retrieveSuccess": "המשוב נטען בהצלחה",
+    "retrieveFailed": "טעינת המשוב נכשלה"
+  },
+  "analytics": {
+    "retrieveSuccess": "נתוני הניתוח נטענו בהצלחה",
+    "retrieveFailed": "טעינת נתוני הניתוח נכשלה",
+    "exportSuccess": "הנתונים יוצאו בהצלחה",
+    "exportFailed": "יצוא הנתונים נכשל"
+  },
+  "general": {
+    "endpointNotFound": "נקודת הקצה המבוקשת של ה-API לא קיימת",
+    "serverError": "אירעה שגיאה פנימית בשרת",
+    "systemReady": "המערכת מוכנה לשימוש"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "event": {
+    "nameRequired": "שם האירוע נדרש",
+    "nameLength": "שם האירוע חייב להיות באורך 1-255 תווים",
+    "descriptionLength": "התיאור חייב להיות באורך פחות מ-1000 תווים",
+    "locationLength": "המיקום חייב להיות באורך פחות מ-255 תווים",
+    "statusInvalid": "סטטוס לא תקין",
+    "expirationDateInvalid": "תאריך התפוגה חייב להיות תאריך תקין בפורמט ISO 8601",
+    "expirationHoursRange": "שעות התפוגה חייבות להיות בין 1 ל-24",
+    "idInvalid": "פורמט מזהה האירוע לא תקין"
+  },
+  "step": {
+    "orderRequired": "סדר השלב נדרש",
+    "orderPositive": "סדר השלב חייב להיות מספר חיובי",
+    "descriptionRequired": "תיאור השלב נדרש",
+    "descriptionLength": "תיאור השלב חייב להיות באורך פחות מ-1000 תווים",
+    "imageRequired": "תמונת השלב נדרשת",
+    "navigationLength": "הניווט חייב להיות באורך פחות מ-500 תווים"
+  },
+  "auth": {
+    "usernameOrEmailRequired": "שם משתמש או אימייל נדרש",
+    "passwordRequired": "סיסמה נדרשת",
+    "passwordLength": "הסיסמה חייבת להיות באורך 6 תווים לפחות",
+    "emailInvalid": "פורמט האימייל לא תקין"
+  },
+  "file": {
+    "typeInvalid": "סוג קובץ לא תקין. רק תמונות JPEG, PNG, GIF ו-WebP מותרות",
+    "sizeTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB",
+    "required": "קובץ נדרש",
+    "uploadFailed": "העלאת הקובץ נכשלה"
+  },
+  "general": {
+    "validationFailed": "הבדיקה נכשלה",
+    "fieldRequired": "שדה זה נדרש",
+    "invalidFormat": "פורמט לא תקין",
+    "valueTooLong": "הערך ארוך מדי",
+    "valueTooShort": "הערך קצר מדי"
+  }
+}

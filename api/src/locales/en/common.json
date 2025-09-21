@@ -1,0 +1,21 @@
+{
+  "errors": {
+    "internalError": "Internal server error",
+    "databaseError": "Database operation failed",
+    "notFound": "Resource not found",
+    "accessDenied": "Access denied",
+    "unauthorized": "Authentication required",
+    "forbidden": "Insufficient permissions"
+  },
+  "success": {
+    "operationCompleted": "Operation completed successfully",
+    "dataRetrieved": "Data retrieved successfully",
+    "resourceCreated": "Resource created successfully",
+    "resourceUpdated": "Resource updated successfully",
+    "resourceDeleted": "Resource deleted successfully"
+  },
+  "rateLimiting": {
+    "tooManyRequests": "Too many requests from this IP, please try again later",
+    "tooManyLoginAttempts": "Too many login attempts, please try again later"
+  }
+}
