@@ -1,0 +1,73 @@
+# Prometheus configuration for way2party.co.il monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+    project: 'trailguide-pwa'
+    domain: 'way2party.co.il'
+
+# Rules for alerting
+rule_files:
+  - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # NGINX metrics (if nginx-prometheus-exporter is enabled)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:9113']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # Node.js API metrics (if metrics endpoint is exposed)
+  - job_name: 'api'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: /api/v1/metrics
+    scrape_interval: 30s
+
+  # PostgreSQL metrics (if postgres-exporter is enabled)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+  # Redis metrics (if redis-exporter is enabled)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+  # Docker container metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+
+  # SSL certificate monitoring
+  - job_name: 'ssl-expiry'
+    static_configs:
+      - targets: ['way2party.co.il:443']
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093

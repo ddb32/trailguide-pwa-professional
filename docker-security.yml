@@ -1,0 +1,101 @@
+# Docker Security Configuration for TrailGuide PWA
+# Additional security settings for production deployment
+
+version: '3.8'
+
+# Security-focused service definitions
+services:
+  # PostgreSQL with enhanced security
+  postgres:
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Database needs write access
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /var/run/postgresql:noexec,nosuid,size=10m
+    sysctls:
+      - kernel.shmmax=268435456
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+
+  # Redis with security constraints
+  redis:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=50m
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+
+  # API backend with strict security
+  api:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /app/.cache:noexec,nosuid,size=50m
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+    sysctls:
+      - net.core.somaxconn=65535
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  # Frontend with nginx security
+  frontend:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=50m
+      - /var/cache/nginx:noexec,nosuid,size=50m
+      - /var/run:noexec,nosuid,size=10m
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+
+  # Main NGINX with security hardening
+  nginx:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /var/cache/nginx:noexec,nosuid,size=100m
+      - /var/run:noexec,nosuid,size=10m
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    sysctls:
+      - net.core.somaxconn=65535
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536

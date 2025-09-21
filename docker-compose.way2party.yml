@@ -1,0 +1,281 @@
+# Production Docker Compose for way2party.co.il
+# Optimized configuration with security and monitoring
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: way2party-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trailguide_production
+      POSTGRES_USER: trailguide_prod
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=he_IL.UTF-8 --lc-ctype=he_IL.UTF-8"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./logs/postgres:/var/log/postgresql
+    networks:
+      - way2party-network
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trailguide_prod -d trailguide_production"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "127.0.0.1:5432:5432"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis Cache (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: way2party-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxclients 1000
+      --tcp-keepalive 60
+      --timeout 300
+    volumes:
+      - redis_prod_data:/data
+      - ./logs/redis:/var/log/redis
+    networks:
+      - way2party-network
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "127.0.0.1:6379:6379"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # API Backend (Production)
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.prod
+    container_name: way2party-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=trailguide_production
+      - DB_USER=trailguide_prod
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_URL=redis://${REDIS_PASSWORD}@redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - SESSION_SECRET=${SESSION_SECRET}
+      - PORT=3000
+      - FRONTEND_URL=https://way2party.co.il
+      - CORS_ORIGIN=https://way2party.co.il
+      - DOMAIN_NAME=way2party.co.il
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs/api:/app/logs
+    networks:
+      - way2party-network
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Frontend (Production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=https://way2party.co.il/api
+        - VITE_PUBLIC_URL=https://way2party.co.il
+    container_name: way2party-frontend
+    restart: unless-stopped
+    networks:
+      - way2party-network
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # NGINX Reverse Proxy (Main entry point)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: way2party-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+      - ./nginx/cache:/var/cache/nginx
+      - ./nginx/certbot-webroot:/var/www/certbot:ro
+    networks:
+      - way2party-network
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
+    depends_on:
+      - frontend
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NGINX_HOST=way2party.co.il
+      - NGINX_PORT=80
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Log aggregator for centralized logging
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.8.0
+    container_name: way2party-logs
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ./logs:/logs:ro
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - way2party-network
+    profiles:
+      - monitoring
+    depends_on:
+      - nginx
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+  # Monitoring and alerting
+  monitoring:
+    image: prom/prometheus:latest
+    container_name: way2party-monitoring
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - way2party-network
+    profiles:
+      - monitoring
+    ports:
+      - "127.0.0.1:9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+volumes:
+  postgres_prod_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
+  redis_prod_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis
+  prometheus_data:
+    driver: local
+
+networks:
+  way2party-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: way2party
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
