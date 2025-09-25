@@ -11,6 +11,12 @@ services:
       POSTGRES_USER: trailguide
       POSTGRES_PASSWORD: secure_dev_password_2024
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      TZ: Asia/Jerusalem
+      PGTZ: Asia/Jerusalem
+    command: >
+      postgres
+      -c timezone=Asia/Jerusalem
+      -c log_timezone=Asia/Jerusalem
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

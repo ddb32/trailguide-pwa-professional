@@ -17,6 +17,7 @@
     "characters": "תווים",
     "optional": "רשות",
     "more": "עוד",
+    "showLess": "הצג פחות",
     "menu": "תפריט",
     "replace": "החלף",
     "remove": "הסר",
@@ -71,9 +72,14 @@
       "noFeedbackYet": "אין משובים עדיין",
       "completionRate": "שיעור השלמה",
       "active": "פעילות",
+      "scheduled": "מתוזמנות",
       "uniqueVisitors": "מבקרים ייחודיים",
       "positive": "חיובי",
+      "negative": "שלילי",
       "completions": "השלמות",
+      "drafts": "טיוטות",
+      "totalViews": "צפיות סה\"כ",
+      "completionSubtitle": "בהתבסס על אינטראקציות משתמשים",
       "lastUpdated": "עודכן לאחרונה",
       "now": "כעת",
       "change": {
@@ -82,6 +88,7 @@
         "neutral": "ללא שינוי"
       }
     },
+    "quickActions": "פעולות מהירות",
     "recentGuides": {
       "title": "הכוונות אחרונות",
       "subtitle": "נהל את ההכוונות שיצרת",
@@ -117,6 +124,7 @@
         "status": "סטטוס",
         "views": "צפיות",
         "expiry": "תפוגה",
+        "created": "נוצר",
         "actions": "פעולות"
       },
       "actions": {
@@ -139,6 +147,9 @@
         "created": "נוצר:",
         "views": "צפיות:",
         "remaining": "נשארו:",
+        "activatesIn": "יופעל בעוד:",
+        "noActivation": "ללא הפעלה:",
+        "overdue": "איחור:",
         "expired": "פג לפני:",
         "noExpiration": "ללא תפוגה"
       }
@@ -152,12 +163,36 @@
       "copyLinkTooltip": "העתק קישור לשיתוף ההכוונה",
       "linkCopied": "הקישור הועתק בהצלחה",
       "copyLinkError": "שגיאה בהעתקת הקישור",
+      "copyLinkDraftError": "לא ניתן להעתיק קישור - יש לפרסם את ההכוונה תחילה",
+      "copyLinkExpiredError": "לא ניתן להעתיק קישור - ההכוונה פגה ואינה זמינה יותר",
+      "copyLinkScheduledError": "לא ניתן להעתיק קישור - ההכוונה מתוזמנת לפרסום עתידי",
+      "copyLinkUnpublishedError": "לא ניתן להעתיק קישור - סטטוס ההכוונה: {{status}}",
       "confirmDelete": "אישור מחיקה",
       "deleteSuccess": "ההכוונה נמחקה בהצלחה",
       "deleteError": "שגיאה במחיקת ההכוונה"
     },
     "preview": {
       "organizerNotice": "תצוגה מקדימה למארגן - תמיד תוכל לצפות בהכוונות שלך, גם לאחר תפוגה"
+    },
+    "feedback": {
+      "noFeedbackYet": "אין משוב עדיין",
+      "encourageFeedback": "ברגע שמשתמשים ישלימו את ההכוונות שלך, המשוב שלהם יופיע כאן כדי לעזור לך להשתפר.",
+      "insightsTitle": "תובנות משוב",
+      "insightsSubtitle": "ניתוח שביעות רצון ומשוב משתמשים",
+      "viewDetails": "הצג פרטים",
+      "totalResponses": "תגובות סה\"כ",
+      "satisfactionRate": "שיעור שביעות רצון",
+      "excellent": "מעולה",
+      "good": "טוב",
+      "needsImprovement": "דרוש שיפור",
+      "overallSatisfaction": "שביעות רצון כללית",
+      "positive": "חיובי",
+      "negative": "שלילי",
+      "topPerformer": "ההכוונה המובילה",
+      "responses": "תגובות",
+      "satisfaction": "שביעות רצון",
+      "perGuideBreakdown": "פירוט לפי הכוונה",
+      "viewAllGuides": "הצג את כל ההכוונות"
     },
     "error": {
       "loadFailed": "טעינת הנתונים נכשלה",
@@ -169,8 +204,10 @@
   "status": {
     "active": "פעיל",
     "draft": "טיוטה",
+    "scheduled": "בהמתנה",
     "published": "פורסם",
-    "expired": "פג תוקף"
+    "expired": "פג תוקף",
+    "unpublished": "לא פורסם"
   },
   "languageSwitcher": {
     "hebrew": "עב",
@@ -276,10 +313,22 @@
       "noCoverImage": "אין תמונת כריכה"
     },
     "status": {
-      "published": "פורסם",
       "draft": "טיוטה",
-      "draftDescription": "שמור כטיוטה לעריכה מאוחרת",
-      "publishedDescription": "פרסם והפוך זמין למשתמשים"
+      "published": "פורסם",
+      "scheduled": "בהמתנה",
+      "expired": "פג תוקף",
+      "archived": "בארכיון",
+      "draftDescription": "המדריך נשמר כטיוטה ולא נראה למשתמשים",
+      "publishedDescription": "המדריך זמין כעת למשתמשים",
+      "scheduledDescription": "המדריך ממתין להפעלה במועד המתוזמן",
+      "lifecycle": {
+        "willPublishIn": "יופרסם בעוד {{time}}",
+        "activeExpiresIn": "פעיל, יפוג בעוד {{time}}",
+        "expiredAgo": "פג תוקף לפני {{time}}",
+        "activeNoExpiration": "פעיל",
+        "draft": "טיוטה",
+        "archived": "בארכיון"
+      }
     },
     "steps": {
       "title": "שלבי הכוונה",
@@ -313,21 +362,31 @@
       "eventNamePlaceholder": "הזן שם לאירוע",
       "messages": {
         "createSuccess": "ההכוונה נוצרה בהצלחה!",
+        "updateSuccess": "המדריך עודכן בהצלחה",
         "createError": "שגיאה ביצירת ההכוונה",
-        "nameExists": "שם ההכוונה כבר קיים",
-        "networkError": "שגיאת רשת. אנא נסה שוב.",
-        "uploadError": "שגיאה בהעלאת התמונה",
-        "stepsCreated": "{{count}} שלבים נוצרו",
-        "stepsCreatedPartial": "{{created}}/{{total}} שלבים נוצרו"
+        "updateError": "עדכון המדריך נכשל",
+        "networkError": "שגיאת רשת - אנא בדקו את החיבור לאינטרנט",
+        "uploadError": "העלאת הקובץ נכשלה",
+        "nameExists": "שם המדריך כבר קיים",
+        "scheduledSuccess": "המדריך תוזמן בהצלחה",
+        "activationUpdated": "זמני ההפעלה עודכנו בהצלחה",
+        "validationError": "שגיאת ולידציה",
+        "formNotReady": "הטופס לא מוכן לשליחה",
+        "stepsCreated": "{{count}} צעדים נוצרו",
+        "stepsCreatedPartial": "{{created}} מתוך {{total}} צעדים נוצרו"
       },
       "validation": {
+        "activationDateRequired": "תאריך הפעלה נדרש",
+        "activationDateInPast": "תאריך ההפעלה חייב להיות בעתיד",
+        "activationAfterExpiration": "תאריך ההפעלה חייב להיות לפני תאריך התפוגה",
         "eventNameRequired": "שם האירוע נדרש",
         "eventNameTooLong": "שם האירוע ארוך מדי (מקסימום 100 תווים)",
-        "descriptionTooLong": "התיאור ארוך מדי (מקסימום 500 תווים)",
         "locationTooLong": "המיקום ארוך מדי (מקסימום 200 תווים)",
+        "statusRequired": "סטטוס נדרש",
+        "invalidActivationTime": "זמן הפעלה לא תקף",
+        "descriptionTooLong": "התיאור ארוך מדי (מקסימום 500 תווים)",
         "invalidFileType": "סוג קובץ לא נתמך. אנא בחר קובץ JPEG, PNG, GIF או WebP",
-        "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB",
-        "statusRequired": "יש לבחור סטטוס"
+        "fileTooLarge": "הקובץ גדול מדי. גודל מקסימלי: 5MB"
       }
     },
     "imageUpload": {
@@ -359,6 +418,28 @@
       "preview": "תצוגה מקדימה",
       "publish": "פרסם הכוונה"
     },
+    "timing": {
+      "title": "תזמון ההכוונה",
+      "subtitle": "קבעו מתי ההכוונה תהיה זמינה ולכמה זמן",
+      "whenToStart": "מתי להתחיל?",
+      "howLongActive": "כמה זמן פעיל?",
+      "customDuration": "מותאם",
+      "preview": "תצוגה מקדימה",
+      "startTime": "התחלה",
+      "endTime": "סיום",
+      "immediatePreview": "ההכוונה תהיה זמינה מיד ותפוג בעוד {{duration}}",
+      "scheduledPreview": "ההכוונה תהיה זמינה החל מ{{startTime}} למשך {{duration}}",
+      "helpText": "המשתתפים יוכלו לגשת להכוונה רק בזמן שנקבע. לאחר תפוגת ההכוונה, רק המארגן ישמור על גישה מלאה.",
+      "duration": {
+        "oneHour": "שעה אחת",
+        "threeHours": "3 שעות",
+        "sixHours": "6 שעות",
+        "twelveHours": "12 שעות",
+        "twentyFourHours": "24 שעות",
+        "hours": "{{count}} שעות",
+        "hour": "{{count}} שעה"
+      }
+    },
     "expiration": {
       "title": "הגדרות תפוגה",
       "subtitle": "בחר כמה זמן ההכוונה תהיה זמינה למשתתפים",
@@ -374,6 +455,42 @@
       "draftNoExpiration": "אין תפוגה (טיוטה)",
       "expirationInfo": "המשתתפים לא יוכלו לגשת להכוונה לאחר תאריך התפוגה. המארגן ישמור על גישה מלאה.",
       "someTime": "זמן מה"
+    },
+    "activation": {
+      "title": "תזמון הפעלה",
+      "subtitle": "בחרו מתי המדריך יהיה זמין למשתמשים",
+      "when": "מתי להפעיל את המדריך?",
+      "immediate": "מיידית",
+      "immediateDesc": "המדריך יהיה זמין מיד לאחר הפרסום",
+      "scheduled": "מתוזמן",
+      "scheduledDesc": "המדריך יהיה זמין במועד שתקבעו",
+      "dateTime": "תאריך ושעה",
+      "date": "תאריך",
+      "time": "שעה",
+      "duration1h": "שעה",
+      "duration3h": "3 שעות",
+      "duration6h": "6 שעות",
+      "duration12h": "12 שעות",
+      "duration24h": "24 שעות",
+      "duration48h": "יומיים",
+      "duration72h": "3 ימים",
+      "preview": "תצוגת זמני הפעלה",
+      "activatesAt": "יופעל ב:",
+      "expiresAt": "יפוג ב:",
+      "activeDuration": "המדריך יהיה זמין למשך {{duration}}",
+      "scheduledDuration": "המדריך יהיה זמין למשך {{duration}} מרגע ההפעלה",
+      "pastDateWarning": "תאריך או שעה בעבר אינם תקפים",
+      "immediateActivation": "המדריך יופעל מיד בפרסום",
+      "scheduledActivation": "המדריך יופעל במועד המתוזמן",
+      "startTimeHelpText": "קבעו מתי המדריך יהיה זמין למשתמשים - המשך הזמן נקבע בהגדרות התפוגה",
+      "noActivation": "ללא תזמון הפעלה",
+      "activatesIn": "יופעל בעוד {{time}}",
+      "setCurrentTime": "קבע לשעה הנוכחית",
+      "overdue": "איחור של {{time}}",
+      "someTime": "זמן מה"
+    },
+    "settings": {
+      "title": "הגדרות נוספות"
     },
     "loading": {
       "loadingGuide": "טוען הכוונה לעריכה...",
@@ -635,10 +752,6 @@
       "platformOverview": "סקירת פלטפורמה",
       "liveData": "נתונים חיים"
     },
-    "tabs": {
-      "overview": "סקירה כללית",
-      "ariaLabel": "לשוניות לוח בקרת מנהל"
-    },
     "periods": {
       "week": "7 ימים",
       "month": "30 ימים", 
@@ -696,7 +809,8 @@
         "subtitle": "תגובות 'האם אתה אוהב את הרעיון הכללי?'",
         "likeIdea": "אוהב את הרעיון",
         "dislikeIdea": "לא אוהב את הרעיון",
-        "approvalRate": "שיעור אישור הרעיון"
+        "approvalRate": "שיעור אישור הרעיון",
+        "totalResponses": "סך התגובות"
       },
       "recentComments": {
         "title": "תגובות משוב אחרונות"
@@ -884,6 +998,56 @@
       "currentValue": "נוכחי",
       "threshold": "סף"
     },
+    "userFocused": {
+      "title": "אנליטיקה ממוקדת משתמש",
+      "subtitle": "בחר מארגן כדי להעמיק בביצועי ההכוונות שלו",
+      "guidesTitle": "הכוונות של {{organizer}}",
+      "guidesSubtitle": "בחר הכוונה לצפייה באנליטיקת הצבעות מפורטת",
+      "detailsTitle": "אנליטיקה עבור \"{{guide}}\"",
+      "detailsSubtitle": "מצב הצבעות מפורט ופירוט משוב",
+      "allOrganizers": "כל המארגנים",
+      "searchOrganizers": "חיפוש מארגנים",
+      "searchPlaceholder": "חיפוש לפי שם משתמש או שם...",
+      "timePeriod": "תקופת זמן",
+      "last7Days": "7 הימים האחרונים",
+      "last30Days": "30 הימים האחרונים",
+      "last90Days": "90 הימים האחרונים",
+      "totalGuides": "סה״כ הכוונות",
+      "totalFeedback": "סה״כ משוב",
+      "helpfulRate": "שיעור תועלת",
+      "totalViews": "סה״כ צפיות",
+      "views": "צפיות",
+      "feedback": "משוב",
+      "likeRate": "שיעור חיוב",
+      "completionRate": "שיעור השלמה",
+      "performance": "ביצועים",
+      "completions": "השלמות",
+      "guideFeedback": "משוב על הכוונה",
+      "conceptFeedback": "משוב על הרעיון",
+      "helpful": "מועיל",
+      "notHelpful": "לא מועיל",
+      "liked": "אהב",
+      "disliked": "לא אהב",
+      "guide": "הכוונה",
+      "founder": "מייסד",
+      "recentFeedback": "משוב אחרון",
+      "noOrganizers": "לא נמצאו מארגנים",
+      "noGuides": "לא נמצאו הכוונות עבור מארגן זה",
+      "noRecentFeedback": "אין משוב אחרון זמין"
+    },
+    "feedbackAnalytics": {
+      "title": "אנליטיקת משוב",
+      "subtitle": "ניתוח משוב מקיף ותובנות"
+    },
+    "guides": {
+      "status": {
+        "published": "מפורסם",
+        "draft": "טיוטה",
+        "expired": "פג תוקף",
+        "archived": "בארכיון",
+        "active": "פעיל"
+      }
+    },
     "pilot": {
       "title": "מצב הפיילוט",
       "subtitle": "איך התוכנית נראית כרגע",
@@ -919,6 +1083,130 @@
     },
     "navigation": {
       "backToDashboard": "חזור ללוח הבקרה"
+    },
+    "production": {
+      "title": "ניהול סביבת ייצור",
+      "description": "ניהול נתוני ייצור והכנה להשקה",
+      "resetButton": "איפוס נתוני ייצור",
+      "resetWarning": "⚠️ פעולה זו תמחק את כל נתוני האנליטיקה",
+      "reset": {
+        "title": "איפוס נתוני ייצור",
+        "message": "פעולה זו תמחק לצמיתות את כל נתוני האנליטיקה כולל צפיות, משוב וסטטיסטיקות. כל המדריכים יישמרו.",
+        "confirm": "אפס נתוני ייצור",
+        "detail1": "כל נתוני האנליטיקה והמשוב יימחקו",
+        "detail2": "סטטיסטיקות המדריכים יאופסו לאפס",
+        "detail3": "כל המדריכים והתוכן שלהם יישמרו",
+        "detail4": "לא ניתן לבטל פעולה זו"
+      }
+    },
+    "tabs": {
+      "overview": "סקירה כללית",
+      "feedbackManagement": "ניהול משוב",
+      "ariaLabel": "לשוניות לוח בקרת מנהל"
+    },
+    "confirmDialog": {
+      "details": "פרטים",
+      "typeToConfirm": "הקלד '{{text}}' לאישור",
+      "typingMismatch": "הטקסט אינו תואם",
+      "confirm": "אישור",
+      "cancel": "ביטול",
+      "processing": "מעבד"
+    },
+    "feedback": {
+      "guideFeedback": {
+        "title": "אנליטיקת משוב על הכוונות",
+        "subtitle": "משוב משתמשים על איכות וברורות ההכוונות",
+        "helpful": "מועיל",
+        "notHelpful": "לא מועיל",
+        "helpfulRate": "שיעור תועלת"
+      },
+      "conceptFeedback": {
+        "title": "אנליטיקת משוב על הרעיון",
+        "subtitle": "משוב משתמשים על רעיון TrailGuide והגישה",
+        "likeIdea": "אוהב את הרעיון",
+        "dislikeIdea": "לא אוהב את הרעיון",
+        "approvalRate": "שיעור אישור הרעיון"
+      },
+      "management": {
+        "title": "ניהול משוב",
+        "description": "חיפוש, צפייה וניהול נתוני משוב מהמשתמשים"
+      },
+      "search": {
+        "title": "חיפוש משוב",
+        "visitorId": "מזהה מבקר",
+        "eventId": "מזהה מדריך",
+        "type": "סוג משוב",
+        "allTypes": "כל הסוגים",
+        "guide": "משוב על מדריך",
+        "founder": "משוב על הפרויקט",
+        "startDate": "תאריך התחלה",
+        "endDate": "תאריך סיום",
+        "button": "חיפוש"
+      },
+      "results": {
+        "showing": "מציג {{start}}-{{end}} מתוך {{total}} תוצאות"
+      },
+      "guide": "מדריך",
+      "organizer": "יוצר התוכן",
+      "visitorId": "מזהה מבקר",
+      "deleteUser": "מחק משתמש",
+      "noResults": "לא נמצא משוב התואם לקריטריוני החיפוש",
+      "noRating": "לא ניתן דירוג",
+      "type": {
+        "guide": "מדריך",
+        "founder": "פרויקט"
+      },
+      "deleteUser": {
+        "title": "מחיקת משוב משתמש",
+        "message": "למחוק את כל {{count}} ערכי המשוב מהמבקר {{visitorId}}?",
+        "confirm": "מחק משוב משתמש",
+        "detail1": "כל המשוב מהמבקר הזה יימחק לצמיתות",
+        "detail2": "זה כולל את כל הדירוגים, הערות והנתונים הקשורים",
+        "detail3": "לא ניתן לבטל פעולה זו"
+      },
+      "bulkDelete": {
+        "title": "מחיקה המונית של משוב",
+        "message": "למחוק {{count}} ערכי משוב התואמים לקריטריונים?",
+        "confirm": "מחיקה המונית של משוב"
+      }
+    }
+  },
+  "time": {
+    "units": {
+      "second": "שנייה",
+      "seconds": "שניות",
+      "minute": "דקה",
+      "minutes": "דקות",
+      "hour": "שעה",
+      "hours": "שעות",
+      "day": "יום",
+      "days": "ימים",
+      "week": "שבוע",
+      "weeks": "שבועות",
+      "month": "חודש",
+      "months": "חודשים",
+      "year": "שנה",
+      "years": "שנים"
+    },
+    "abbreviations": {
+      "s": "ש",
+      "m": "ד",
+      "h": "ש",
+      "d": "י",
+      "w": "ש"
+    },
+    "relative": {
+      "ago": "לפני",
+      "in": "בעוד",
+      "remaining": "נותרו"
+    },
+    "formats": {
+      "timeAgo": "לפני {{time}} {{unit}}",
+      "timeRemaining": "נותרו {{time}} {{unit}}",
+      "timeIn": "בעוד {{time}} {{unit}}",
+      "compactTimeAgo": "לפני {{time}}{{unit}}",
+      "compactRemaining": "{{time}}{{unit}}",
+      "hoursAndMinutes": "{{hours}} {{hourUnit}} ו{{minutes}} {{minuteUnit}}"
     }
   }
 }

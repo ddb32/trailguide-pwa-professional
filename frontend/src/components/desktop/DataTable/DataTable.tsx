@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLanguageDirection } from '../../../hooks/useLanguageDirection';
 import { useCopyLink } from '../../../hooks/useCopyLink';
-import { /* getExpirationStatus, */ formatExpirationDate, useRealTimeExpiration } from '../../../utils/expiration';
+import StatusDisplay from '../../common/StatusDisplay/StatusDisplay';
 import { Icon } from '../../common/Icon';
 import type { FormattedEvent } from '../../../types/global';
 
@@ -12,7 +12,7 @@ export interface TableEvent {
   id: string;
   name: string;
   description?: string;
-  status: 'active' | 'expired' | 'draft' | 'published';
+  status: 'active' | 'expired' | 'draft' | 'published' | 'scheduled' | 'archived';
   views?: number;
   steps?: number;
   stepsCount?: number;
@@ -101,81 +101,11 @@ const DataTable: React.FC<DataTableProps> = ({
   }, []);
 
 
-  // Status badge component - minimal design
-  const StatusBadge: React.FC<{ status: FormattedEvent['status'] }> = ({ status }) => {
-    const getStatusText = (status: string) => {
-      switch (status) {
-        case 'active':
-          return { text: t('status.active'), color: 'text-green-600' };
-        case 'expired':
-          return { text: t('status.expired'), color: 'text-red-600' };
-        case 'draft':
-          return { text: t('status.draft'), color: 'text-gray-600' };
-        case 'published':
-          return { text: t('status.published'), color: 'text-blue-600' };
-        default:
-          return { text: status, color: 'text-gray-600' };
-      }
-    };
+  // Legacy StatusBadge component (unused - replaced by StatusDisplay)
 
-    const config = getStatusText(status);
+  // Legacy ExpirationDisplay component (unused - replaced by StatusDisplay)
 
-    return (
-      <span className={`text-base lg:text-lg font-normal ${config.color}`}>
-        {config.text}
-      </span>
-    );
-  };
-
-  // Expiration display component
-  const ExpirationDisplay: React.FC<{ event: FormattedEvent }> = ({ event }) => {
-    const { t } = useTranslation();
-
-    const expirationDate = event.expiration_date;
-    const eventStatus = event.status || 'published';
-
-    // Use the hook correctly to get both time and status info
-    const expirationData = useRealTimeExpiration(expirationDate || null, eventStatus);
-
-    // Use the status directly from the hook
-    const status = expirationData?.status || {
-      text: t('createGuide.expiration.noExpiration'),
-      color: 'text-gray-500',
-      urgency: 'none'
-    };
-    
-    if (eventStatus === 'draft') {
-      return (
-        <div className="text-base lg:text-lg font-normal text-gray-500">
-          {t('createGuide.expiration.draftNoExpiration')}
-        </div>
-      );
-    }
-
-    if (!expirationDate) {
-      return (
-        <div className="text-base lg:text-lg font-normal text-gray-500">
-          {t('createGuide.expiration.noExpiration')}
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-1">
-        <div className={`text-base lg:text-lg font-normal ${status.color}`}>
-          {status.urgency === 'expired'
-            ? t('createGuide.expiration.expired', { time: status.text })
-            : status.urgency === 'critical' || status.urgency === 'warning'
-            ? t('createGuide.expiration.remaining', { time: status.text })
-            : status.text
-          }
-        </div>
-        <div className="text-sm text-gray-500 font-normal">
-          {formatExpirationDate(expirationDate, language === 'he' ? 'he-IL' : 'en-US')}
-        </div>
-      </div>
-    );
-  };
+  // Legacy ActivationDisplay component (unused - replaced by StatusDisplay)
 
   // Sortable header component
   const SortableHeader: React.FC<{
@@ -237,11 +167,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
   // Mobile Card Component with enhanced interactions
   const MobileCard: React.FC<{ event: FormattedEvent; index: number }> = ({ event, index: _ }) => {
-    const expirationData = useRealTimeExpiration(event.expiration_date || null, event.status);
     const locale = language === 'he' ? 'he-IL' : 'en-US';
 
     // Format creation date in Israeli timezone with validation
-    const createdDate = event.created ? new Date(event.created) : null;
+    const createdDate = event.created_at ? new Date(event.created_at) : null;
     const isValidDate = createdDate && !isNaN(createdDate.getTime());
     const formattedCreatedDate = isValidDate ? new Intl.DateTimeFormat(locale, {
       month: 'short',
@@ -249,50 +178,6 @@ const DataTable: React.FC<DataTableProps> = ({
       year: 'numeric',
       timeZone: 'Asia/Jerusalem'
     }).format(createdDate) : t('dashboard.table.noDate');
-
-    // Determine expiration status and colors
-    const getExpirationStatus = () => {
-      if (event.status === 'draft') {
-        return {
-          label: t('dashboard.table.labels.noExpiration'),
-          value: t('createGuide.expiration.draftNoExpiration'),
-          colorClass: 'text-gray-500'
-        };
-      }
-
-      if (!event.expiration_date) {
-        return {
-          label: t('dashboard.table.labels.noExpiration'),
-          value: t('createGuide.expiration.noExpiration'),
-          colorClass: 'text-gray-500'
-        };
-      }
-
-      const isExpired = expirationData?.time?.isExpired || false;
-      const isExpiringSoon = expirationData?.status?.urgency === 'warning' || expirationData?.status?.urgency === 'critical';
-
-      if (isExpired) {
-        return {
-          label: t('dashboard.table.labels.expired'),
-          value: expirationData?.time?.expiredAgo || t('createGuide.expiration.someTime'),
-          colorClass: 'text-red-600'
-        };
-      } else if (expirationData?.time?.remaining) {
-        return {
-          label: t('dashboard.table.labels.remaining'),
-          value: expirationData.time.remaining,
-          colorClass: isExpiringSoon ? 'text-amber-600' : 'text-green-600'
-        };
-      } else {
-        return {
-          label: t('dashboard.table.labels.noExpiration'),
-          value: t('createGuide.expiration.noExpiration'),
-          colorClass: 'text-gray-500'
-        };
-      }
-    };
-
-    const expirationStatus = getExpirationStatus();
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4 hover:shadow-md active:shadow-lg transition-all duration-200 touch-manipulation">
@@ -314,7 +199,7 @@ const DataTable: React.FC<DataTableProps> = ({
             </div>
           </Link>
           <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-shrink-0`}>
-            <StatusBadge status={event.status} />
+            <StatusDisplay event={event} variant="compact" size="sm" />
           </div>
         </div>
 
@@ -339,28 +224,6 @@ const DataTable: React.FC<DataTableProps> = ({
               {event.views || 0}
             </span>
           </div>
-
-          {/* Expiration Status */}
-          <div className={`flex items-center justify-between py-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <span className={`text-xs font-medium text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-              {expirationStatus.label}
-            </span>
-            <span className={`text-sm font-medium ${expirationStatus.colorClass}`}>
-              {expirationStatus.value}
-            </span>
-          </div>
-
-          {/* Formatted expiration date (if exists) */}
-          {event.expiration_date && (
-            <div className={`flex items-center justify-between border-t border-gray-200 pt-2 mt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <span className={`text-xs font-medium text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {t('dashboard.table.headers.expiry')}
-              </span>
-              <span className={`text-xs text-gray-500 ${isRTL ? 'text-left' : 'text-right'}`}>
-                {formatExpirationDate(event.expiration_date, language === 'he' ? 'he-IL' : 'en-US')}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Actions Row - Touch-optimized with minimum 44px touch targets */}
@@ -383,7 +246,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
             {/* Copy Link Button - Enhanced touch target */}
             <button
-              onClick={() => copyGuideLink(event.id)}
+              onClick={() => copyGuideLink(event.id, event.name, event.status)}
               className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               aria-label={t('dashboard.actions.copyLink')}
             >
@@ -561,8 +424,8 @@ const DataTable: React.FC<DataTableProps> = ({
                 <SortableHeader sortKey="views" className={conditionalClass.textLeft}>
                   {t('dashboard.table.headers.views')}
                 </SortableHeader>
-                <SortableHeader sortKey="expiration_date" className={conditionalClass.textLeft}>
-                  {t('dashboard.table.headers.expiry')}
+                <SortableHeader sortKey="created_at" className={conditionalClass.textLeft}>
+                  {t('dashboard.table.headers.created')}
                 </SortableHeader>
                 <SortableHeader className={conditionalClass.textLeft}>
                   {t('dashboard.table.headers.actions')}
@@ -591,9 +454,9 @@ const DataTable: React.FC<DataTableProps> = ({
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Unified Status & Timing Display */}
                   <td className="py-6 px-6">
-                    <StatusBadge status={event.status} />
+                    <StatusDisplay event={event} variant="detailed" size="md" />
                   </td>
 
                   {/* Views */}
@@ -603,9 +466,20 @@ const DataTable: React.FC<DataTableProps> = ({
                     </span>
                   </td>
 
-                  {/* Expiration */}
+                  {/* Created Date */}
                   <td className="py-6 px-6">
-                    <ExpirationDisplay event={event} />
+                    <span className="text-base lg:text-lg text-gray-600 font-normal">
+                      {(() => {
+                        const createdDate = event.created_at ? new Date(event.created_at) : null;
+                        const isValidDate = createdDate && !isNaN(createdDate.getTime());
+                        return isValidDate ? new Intl.DateTimeFormat(language === 'he' ? 'he-IL' : 'en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          timeZone: 'Asia/Jerusalem'
+                        }).format(createdDate) : t('dashboard.table.noDate');
+                      })()}
+                    </span>
                   </td>
 
                   {/* Actions */}
@@ -623,7 +497,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
                       {/* Copy Link Button */}
                       <button
-                        onClick={() => copyGuideLink(event.id)}
+                        onClick={() => copyGuideLink(event.id, event.name, event.status)}
                         className="p-3 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all duration-200"
                         aria-label={t('dashboard.actions.copyLink')}
                       >

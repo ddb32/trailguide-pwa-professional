@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLanguageDirection } from '../../hooks/useLanguageDirection';
@@ -6,6 +6,7 @@ import { useGuideLanguage } from '../../hooks/useGuideLanguage';
 import { useAuth } from '../../contexts/AuthContext';
 import { eventsService } from '../../services/eventsService';
 import { useVisitorTracking } from '../../hooks/useVisitorTracking';
+import { useViewTracking } from '../../contexts/ViewTrackingContext';
 import FeedbackModal from '../../components/FeedbackModal/FeedbackModal';
 import FounderFeedbackModal from '../../components/FeedbackModal/FounderFeedbackModal';
 import LanguageSelector from '../../components/LanguageSelector/LanguageSelector';
@@ -43,7 +44,15 @@ const ViewGuide = ({ isPreviewMode = false, previewData = null }) => {
   const [showFounderFeedbackModal, setShowFounderFeedbackModal] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [isSubmittingFounderFeedback, setIsSubmittingFounderFeedback] = useState(false);
-  const [viewTracked, setViewTracked] = useState(false); // Prevent duplicate view tracking
+  // **BULLETPROOF VIEW TRACKING**: Use global context instead of local state
+  const {
+    isViewTracked,
+    markViewAsTracked,
+    isDuplicateRequest,
+    getTrackingStats
+  } = useViewTracking();
+  // **STRICT MODE PROTECTION**: Prevent double execution within same component instance
+  const hasLoadedRef = useRef(false);
   // LANGUAGE SWITCHER - TEMPORARILY HIDDEN FOR HEBREW-ONLY SYSTEM
   // Change back to useState(true) to restore multilingual functionality
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
@@ -51,173 +60,112 @@ const ViewGuide = ({ isPreviewMode = false, previewData = null }) => {
   const [autoFeedbackTriggered, setAutoFeedbackTriggered] = useState(false);
   const feedbackTimerRef = useRef(null);
 
+  // **BULLETPROOF GUIDE LOADING**: Simple, dependency-free approach
+  const loadGuideData = useCallback(async () => {
+    if (!id) return null;
+
+    console.log('🚀 Loading guide with bulletproof approach:', {
+      guideId: id,
+      isPreview: isPreviewMode,
+      isAuthenticated,
+      user: user?.username || 'anonymous'
+    });
+
+    const userInfo = { id: user?.id, username: user?.username };
+
+    // Check if this request would be a duplicate
+    if (isDuplicateRequest(id, userInfo, 3000)) { // 3-second window
+      console.log('🛑 Duplicate request blocked by ViewTrackingContext');
+      return null;
+    }
+
+    // Check if view already tracked
+    if (isViewTracked(id, userInfo)) {
+      console.log('🛑 View already tracked in session');
+      return null;
+    }
+
+    try {
+      let result = null;
+
+      // **PREVIEW MODE**: Use provided data
+      if (isPreviewMode && previewData) {
+        console.log('👁️ Preview mode: Using provided data');
+        result = { success: true, data: previewData };
+        const mockViewId = `preview-${id}-${Date.now()}`;
+        setViewId(mockViewId);
+        markViewAsTracked(id, userInfo, mockViewId);
+        return result;
+      }
+
+      // **PRODUCTION MODE**: Try authenticated first, then public
+      if (user && isAuthenticated) {
+        console.log('✅ Trying authenticated access (no view count)');
+        try {
+          result = await eventsService.getEvent(id);
+          if (result.success) {
+            console.log('✅ Authenticated access successful');
+            // Generate mock viewId for organizer testing
+            const mockViewId = `organizer-${user.id || user.username}-${id}-${Date.now()}`;
+            setViewId(mockViewId);
+            markViewAsTracked(id, userInfo, mockViewId);
+            return result;
+          }
+        } catch (authError) {
+          console.warn('⚠️ Authenticated access failed, trying public');
+        }
+      }
+
+      // **PUBLIC ACCESS**: This will increment view count
+      console.log('📡 Making public access call (will count view)');
+      const headers = trackingInitialized ? getHeaders() : {};
+      result = await eventsService.getPublicEvent(id, headers);
+
+      if (result.success) {
+        console.log('✅ Public access successful - view counted');
+        // Extract viewId from response
+        if (result.analytics?.viewId) {
+          setViewId(result.analytics.viewId);
+        }
+        // Mark as tracked to prevent future duplicates
+        markViewAsTracked(id, userInfo, result.analytics?.viewId);
+        return result;
+      }
+
+      return result;
+
+    } catch (error) {
+      console.error('❌ Guide loading error:', error);
+      return { success: false, error: error.message || 'Failed to load guide' };
+    }
+  }, [id, isPreviewMode, previewData, user, isAuthenticated, trackingInitialized, getHeaders, isViewTracked, isDuplicateRequest, markViewAsTracked]);
+
   useEffect(() => {
     const loadGuidanceData = async () => {
       try {
-        setLoading(true);
-        let result;
-
-        // Handle preview mode - use provided data instead of loading
-        if (isPreviewMode && previewData) {
-          console.log('👁️ Preview mode: Using provided preview data');
-          result = { success: true, data: previewData };
-          setViewTracked(true); // Preview mode doesn't need view tracking
-
-          // Generate mock viewId for feedback testing in preview mode
-          const mockViewId = `preview-${id}-${Date.now()}`;
-          setViewId(mockViewId);
-          console.log('✅ Preview mode: Generated mock viewId for feedback testing:', mockViewId);
-        } else {
-          console.log('🔓 Public mode: Loading guide data for ID:', id);
-          console.log('Auth state - user:', user ? user.username : 'null', 'isAuthenticated:', isAuthenticated);
-          console.log('View tracking state:', viewTracked ? 'already tracked' : 'not tracked yet');
-
-          // **CRITICAL FIX**: Single API call strategy to prevent view count duplication
-          if (viewTracked) {
-            console.log('🛑 View already tracked - skipping API calls to prevent duplicate counts');
-            if (guidance && guidance.id === id) {
-              setLoading(false);
-              return;
-            }
-          }
-
-        // Smart access detection: Try organizer access first if authenticated
-        if (user && isAuthenticated) {
-          console.log('✅ User authenticated - attempting organizer access for:', user.username);
-          try {
-            // Try authenticated API first (organizer access - any status)
-            // Note: Authenticated access doesn't increment view counts
-            result = await eventsService.getEvent(id);
-
-            if (!result.success) {
-              console.log('❌ Organizer access failed:', result.error, '- falling back to public access');
-              // Only use public access ONCE - wait for tracking to be ready if needed
-              if (!viewTracked) {
-                // Wait for tracking to be initialized if not ready
-                if (!trackingInitialized) {
-                  console.log('⏳ Waiting for analytics tracking to initialize...');
-                  // Set a short timeout to wait for tracking initialization
-                  setTimeout(() => {
-                    if (!viewTracked) {
-                      console.log('🔄 Retrying after tracking initialization delay');
-                      loadGuidanceData();
-                    }
-                  }, 100);
-                  setLoading(false);
-                  return;
-                }
-
-                result = await eventsService.getPublicEvent(id, getHeaders());
-                if (result.success) {
-                  console.log('✅ Public access fallback successful - view tracked');
-                  setViewTracked(true); // Mark as tracked to prevent duplicates
-                } else {
-                  console.log('❌ Public access fallback also failed:', result.error);
-                }
-              } else {
-                console.log('🛑 View already tracked - not making public API call');
-                result = { success: false, error: 'Guide not accessible to this user' };
-              }
-            } else {
-              console.log('✅ Successfully loaded guide via organizer access - no view count increment');
-
-              // **CRITICAL FIX**: For organizer testing, we need a viewId for feedback
-              // Make a separate public API call to get analytics viewId without incrementing view count
-              if (!viewTracked && !viewId) {
-                console.log('🔧 Organizer needs viewId for feedback testing - making public API call');
-                try {
-                  if (!trackingInitialized) {
-                    console.log('⏳ Waiting for analytics tracking for organizer testing...');
-                    setTimeout(() => {
-                      if (!viewTracked && !viewId) {
-                        console.log('🔄 Retrying organizer viewId acquisition');
-                        loadGuidanceData();
-                      }
-                    }, 100);
-                    setLoading(false);
-                    return;
-                  }
-
-                  const publicResult = await eventsService.getPublicEvent(id, getHeaders());
-                  if (publicResult.success && publicResult.data?.analytics?.viewId) {
-                    setViewId(publicResult.data.analytics.viewId);
-                    setViewTracked(true);
-                    console.log('✅ Organizer testing viewId captured:', publicResult.data.analytics.viewId);
-                  }
-                } catch (publicError) {
-                  console.warn('⚠️ Could not get viewId for organizer testing:', publicError.message);
-                }
-              }
-            }
-          } catch (authError) {
-            console.warn('🔄 Authenticated API error, trying public access:', authError.message);
-            // Fall back to public access if authenticated API fails
-            if (!viewTracked) {
-              // Wait for tracking to be ready
-              if (!trackingInitialized) {
-                console.log('⏳ Waiting for analytics tracking before fallback...');
-                setTimeout(() => {
-                  if (!viewTracked) {
-                    console.log('🔄 Retrying fallback after tracking initialization');
-                    loadGuidanceData();
-                  }
-                }, 100);
-                setLoading(false);
-                return;
-              }
-
-              try {
-                result = await eventsService.getPublicEvent(id, getHeaders());
-                if (result.success) {
-                  console.log('✅ Public access fallback after auth error successful - view tracked');
-                  setViewTracked(true); // Mark as tracked to prevent duplicates
-                }
-              } catch (publicError) {
-                console.error('❌ Both authenticated and public access failed:', publicError.message);
-                result = { success: false, error: 'Guide not accessible' };
-              }
-            } else {
-              console.log('🛑 View already tracked - not making fallback API call');
-              result = { success: false, error: 'Guide not accessible' };
-            }
-          }
-        } else {
-          console.log('🔓 User not authenticated - using public access only');
-          // Not authenticated - use public access only (published guides only)
-          // Only track view once when tracking is ready
-          if (!viewTracked) {
-            // Wait for tracking to be initialized
-            if (!trackingInitialized) {
-              console.log('⏳ Waiting for analytics tracking to initialize for anonymous user...');
-              setTimeout(() => {
-                if (!viewTracked) {
-                  console.log('🔄 Retrying for anonymous user after tracking initialization');
-                  loadGuidanceData();
-                }
-              }, 100);
-              setLoading(false);
-              return;
-            }
-
-            result = await eventsService.getPublicEvent(id, getHeaders());
-
-            if (result.success) {
-              console.log('✅ Public access successful - view tracked');
-              setViewTracked(true); // Mark as tracked to prevent duplicates
-            } else {
-              console.log('❌ Public access failed:', result.error);
-            }
-          } else {
-            console.log('🛑 View already tracked - skipping public API call');
-            // Return early if view already tracked - don't fail the whole operation
-            if (guidance && guidance.id === id) {
-              setLoading(false);
-              return;
-            }
-            result = { success: false, error: 'Guide not accessible' };
-          }
+        // **STRICT MODE PROTECTION**: Prevent double execution within same component instance
+        if (hasLoadedRef.current) {
+          console.log('🛑 Duplicate useEffect call blocked by useRef protection');
+          return;
         }
-        } // End of else clause for API loading
+        hasLoadedRef.current = true;
+
+        setLoading(true);
+
+        console.log('🔄 useEffect triggered - loading guide data:', {
+          guideId: id,
+          trackingStats: getTrackingStats(),
+          hasLoadedRef: hasLoadedRef.current
+        });
+
+        // Use bulletproof loading function
+        const result = await loadGuideData();
+
+        if (!result) {
+          console.log('🛑 Load request skipped - view already tracked or duplicate');
+          setLoading(false);
+          return;
+        }
 
         // Check if the guide has expired and redirect if needed (only for non-preview mode)
         if (!isPreviewMode && !result.success && result.errorType === 'expired') {
@@ -300,11 +248,16 @@ const ViewGuide = ({ isPreviewMode = false, previewData = null }) => {
       }
     };
 
-    // Only load data if we have an ID and haven't loaded yet, or if it's a new ID
-    if (id && (!guidance || guidance.id !== id)) {
+    // Only load data if we have an ID
+    if (id) {
       loadGuidanceData();
     }
-  }, [id, isPreviewMode, previewData]); // Stable dependencies - trackingInitialized handled internally
+
+    // **CLEANUP**: Reset protection ref when component unmounts or ID changes
+    return () => {
+      hasLoadedRef.current = false;
+    };
+  }, [id]); // **SIMPLIFIED DEPENDENCIES**: Only depend on ID to prevent re-render loops
 
   const handleLanguageSelect = (language) => {
     setGuideLanguage(language);

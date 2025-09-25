@@ -1,0 +1,185 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: trailguide-db-hub
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-trailguide_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-trailguide}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./api/init-db:/docker-entrypoint-initdb.d
+    networks:
+      - trailguide-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trailguide} -d ${POSTGRES_DB:-trailguide_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: trailguide-redis-hub
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    networks:
+      - trailguide-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # TrailGuide API Backend (from Docker Hub)
+  api:
+    image: ${DOCKER_HUB_USERNAME}/trailguide-api:${API_VERSION:-latest}
+    container_name: trailguide-api-hub
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql://${POSTGRES_USER:-trailguide}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-trailguide_prod}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379
+
+      # Application Configuration
+      NODE_ENV: production
+      PORT: 3000
+
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+
+      # Rate Limiting
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+
+      # File Upload Configuration
+      UPLOAD_MAX_SIZE: ${UPLOAD_MAX_SIZE:-10485760}
+      UPLOAD_ALLOWED_TYPES: ${UPLOAD_ALLOWED_TYPES:-image/jpeg,image/png,image/webp}
+
+      # Hebrew/RTL Configuration
+      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-he}
+      TIMEZONE: ${TIMEZONE:-Asia/Jerusalem}
+
+      # Monitoring
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_METRICS: ${ENABLE_METRICS:-true}
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+    networks:
+      - trailguide-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # TrailGuide Frontend PWA (from Docker Hub)
+  frontend:
+    image: ${DOCKER_HUB_USERNAME}/trailguide-frontend:${FRONTEND_VERSION:-latest}
+    container_name: trailguide-frontend-hub
+    environment:
+      # API Configuration
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+
+      # Application Configuration
+      VITE_APP_NAME: ${VITE_APP_NAME:-TrailGuide}
+      VITE_DEFAULT_LANGUAGE: ${VITE_DEFAULT_LANGUAGE:-he}
+      VITE_ENABLE_RTL: ${VITE_ENABLE_RTL:-true}
+
+      # Domain Configuration
+      VITE_DOMAIN: ${VITE_DOMAIN:-localhost}
+      VITE_SECURE: ${VITE_SECURE:-false}
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+      - "${FRONTEND_SSL_PORT:-443}:443"
+    networks:
+      - trailguide-network
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # NGINX Reverse Proxy (Optional - for production SSL)
+  nginx:
+    image: nginx:alpine
+    container_name: trailguide-nginx-hub
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - trailguide-network
+    depends_on:
+      - frontend
+      - api
+    restart: unless-stopped
+    profiles:
+      - nginx
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
+    driver: local
+  logs_data:
+    driver: local
+
+networks:
+  trailguide-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

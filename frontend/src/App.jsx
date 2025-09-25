@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Auth Context
 import { AuthProvider, ProtectedRoute, AdminRoute } from './contexts/AuthContext';
+import { ViewTrackingProvider } from './contexts/ViewTrackingContext';
 
 // Layout Components
 import Layout from './components/Layout/Layout';
@@ -38,12 +39,13 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router 
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
-      >
+      <ViewTrackingProvider>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}
+        >
         <div className="App min-h-screen bg-gray-50" dir={direction}>
         {/* Global Toast Notifications */}
         <Toaster
@@ -90,7 +92,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </Router>
+        </Router>
+      </ViewTrackingProvider>
     </AuthProvider>
   );
 }

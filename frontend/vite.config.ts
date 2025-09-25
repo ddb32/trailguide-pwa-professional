@@ -78,5 +78,17 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom']
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    hmr: {
+      port: 5173,
+      host: '0.0.0.0'
+    },
+    watch: {
+      usePolling: true,
+      interval: 1000
+    }
   }
 });

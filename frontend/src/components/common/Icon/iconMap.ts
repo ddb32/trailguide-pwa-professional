@@ -76,6 +76,7 @@ export const iconMap = {
   'feedback': '💬',
   'thumbs-up': '👍',
   'thumbs-down': '👎',
+  'star': '⭐',
   'check-circle': '✅',
   'x-circle': '❌',
   'refresh': '🔄',

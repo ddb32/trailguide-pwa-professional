@@ -3,6 +3,8 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { formatInIsraelTimezone } from './timezone';
 
 /**
  * Check if a guide is expired
@@ -17,33 +19,34 @@ export const isExpired = (expirationDate) => {
 /**
  * Calculate remaining time until expiration
  * @param {string} expirationDate - ISO date string
+ * @param {Function} t - Translation function from react-i18next
  * @returns {Object} Object with remaining time info
  */
-export const getRemainingTime = (expirationDate) => {
+export const getRemainingTime = (expirationDate, t = null) => {
   if (!expirationDate) {
     return { hasExpiration: false, isExpired: false, remaining: null };
   }
 
-  // Get current time in Israeli timezone
+  // Get current time and expiration in UTC for accurate comparison
   const now = new Date();
   const expiration = new Date(expirationDate);
 
   // Calculate difference in milliseconds
   const diffMs = expiration.getTime() - now.getTime();
-  
+
   if (diffMs <= 0) {
-    return { 
-      hasExpiration: true, 
-      isExpired: true, 
+    return {
+      hasExpiration: true,
+      isExpired: true,
       remaining: null,
-      expiredAgo: formatTimeAgo(Math.abs(diffMs))
+      expiredAgo: formatTimeAgo(Math.abs(diffMs), t)
     };
   }
 
   return {
     hasExpiration: true,
     isExpired: false,
-    remaining: formatRemainingTime(diffMs),
+    remaining: formatRemainingTime(diffMs, t),
     totalHours: Math.ceil(diffMs / (1000 * 60 * 60)),
     totalMinutes: Math.ceil(diffMs / (1000 * 60))
   };
@@ -52,47 +55,55 @@ export const getRemainingTime = (expirationDate) => {
 /**
  * Format remaining time for display
  * @param {number} ms - Milliseconds remaining
+ * @param {Function} t - Translation function from react-i18next
  * @returns {string} Formatted time string
  */
-const formatRemainingTime = (ms) => {
+const formatRemainingTime = (ms, t = null) => {
+  // Fallback function for when translation is not available
+  const translate = t || ((key, fallback) => fallback || key);
+
   const hours = Math.floor(ms / (1000 * 60 * 60));
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
 
   if (hours > 0) {
     if (minutes > 0) {
-      return `${hours}h ${minutes}m`;
+      return `${hours}${translate('time.abbreviations.h')} ${minutes}${translate('time.abbreviations.m')}`;
     }
-    return `${hours}h`;
+    return `${hours}${translate('time.abbreviations.h')}`;
   }
-  
+
   if (minutes > 5) {
-    return `${minutes}m`;
+    return `${minutes}${translate('time.abbreviations.m')}`;
   }
-  
+
   // Show seconds for last 5 minutes
   const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-  return `${minutes}m ${seconds}s`;
+  return `${minutes}${translate('time.abbreviations.m')} ${seconds}${translate('time.abbreviations.s')}`;
 };
 
 /**
  * Format time ago for expired items
  * @param {number} ms - Milliseconds since expiration
+ * @param {Function} t - Translation function from react-i18next
  * @returns {string} Formatted time string
  */
-const formatTimeAgo = (ms) => {
+const formatTimeAgo = (ms, t = null) => {
+  // Fallback function for when translation is not available
+  const translate = t || ((key, fallback) => fallback || key);
+
   const hours = Math.floor(ms / (1000 * 60 * 60));
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-  
+
   if (hours > 24) {
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return translate('time.formats.compactTimeAgo', { time: days, unit: translate('time.abbreviations.d') });
   }
-  
+
   if (hours > 0) {
-    return `${hours}h ago`;
+    return translate('time.formats.compactTimeAgo', { time: hours, unit: translate('time.abbreviations.h') });
   }
-  
-  return `${minutes}m ago`;
+
+  return translate('time.formats.compactTimeAgo', { time: minutes, unit: translate('time.abbreviations.m') });
 };
 
 /**
@@ -101,7 +112,7 @@ const formatTimeAgo = (ms) => {
  * @param {string} status - Guide status (draft, published, etc.)
  * @returns {Object} Status with color classes and text
  */
-export const getExpirationStatus = (expirationDate, status = 'published') => {
+export const getExpirationStatus = (expirationDate, status = 'published', t = null) => {
   // Handle draft status - no expiration
   if (status === 'draft') {
     return {
@@ -116,7 +127,7 @@ export const getExpirationStatus = (expirationDate, status = 'published') => {
   // Normalize 'active' status to 'published' for expiration logic
   const normalizedStatus = status === 'active' ? 'published' : status;
 
-  const timeInfo = getRemainingTime(expirationDate);
+  const timeInfo = getRemainingTime(expirationDate, t);
   
   if (!timeInfo.hasExpiration) {
     return {
@@ -182,17 +193,9 @@ export const formatExpirationDate = (expirationDate, locale = 'en-US') => {
 
   try {
     const date = new Date(expirationDate);
-    const isRTL = locale.startsWith('he');
-
-    return new Intl.DateTimeFormat(locale, {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: !isRTL,
-      timeZone: 'Asia/Jerusalem'  // Always use Israeli timezone
-    }).format(date);
+    return formatInIsraelTimezone(date, locale, {
+      weekday: 'short'
+    });
   } catch (error) {
     console.error('Error formatting expiration date:', error);
     return expirationDate;
@@ -206,27 +209,30 @@ export const formatExpirationDate = (expirationDate, locale = 'en-US') => {
  * @returns {Object} Real-time remaining time info and status
  */
 export const useRealTimeExpiration = (expirationDate, status = 'published') => {
+  // Use translation hook for localized time formatting
+  const { t } = useTranslation();
+
   // Normalize 'active' status to 'published' for expiration logic
   const normalizedStatus = status === 'active' ? 'published' : status;
 
   const [timeInfo, setTimeInfo] = useState(() => ({
-    time: getRemainingTime(expirationDate),
-    status: getExpirationStatus(expirationDate, normalizedStatus)
+    time: getRemainingTime(expirationDate, t),
+    status: getExpirationStatus(expirationDate, normalizedStatus, t)
   }));
 
   useEffect(() => {
     // Don't update for drafts or if no expiration
     if (normalizedStatus === 'draft' || !expirationDate) {
       setTimeInfo({
-        time: getRemainingTime(expirationDate),
-        status: getExpirationStatus(expirationDate, normalizedStatus)
+        time: getRemainingTime(expirationDate, t),
+        status: getExpirationStatus(expirationDate, normalizedStatus, t)
       });
       return;
     }
-    
+
     const updateTime = () => {
-      const newTime = getRemainingTime(expirationDate);
-      const newStatus = getExpirationStatus(expirationDate, normalizedStatus);
+      const newTime = getRemainingTime(expirationDate, t);
+      const newStatus = getExpirationStatus(expirationDate, normalizedStatus, t);
 
       setTimeInfo({
         time: newTime,
@@ -239,7 +245,7 @@ export const useRealTimeExpiration = (expirationDate, status = 'published') => {
     
     // Smart interval based on remaining time
     let interval;
-    const timeRemaining = getRemainingTime(expirationDate);
+    const timeRemaining = getRemainingTime(expirationDate, t);
     
     if (timeRemaining.isExpired) {
       // No updates needed for expired guides

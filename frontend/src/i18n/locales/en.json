@@ -51,6 +51,7 @@
     "items": "items",
     "showing": "Showing {{shown}} of {{total}}",
     "more": "more",
+    "showLess": "Show Less",
     "characters": "characters",
     "close": "Close",
     "complete": "Complete",
@@ -95,10 +96,12 @@
   },
   "status": {
     "active": "Active",
-    "expired": "Expired", 
+    "expired": "Expired",
     "draft": "Draft",
+    "scheduled": "Scheduled",
     "published": "Published",
-    "archived": "Archived"
+    "archived": "Archived",
+    "unpublished": "Unpublished"
   },
   "languageSwitcher": {
     "english": "EN",
@@ -212,11 +215,12 @@
     "he": "Hebrew"
   },
   "dashboard": {
-    "title": "Dashboard", 
+    "title": "Dashboard",
     "subtitle": "Create visual guidance for unmapped spaces",
     "developmentMode": "🚧 Development mode: Load sample data for preview testing",
     "welcomeMessage": "Welcome, {{name}}",
     "welcomeDescription": "Here you can manage your guidance, view data and create new guidance quickly and easily",
+    "quickActions": "Quick Actions",
     "stepsCount": "Steps",
     "stats": {
       "totalGuides": "Total Guidance",
@@ -226,10 +230,15 @@
       "feedbackReceived": "Feedback Received",
       "feedbackSummary": "Feedback Summary",
       "feedbackSentiment": "Positive Feedback",
+      "positive": "positive",
       "negative": "negative",
       "noFeedbackYet": "No feedback yet",
       "completionRate": "Completion Rate",
+      "drafts": "drafts",
+      "completions": "completions",
+      "completionSubtitle": "Based on user interactions",
       "active": "active",
+      "scheduled": "scheduled",
       "uniqueVisitors": "unique visitors",
       "positive": "positive", 
       "completions": "completions",
@@ -271,6 +280,7 @@
         "status": "Status",
         "views": "Views",
         "expiry": "Expiry",
+        "created": "Created",
         "actions": "Actions"
       },
       "noData": {
@@ -287,6 +297,9 @@
         "created": "Created:",
         "views": "Views:",
         "remaining": "Remaining:",
+        "activatesIn": "Activates in:",
+        "noActivation": "No activation:",
+        "overdue": "Overdue:",
         "expired": "Expired:",
         "noExpiration": "No expiration"
       }
@@ -300,6 +313,10 @@
       "confirmDelete": "Confirm Delete",
       "copyLink": "Copy Link",
       "copyLinkError": "Failed to copy link",
+      "copyLinkDraftError": "Cannot copy link - guide must be published first",
+      "copyLinkExpiredError": "Cannot copy link - guide has expired and is no longer available",
+      "copyLinkScheduledError": "Cannot copy link - guide is scheduled for future publication",
+      "copyLinkUnpublishedError": "Cannot copy link - guide status: {{status}}",
       "copyLinkTooltip": "Copy sharing link",
       "deleteError": "Error deleting guide",
       "deleteSuccess": "Guide deleted successfully",
@@ -307,6 +324,26 @@
     },
     "preview": {
       "organizerNotice": "Organizer Preview - You can always view your guides, even after expiration"
+    },
+    "feedback": {
+      "noFeedbackYet": "No feedback yet",
+      "encourageFeedback": "Once users complete your guides, their feedback will appear here to help you improve.",
+      "insightsTitle": "Feedback Insights",
+      "insightsSubtitle": "User satisfaction and feedback analysis",
+      "viewDetails": "View Details",
+      "totalResponses": "Total Responses",
+      "satisfactionRate": "Satisfaction Rate",
+      "excellent": "Excellent",
+      "good": "Good",
+      "needsImprovement": "Needs Improvement",
+      "overallSatisfaction": "Overall Satisfaction",
+      "positive": "positive",
+      "negative": "negative",
+      "topPerformer": "Top Performing Guide",
+      "responses": "responses",
+      "satisfaction": "satisfaction",
+      "perGuideBreakdown": "Per Guide Breakdown",
+      "viewAllGuides": "View All Guides"
     },
     "error": {
       "loadFailed": "Failed to load dashboard data",
@@ -351,8 +388,18 @@
     "status": {
       "draft": "Draft",
       "published": "Published",
+      "scheduled": "Scheduled",
       "draftDescription": "Save as draft for later editing",
-      "publishedDescription": "Publish and make available to users"
+      "publishedDescription": "Publish and make available to users",
+      "scheduledDescription": "Guide is waiting for activation at the scheduled time",
+      "lifecycle": {
+        "willPublishIn": "Will be published in {{time}}",
+        "activeExpiresIn": "Active, expires in {{time}}",
+        "expiredAgo": "Expired {{time}} ago",
+        "activeNoExpiration": "Active",
+        "draft": "Draft",
+        "archived": "Archived"
+      }
     },
     "steps": {
       "title": "Steps",
@@ -390,6 +437,28 @@
       "noExpiration": "No expiration set",
       "draftNoExpiration": "No expiration (Draft)",
       "expirationInfo": "Participants will not be able to access the guide after the expiration date. Organizers retain full access.",
+      "someTime": "some time"
+    },
+    "activation": {
+      "title": "Activation Scheduling",
+      "subtitle": "Choose when your guide will be available to users",
+      "when": "When to activate the guide?",
+      "immediate": "Immediate",
+      "immediateDesc": "Guide will be available immediately after publishing",
+      "scheduled": "Scheduled",
+      "scheduledDesc": "Guide will be available at a scheduled time",
+      "dateTime": "Date and Time",
+      "date": "Date",
+      "time": "Time",
+      "preview": "Activation Preview",
+      "activatesAt": "Activates at:",
+      "pastDateWarning": "Past date or time is not valid",
+      "immediateActivation": "Guide will activate immediately upon publishing",
+      "scheduledActivation": "Guide will activate at the scheduled time",
+      "startTimeHelpText": "Set when the guide will be available to users - duration is set in expiration settings",
+      "noActivation": "No activation schedule",
+      "activatesIn": "Activates in {{time}}",
+      "overdue": "{{time}} overdue",
       "someTime": "some time"
     },
     "loading": {
@@ -487,6 +556,28 @@
       "title": "Final Actions",
       "preview": "Preview",
       "publish": "Publish Guidance"
+    },
+    "timing": {
+      "title": "Guide Timing",
+      "subtitle": "Set when the guide will be available and for how long",
+      "whenToStart": "When to start?",
+      "howLongActive": "How long active?",
+      "customDuration": "Custom",
+      "preview": "Preview",
+      "startTime": "Start",
+      "endTime": "End",
+      "immediatePreview": "The guide will be available immediately and expire in {{duration}}",
+      "scheduledPreview": "The guide will be available starting {{startTime}} for {{duration}}",
+      "helpText": "Participants can only access the guide during the set time. After expiration, only the organizer retains full access.",
+      "duration": {
+        "oneHour": "1 hour",
+        "threeHours": "3 hours",
+        "sixHours": "6 hours",
+        "twelveHours": "12 hours",
+        "twentyFourHours": "24 hours",
+        "hours": "{{count}} hours",
+        "hour": "{{count}} hour"
+      }
     },
     "navigation": {
       "title": "Navigation Link",
@@ -697,10 +788,6 @@
       "platformOverview": "Platform Overview",
       "liveData": "Live Data"
     },
-    "tabs": {
-      "overview": "Overview",
-      "ariaLabel": "Admin dashboard tabs"
-    },
     "feedback": {
       "title": "Feedback Analytics",
       "subtitle": "Last {{period}} days - {{count}} total feedback submissions",
@@ -722,7 +809,8 @@
         "subtitle": "\"Do you like the overall idea?\" responses",
         "likeIdea": "Like the Idea",
         "dislikeIdea": "Don't Like the Idea",
-        "approvalRate": "Concept Approval Rate"
+        "approvalRate": "Concept Approval Rate",
+        "totalResponses": "Total Responses"
       },
       "recentComments": {
         "title": "Recent Feedback Comments"
@@ -972,6 +1060,56 @@
       "currentValue": "Current",
       "threshold": "Threshold"
     },
+    "userFocused": {
+      "title": "User-Focused Analytics",
+      "subtitle": "Select an organizer to drill down into their guide performance",
+      "guidesTitle": "Guides by {{organizer}}",
+      "guidesSubtitle": "Select a guide to see detailed voting analytics",
+      "detailsTitle": "Analytics for \"{{guide}}\"",
+      "detailsSubtitle": "Detailed voting status and feedback breakdown",
+      "allOrganizers": "All Organizers",
+      "searchOrganizers": "Search Organizers",
+      "searchPlaceholder": "Search by username or name...",
+      "timePeriod": "Time Period",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "last90Days": "Last 90 Days",
+      "totalGuides": "Total Guides",
+      "totalFeedback": "Total Feedback",
+      "helpfulRate": "Helpful Rate",
+      "totalViews": "Total Views",
+      "views": "Views",
+      "feedback": "Feedback",
+      "likeRate": "Like Rate",
+      "completionRate": "Completion Rate",
+      "performance": "Performance",
+      "completions": "Completions",
+      "guideFeedback": "Guide Feedback",
+      "conceptFeedback": "Concept Feedback",
+      "helpful": "Helpful",
+      "notHelpful": "Not Helpful",
+      "liked": "Liked",
+      "disliked": "Disliked",
+      "guide": "Guide",
+      "founder": "Founder",
+      "recentFeedback": "Recent Feedback",
+      "noOrganizers": "No organizers found",
+      "noGuides": "No guides found for this organizer",
+      "noRecentFeedback": "No recent feedback available"
+    },
+    "feedbackAnalytics": {
+      "title": "Feedback Analytics",
+      "subtitle": "Comprehensive feedback analysis and insights"
+    },
+    "guides": {
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "expired": "Expired",
+        "archived": "Archived",
+        "active": "Active"
+      }
+    },
     "pilot": {
       "title": "Pilot Status",
       "subtitle": "How the program is doing right now",
@@ -1006,6 +1144,130 @@
     },
     "navigation": {
       "backToDashboard": "Back to Dashboard"
+    },
+    "production": {
+      "title": "Production Management",
+      "description": "Manage production data and prepare for launch",
+      "resetButton": "Reset Production Data",
+      "resetWarning": "⚠️ This will clear all analytics data",
+      "reset": {
+        "title": "Reset Production Data",
+        "message": "This will permanently delete all analytics data including views, feedback, and statistics. All guides will be preserved.",
+        "confirm": "Reset Production Data",
+        "detail1": "All visitor analytics and feedback will be deleted",
+        "detail2": "Guide statistics will be reset to zero",
+        "detail3": "All guides and their content will be preserved",
+        "detail4": "This action cannot be undone"
+      }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "feedbackManagement": "Feedback Management",
+      "ariaLabel": "Admin dashboard tabs"
+    },
+    "confirmDialog": {
+      "details": "Details",
+      "typeToConfirm": "Type '{{text}}' to confirm",
+      "typingMismatch": "Text does not match",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "processing": "Processing"
+    },
+    "feedback": {
+      "guideFeedback": {
+        "title": "Guide Feedback Analytics",
+        "subtitle": "User feedback on guide quality and clarity",
+        "helpful": "Helpful",
+        "notHelpful": "Not Helpful",
+        "helpfulRate": "Helpful Rate"
+      },
+      "conceptFeedback": {
+        "title": "Concept Feedback Analytics",
+        "subtitle": "User feedback on TrailGuide concept and approach",
+        "likeIdea": "Like the Idea",
+        "dislikeIdea": "Don't Like the Idea",
+        "approvalRate": "Concept Approval Rate"
+      },
+      "management": {
+        "title": "Feedback Management",
+        "description": "Search, view, and manage user feedback data"
+      },
+      "search": {
+        "title": "Search Feedback",
+        "visitorId": "Visitor ID",
+        "eventId": "Event ID",
+        "type": "Feedback Type",
+        "allTypes": "All Types",
+        "guide": "Guide Feedback",
+        "founder": "Founder Feedback",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "button": "Search"
+      },
+      "results": {
+        "showing": "Showing {{start}}-{{end}} of {{total}} results"
+      },
+      "guide": "Guide",
+      "organizer": "Organizer",
+      "visitorId": "Visitor ID",
+      "deleteUser": "Delete User",
+      "noResults": "No feedback found matching your search criteria",
+      "noRating": "No rating provided",
+      "type": {
+        "guide": "Guide",
+        "founder": "Founder"
+      },
+      "deleteUser": {
+        "title": "Delete User Feedback",
+        "message": "Delete all {{count}} feedback entries from visitor {{visitorId}}?",
+        "confirm": "Delete User Feedback",
+        "detail1": "All feedback from this visitor will be permanently deleted",
+        "detail2": "This includes all ratings, comments, and associated data",
+        "detail3": "This action cannot be undone"
+      },
+      "bulkDelete": {
+        "title": "Bulk Delete Feedback",
+        "message": "Delete {{count}} feedback entries matching your criteria?",
+        "confirm": "Bulk Delete Feedback"
+      }
+    }
+  },
+  "time": {
+    "units": {
+      "second": "second",
+      "seconds": "seconds",
+      "minute": "minute",
+      "minutes": "minutes",
+      "hour": "hour",
+      "hours": "hours",
+      "day": "day",
+      "days": "days",
+      "week": "week",
+      "weeks": "weeks",
+      "month": "month",
+      "months": "months",
+      "year": "year",
+      "years": "years"
+    },
+    "abbreviations": {
+      "s": "s",
+      "m": "m",
+      "h": "h",
+      "d": "d",
+      "w": "w"
+    },
+    "relative": {
+      "ago": "ago",
+      "in": "in",
+      "remaining": "remaining"
+    },
+    "formats": {
+      "timeAgo": "{{time}} {{unit}} ago",
+      "timeRemaining": "{{time}} {{unit}} remaining",
+      "timeIn": "in {{time}} {{unit}}",
+      "compactTimeAgo": "{{time}}{{unit}} ago",
+      "compactRemaining": "{{time}}{{unit}}",
+      "hoursAndMinutes": "{{hours}} {{hourUnit}} and {{minutes}} {{minuteUnit}}"
     }
   }
 }

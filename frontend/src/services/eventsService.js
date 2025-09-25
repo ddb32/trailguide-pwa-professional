@@ -223,6 +223,11 @@ class EventsService {
         'Content-Type': 'application/json',
       },
     });
+
+    // **REQUEST DEDUPLICATION**: Service-level safety net
+    this.requestCache = new Map(); // Cache for request deduplication
+    this.pendingRequests = new Map(); // Track pending requests to avoid duplicates
+    this.debugMode = process.env.NODE_ENV === 'development';
   }
 
   /**
@@ -672,7 +677,7 @@ class EventsService {
    */
   formatEventForDisplay(event) {
     if (!event) return null;
-    
+
     // **CRITICAL AUTO-CORRECTION**: Ensure event has required fields - PRODUCTION SAFETY
     const correctedEvent = {
       ...event,
@@ -682,7 +687,7 @@ class EventsService {
       // **AUTO-FIX**: Ensure critical fields exist with defaults
       id: event.id || event.event_id || `auto-id-${Date.now()}`,
       event_name: event.event_name || 'Untitled Event',
-      status: event.status || 'draft', 
+      status: event.status || 'draft',
       created: event.created || new Date().toISOString(),
       updated_at: event.updated_at || event.created || new Date().toISOString()
     };
@@ -771,12 +776,14 @@ class EventsService {
       id: correctedEvent.id,
       name: correctedEvent.event_name,
       slug: correctedEvent.slug,
-      status: this.mapEventStatus(correctedEvent.status, correctedEvent.expiration_date),
+      status: this.mapEventStatus(correctedEvent.status, correctedEvent.expiration_date, correctedEvent.activation_date),
       views: correctedEvent.clicks_count || 0,
       completion_count: correctedEvent.completion_count || 0,
       created: this.formatDate(correctedEvent.created_at || correctedEvent.created),
+      created_at: correctedEvent.created_at || correctedEvent.created, // Preserve raw ISO timestamp for components
       expires: correctedEvent.expiration_date ? this.formatDate(correctedEvent.expiration_date) : null,
       expiration_date: correctedEvent.expiration_date, // Preserve original field for real-time components
+      activation_date: correctedEvent.activation_date, // Preserve original field for scheduled activation support
       stepsCount: stepsCount, // Enhanced with fallback logic and validation
       metadata: correctedEvent.metadata || {},
       description: correctedEvent.metadata?.description, // Extract description for DataTable
@@ -798,21 +805,32 @@ class EventsService {
   }
 
   /**
-   * Map API event status to display status (considering expiration)
+   * Map API event status to display status (considering expiration and activation)
    * @param {string} status - API status
    * @param {string} expirationDate - ISO date string
+   * @param {string} activationDate - ISO date string
    * @returns {string} Display status
    */
-  mapEventStatus(status, expirationDate) {
+  mapEventStatus(status, expirationDate, activationDate) {
+    const now = new Date();
+
+    // Handle scheduled activation
+    if (activationDate) {
+      const activation = new Date(activationDate);
+      if (activation > now) {
+        return 'scheduled'; // Future activation - show as scheduled
+      }
+    }
+
+    // Handle expiration
     if (status === 'published' && expirationDate) {
       const expiration = new Date(expirationDate);
-      const now = new Date();
-      
+
       if (expiration <= now) {
         return 'expired';
       }
     }
-    
+
     // Map 'published' to 'active' for display
     return status === 'published' ? 'active' : status;
   }
@@ -1164,14 +1182,109 @@ class EventsService {
     }
   }
 
+
   /**
-   * Get a public event by ID (no authentication required)
+   * Generate a unique fingerprint for a request
+   */
+  generateRequestFingerprint(method, url, headers = {}) {
+    const fingerprint = {
+      method,
+      url,
+      visitorId: headers['x-visitor-id'] || 'anonymous',
+      sessionId: headers['x-session-id'] || null,
+      timestamp: Math.floor(Date.now() / 1000) // Round to seconds for deduplication window
+    };
+
+    return `${method}_${url}_${fingerprint.visitorId}_${fingerprint.sessionId}_${fingerprint.timestamp}`;
+  }
+
+  /**
+   * Check if request is duplicate within time window
+   */
+  isDuplicateRequest(fingerprint, maxAgeMs = 5000) {
+    const cached = this.requestCache.get(fingerprint);
+    if (!cached) return false;
+
+    const age = Date.now() - cached.timestamp;
+    if (age > maxAgeMs) {
+      this.requestCache.delete(fingerprint);
+      return false;
+    }
+
+    console.log('🛑 Service-level duplicate request detected:', {
+      fingerprint,
+      ageMs: age,
+      maxAgeMs
+    });
+
+    return true;
+  }
+
+  /**
+   * Enhanced getPublicEvent with request-level deduplication
    * Used for shareable guide links that can be viewed by anyone
-   * @param {string} eventId - UUID of the event 
+   * @param {string} eventId - UUID of the event
+   * @param {Object} analyticsHeaders - Analytics tracking headers
+   * @param {Object} options - Additional options
    * @returns {Promise<Object>} Event data with steps
    */
-  async getPublicEvent(eventId, analyticsHeaders = {}) {
+  async getPublicEvent(eventId, analyticsHeaders = {}, options = {}) {
+    const { allowDuplicates = false } = options;
+
+    // Generate request fingerprint for deduplication
+    const url = `/api/v1/public/events/${eventId}`;
+    const fingerprint = this.generateRequestFingerprint('GET', url, analyticsHeaders);
+
+    // Check for duplicate requests unless explicitly allowed
+    if (!allowDuplicates && this.isDuplicateRequest(fingerprint)) {
+      const cached = this.requestCache.get(fingerprint);
+      return cached.result;
+    }
+
+    // Check if same request is currently pending
+    if (this.pendingRequests.has(fingerprint)) {
+      if (this.debugMode) {
+        console.log('⏳ Request already pending, waiting for result:', fingerprint);
+      }
+      return await this.pendingRequests.get(fingerprint);
+    }
+
+    // Create the request promise and store it
+    const requestPromise = this.executePublicEventRequest(eventId, analyticsHeaders, fingerprint);
+    this.pendingRequests.set(fingerprint, requestPromise);
+
     try {
+      const result = await requestPromise;
+
+      // Cache successful result
+      this.requestCache.set(fingerprint, {
+        result,
+        timestamp: Date.now()
+      });
+
+      return result;
+    } catch (error) {
+      // Don't cache errors
+      throw error;
+    } finally {
+      // Clean up pending request
+      this.pendingRequests.delete(fingerprint);
+    }
+  }
+
+  /**
+   * Execute the actual public event request (separated for better error handling)
+   */
+  async executePublicEventRequest(eventId, analyticsHeaders = {}, fingerprint) {
+    try {
+      if (this.debugMode) {
+        console.log('📡 Making public event request:', {
+          eventId,
+          fingerprint,
+          hasHeaders: Object.keys(analyticsHeaders).length > 0
+        });
+      }
+
       // Enhanced visitor tracking: Include analytics headers if provided
       const headers = {
         ...analyticsHeaders

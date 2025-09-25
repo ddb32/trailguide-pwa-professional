@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguageDirection } from '../../hooks/useLanguageDirection';
 
-const ExpirationSettings = ({ 
-  value = 24, 
-  onChange, 
-  disabled = false, 
+const ExpirationSettings = ({
+  value = 24,
+  onChange,
+  disabled = false,
   className = '',
-  showPreview = true 
+  showPreview = true
 }) => {
   const { t } = useTranslation();
   const { isRTL, conditionalClass } = useLanguageDirection();
@@ -65,7 +65,9 @@ const ExpirationSettings = ({
   };
 
   return (
-    <div className={`bg-white rounded-lg lg:rounded-2xl shadow-sm lg:shadow-desktop p-6 lg:p-8 ${className}`}>
+    <div className={className}>
+      {/* Expiration Settings */}
+      <div className="bg-white rounded-lg lg:rounded-2xl shadow-sm lg:shadow-desktop p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6">
         <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-2">
@@ -181,6 +183,7 @@ const ExpirationSettings = ({
         <p>
           ℹ️ {t('createGuide.expiration.expirationInfo')}
         </p>
+      </div>
       </div>
     </div>
   );

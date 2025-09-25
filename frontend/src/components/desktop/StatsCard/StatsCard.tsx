@@ -105,61 +105,67 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  // Color variants using new semantic color system
+  // Professional color variants - business-grade design
   const variants = {
     primary: {
-      background: 'bg-gradient-to-br from-primary-50 to-primary-100',
-      border: 'border-primary-200',
-      icon: 'text-primary-600',
-      iconBg: 'bg-primary-100',
-      title: 'text-primary-900',
-      value: 'text-primary-800',
-      accent: 'bg-primary-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-blue-600',
+      iconBg: 'bg-blue-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-blue-600',
+      shadow: 'shadow-sm hover:shadow-md'
     },
     secondary: {
-      background: 'bg-gradient-to-br from-secondary-50 to-secondary-100',
-      border: 'border-secondary-200',
-      icon: 'text-secondary-600',
-      iconBg: 'bg-secondary-100',
-      title: 'text-secondary-900',
-      value: 'text-secondary-800',
-      accent: 'bg-secondary-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-indigo-600',
+      iconBg: 'bg-indigo-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-indigo-600',
+      shadow: 'shadow-sm hover:shadow-md'
     },
     success: {
-      background: 'bg-gradient-to-br from-success-50 to-success-100',
-      border: 'border-success-200',
-      icon: 'text-success-600',
-      iconBg: 'bg-success-100',
-      title: 'text-success-900',
-      value: 'text-success-800',
-      accent: 'bg-success-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-green-600',
+      iconBg: 'bg-green-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-green-600',
+      shadow: 'shadow-sm hover:shadow-md'
     },
     warning: {
-      background: 'bg-gradient-to-br from-warning-50 to-warning-100',
-      border: 'border-warning-200',
-      icon: 'text-warning-600',
-      iconBg: 'bg-warning-100',
-      title: 'text-warning-900',
-      value: 'text-warning-800',
-      accent: 'bg-warning-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-amber-600',
+      iconBg: 'bg-amber-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-amber-600',
+      shadow: 'shadow-sm hover:shadow-md'
     },
     error: {
-      background: 'bg-gradient-to-br from-error-50 to-error-100',
-      border: 'border-error-200',
-      icon: 'text-error-600',
-      iconBg: 'bg-error-100',
-      title: 'text-error-900',
-      value: 'text-error-800',
-      accent: 'bg-error-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-red-600',
+      iconBg: 'bg-red-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-red-600',
+      shadow: 'shadow-sm hover:shadow-md'
     },
     info: {
-      background: 'bg-gradient-to-br from-info-50 to-info-100',
-      border: 'border-info-200',
-      icon: 'text-info-600',
-      iconBg: 'bg-info-100',
-      title: 'text-info-900',
-      value: 'text-info-800',
-      accent: 'bg-info-500'
+      background: 'bg-white',
+      border: 'border-gray-200',
+      icon: 'text-cyan-600',
+      iconBg: 'bg-cyan-50',
+      title: 'text-gray-700',
+      value: 'text-gray-900',
+      accent: 'bg-cyan-600',
+      shadow: 'shadow-sm hover:shadow-md'
     }
   };
 
@@ -220,14 +226,10 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
   const cardClasses = `
     group relative overflow-hidden transform-gpu
-    bg-white rounded-2xl border shadow-lg
-    ${enhanced ? 'transition-all duration-500 ease-out' : 'transition-all duration-300 ease-out'}
-    ${enhanced && floatOnHover ?
-      'motion-safe:hover:shadow-xl motion-safe:hover:-translate-y-2 motion-safe:hover:scale-[1.02]' :
-      'hover:shadow-xl hover:-translate-y-1 hover:scale-[1.01]'
-    }
-    ${theme.border}
-    ${onClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500/30 active:scale-[0.98]' : ''}
+    ${theme.background} rounded-xl border
+    ${theme.shadow} ${theme.border}
+    transition-all duration-300 ease-out
+    ${onClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:scale-[0.98]' : ''}
     ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
     motion-reduce:transform-none motion-reduce:transition-none
     ${className}

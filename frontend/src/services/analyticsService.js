@@ -7,7 +7,7 @@ import { authService } from './authService';
 
 class AnalyticsService {
   constructor() {
-    this.baseURL = '/api/v1/analytics';
+    this.baseURL = '/analytics';
     this.axiosInstance = authService.axiosInstance;
   }
 

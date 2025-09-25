@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useLanguageDirection } from '../../hooks/useLanguageDirection';
-import { useAdminAnalytics } from '../../hooks/useAdminAnalytics';
+import { adminService } from '../../services/adminService';
 import { Icon } from '../../components/common/Icon';
 import { Button } from '../../components/common/Button/Button';
+import AdminConfirmDialog from '../../components/admin/AdminConfirmDialog/AdminConfirmDialog';
+import FeedbackManagement from '../../components/admin/FeedbackManagement/FeedbackManagement';
+import UserFocusedAnalytics from '../../components/admin/Analytics/UserFocusedAnalytics';
 
 // Types and Interfaces
 interface PlatformStats {
@@ -16,27 +19,6 @@ interface PlatformStats {
 }
 
 
-interface FeedbackStats {
-  totalFeedback: number;
-  avgRating: number;
-  likeRate: number;
-  [key: string]: any;
-}
-
-interface UsageStats {
-  dailyActiveUsers: number;
-  peakHours: string[];
-  [key: string]: any;
-}
-
-interface AdminAnalyticsData {
-  platformStats: PlatformStats | null;
-  feedbackStats: FeedbackStats | null;
-  usageStats: UsageStats | null;
-  isLoading: boolean;
-  error: string | null;
-  refreshAnalytics: () => Promise<void>;
-}
 
 interface AdminHeaderProps {
   title: string;
@@ -144,21 +126,79 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
-  const {
-    platformStats,
-    feedbackStats,
-    usageStats,
-    isLoading,
-    error,
-    refreshAnalytics
-  } = useAdminAnalytics({ days: 30 }) as AdminAnalyticsData;
+  // Production reset dialog state
+  const [resetDialog, setResetDialog] = useState<{
+    isOpen: boolean;
+    isLoading: boolean;
+  }>({ isOpen: false, isLoading: false });
+
+  // Optimized state management - only fetch platform stats for Overview
+  const [platformStats, setPlatformStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch only platform analytics for Overview tab
+  const fetchPlatformAnalytics = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await adminService.getPlatformAnalytics({ days: 30 });
+      if (response.success) {
+        setPlatformStats(response.data.summary);
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message;
+      setError(errorMessage);
+      console.error('Failed to fetch platform analytics:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Initialize platform analytics
+  useEffect(() => {
+    fetchPlatformAnalytics();
+  }, [fetchPlatformAnalytics]);
 
   const handleRetry = () => {
-    refreshAnalytics();
+    fetchPlatformAnalytics();
   };
 
   const handleBackToDashboard = () => {
     navigate('/app/dashboard');
+  };
+
+  // Production reset function
+  const handleProductionReset = async () => {
+    setResetDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await fetch('/api/v1/admin/analytics/reset', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ preserve_guides: true })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset analytics data');
+      }
+
+      const result = await response.json();
+      console.log('Production reset completed:', result);
+
+      // Refresh analytics data
+      fetchPlatformAnalytics();
+
+      setResetDialog({ isOpen: false, isLoading: false });
+    } catch (error) {
+      console.error('Production reset failed:', error);
+      setResetDialog(prev => ({ ...prev, isLoading: false }));
+      // Show error to user (you might want to add a toast notification here)
+    }
   };
 
   if (error) {
@@ -185,6 +225,8 @@ const AdminDashboard: React.FC = () => {
             <nav className="flex px-4 sm:px-6 lg:px-8" aria-label={t('admin.tabs.ariaLabel')}>
               {[
                 { id: 'overview', label: t('admin.tabs.overview'), icon: 'dashboard' },
+                { id: 'feedback_analytics', label: t('admin.feedbackAnalytics.title'), icon: 'analytics' },
+                { id: 'feedback_management', label: t('admin.tabs.feedbackManagement'), icon: 'settings' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -207,6 +249,34 @@ const AdminDashboard: React.FC = () => {
         <div className="space-y-4 sm:space-y-6 lg:space-y-8 xl:space-y-12">
           {activeTab === 'overview' && (
             <>
+          {/* Production Management Section */}
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-desktop p-4 sm:p-6 lg:p-8 border border-gray-100">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {t('admin.production.title')}
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                {t('admin.production.description')}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={() => setResetDialog({ isOpen: true, isLoading: false })}
+                  variant="danger"
+                  size="md"
+                  className="justify-center sm:w-auto"
+                >
+                  <Icon name="warning" size="sm" className="mr-2" />
+                  {t('admin.production.resetButton')}
+                </Button>
+
+                <div className="text-xs text-gray-500 self-center sm:ml-4">
+                  {t('admin.production.resetWarning')}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Pilot-Focused Overview Cards */}
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-desktop p-4 sm:p-6 lg:p-8 border border-gray-100">
             <div className="mb-8">
@@ -321,8 +391,8 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="text-2xl sm:text-3xl font-bold text-orange-900 mb-1 sm:mb-2">
                     {isLoading ? '...' : (
-                      feedbackStats?.statistics?.likeRate
-                        ? `${Math.round(feedbackStats.statistics.likeRate * 100)}%`
+                      platformStats?.platform_like_rate
+                        ? `${Math.round(platformStats.platform_like_rate * 100)}%`
                         : '0%'
                     )}
                   </div>
@@ -334,175 +404,42 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Pilot Feedback Analysis - Mobile Optimized */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-            {/* Guide Feedback Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-desktop p-4 sm:p-6 lg:p-8 border border-gray-100">
-              <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                    {t('admin.feedback.guideFeedback.title')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600 leading-tight">
-                    {t('admin.feedback.guideFeedback.subtitle')}
-                  </p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-                  <Icon name="guides" size="lg" className="text-white sm:hidden" ariaHidden />
-                  <Icon name="guides" size="xl" className="text-white hidden sm:block" ariaHidden />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                {/* Helpful */}
-                <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 mb-1 sm:mb-2">
-                    {feedbackStats?.statistics?.helpful_stats?.helpful || '0'}
-                  </div>
-                  <div className="text-xs sm:text-sm text-green-700 font-medium leading-tight">
-                    {t('admin.feedback.guideFeedback.helpful')}
-                  </div>
-                </div>
-
-                {/* Not Helpful */}
-                <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 mb-1 sm:mb-2">
-                    {feedbackStats?.statistics?.helpful_stats?.not_helpful || '0'}
-                  </div>
-                  <div className="text-xs sm:text-sm text-red-700 font-medium leading-tight">
-                    {t('admin.feedback.guideFeedback.notHelpful')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Helpful Rate */}
-              <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-1 sm:mb-2">
-                  {feedbackStats?.statistics?.helpful_stats?.helpful_rate
-                    ? `${Math.round(feedbackStats.statistics.helpful_stats.helpful_rate * 100)}%`
-                    : '0%'}
-                </div>
-                <div className="text-xs sm:text-sm text-blue-700 font-medium leading-tight">
-                  {t('admin.feedback.guideFeedback.helpfulRate')}
-                </div>
-              </div>
-            </div>
-
-            {/* Concept Feedback Section */}
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-desktop p-4 sm:p-6 lg:p-8 border border-gray-100">
-              <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
-                    {t('admin.feedback.conceptFeedback.title')}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600 leading-tight">
-                    {t('admin.feedback.conceptFeedback.subtitle')}
-                  </p>
-                </div>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-                  <Icon name="feedback" size="lg" className="text-white sm:hidden" ariaHidden />
-                  <Icon name="feedback" size="xl" className="text-white hidden sm:block" ariaHidden />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                {/* Positive */}
-                <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600 mb-1 sm:mb-2">
-                    {feedbackStats?.statistics?.like_stats?.likes || '0'}
-                  </div>
-                  <div className="text-xs sm:text-sm text-green-700 font-medium leading-tight">
-                    {t('admin.feedback.conceptFeedback.likeIdea')}
-                  </div>
-                </div>
-
-                {/* Negative */}
-                <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 mb-1 sm:mb-2">
-                    {feedbackStats?.statistics?.like_stats?.dislikes || '0'}
-                  </div>
-                  <div className="text-xs sm:text-sm text-red-700 font-medium leading-tight">
-                    {t('admin.feedback.conceptFeedback.dislikeIdea')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Like Rate */}
-              <div className="text-center p-3 sm:p-4 bg-purple-50 rounded-lg">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">
-                  {feedbackStats?.statistics?.like_stats?.like_rate
-                    ? `${Math.round(feedbackStats.statistics.like_stats.like_rate * 100)}%`
-                    : '0%'}
-                </div>
-                <div className="text-xs sm:text-sm text-purple-700 font-medium leading-tight">
-                  {t('admin.feedback.conceptFeedback.approvalRate')}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Feedback Comments - Mobile Optimized */}
-          {feedbackStats?.feedback && feedbackStats.feedback.length > 0 && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-desktop p-4 sm:p-6 lg:p-8 border border-gray-100">
-              <h4 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                {t('admin.feedback.recentComments.title')}
-              </h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                {feedbackStats.feedback.slice(0, 6).map((feedback, index) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                    {/* Header with badges and date */}
-                    <div className="flex flex-col space-y-2 mb-3">
-                      {/* Date - Always on top for mobile */}
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-500 font-medium">
-                          {new Date(feedback.submitted_at).toLocaleDateString('he-IL')}
-                        </span>
-                      </div>
-
-                      {/* Badges - Stack on mobile, inline on desktop */}
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                        {feedback.helpful !== null && (
-                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                            feedback.helpful ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {feedback.helpful ? t('admin.feedback.labels.helpful') : t('admin.feedback.labels.notHelpful')}
-                          </span>
-                        )}
-                        {feedback.liked !== null && (
-                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                            feedback.liked ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'
-                          }`}>
-                            {feedback.liked ? t('admin.feedback.labels.likeIdea') : t('admin.feedback.labels.dislikeIdea')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Feedback text */}
-                    {feedback.feedback_text && (
-                      <p className="text-sm text-gray-700 italic leading-relaxed mb-2">
-                        "{feedback.feedback_text}"
-                      </p>
-                    )}
-
-                    {/* Guide reference */}
-                    {feedback.guide && (
-                      <p className="text-xs text-gray-500 truncate">
-                        <span className="font-medium">{t('admin.feedback.labels.guide')}</span> {feedback.guide.name}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
 
             </>
           )}
 
+          {/* Feedback Analytics Tab */}
+          {activeTab === 'feedback_analytics' && (
+            <UserFocusedAnalytics />
+          )}
+
+          {/* Feedback Management Tab */}
+          {activeTab === 'feedback_management' && (
+            <FeedbackManagement />
+          )}
 
         </div>
+
+        {/* Production Reset Confirmation Dialog */}
+        <AdminConfirmDialog
+          isOpen={resetDialog.isOpen}
+          onClose={() => setResetDialog({ isOpen: false, isLoading: false })}
+          onConfirm={handleProductionReset}
+          title={t('admin.production.reset.title')}
+          message={t('admin.production.reset.message')}
+          confirmText={t('admin.production.reset.confirm')}
+          type="danger"
+          requiresTyping={true}
+          confirmationText="RESET PRODUCTION"
+          isLoading={resetDialog.isLoading}
+          details={[
+            t('admin.production.reset.detail1'),
+            t('admin.production.reset.detail2'),
+            t('admin.production.reset.detail3'),
+            t('admin.production.reset.detail4')
+          ]}
+        />
       </div>
     </div>
   );

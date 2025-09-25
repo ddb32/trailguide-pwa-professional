@@ -4,6 +4,12 @@ const { query, getClient } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 const { uploadSingleImage, handleUploadError, deleteUploadedFile } = require('../middleware/upload');
 const { v4: uuidv4 } = require('uuid');
+const {
+  nowInIsrael,
+  validateDateRange,
+  parseFrontendDate,
+  logWithTimezone
+} = require('../utils/timezone');
 
 const router = express.Router();
 
@@ -30,7 +36,12 @@ const eventValidation = [
     .optional()
     .isInt({ min: 1, max: 24 })
     .toInt()
-    .withMessage((value, { req }) => req.t('validation:event.expirationHoursRange'))
+    .withMessage((value, { req }) => req.t('validation:event.expirationHoursRange')),
+  body('activation_date')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage((value, { req }) => req.t('validation:event.activationDateInvalid'))
 ];
 
 const eventUpdateValidation = [
@@ -41,7 +52,7 @@ const eventUpdateValidation = [
     .withMessage((value, { req }) => req.t('validation:event.nameLength')),
   body('status')
     .optional()
-    .isIn(['draft', 'published', 'expired', 'archived'])
+    .isIn(['draft', 'scheduled', 'published', 'expired', 'archived'])
     .withMessage((value, { req }) => req.t('validation:event.statusInvalid')),
   body('metadata.description')
     .optional()
@@ -56,7 +67,12 @@ const eventUpdateValidation = [
     .optional()
     .isInt({ min: 1, max: 24 })
     .toInt()
-    .withMessage((value, { req }) => req.t('validation:event.expirationHoursRange'))
+    .withMessage((value, { req }) => req.t('validation:event.expirationHoursRange')),
+  body('activation_date')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage((value, { req }) => req.t('validation:event.activationDateInvalid'))
 ];
 
 const uuidValidation = [
@@ -166,12 +182,13 @@ router.get('/', authenticateToken, [
 
     // Get events with step count
     const eventsQuery = `
-      SELECT 
+      SELECT
         e.id,
         e.event_name,
         e.slug,
         e.status,
         e.expiration_date,
+        e.activation_date,
         e.clicks_count,
         e.unique_visitors_count,
         e.completion_count,
@@ -269,6 +286,7 @@ router.get('/:id', authenticateToken, uuidValidation, async (req, res) => {
         slug,
         status,
         expiration_date,
+        activation_date,
         clicks_count,
         unique_visitors_count,
         completion_count,
@@ -419,6 +437,7 @@ router.get('/:id/preview', authenticateToken, uuidValidation, async (req, res) =
         slug,
         status,
         expiration_date,
+        activation_date,
         clicks_count,
         unique_visitors_count,
         completion_count,
@@ -532,27 +551,27 @@ router.post('/text-only', authenticateToken, eventValidation, async (req, res) =
       });
     }
 
-    const { event_name, description, location, status, expiration_date, expiration_hours } = req.body;
+    const { event_name, description, location, status, expiration_date, expiration_hours, activation_date } = req.body;
     
     const trimmedEventName = event_name.trim();
     const slug = generateSlug(trimmedEventName);
     
-    // Set expiration date based on status and user preferences
+    // Set expiration date based on status and user preferences (using timezone utilities)
     let defaultExpirationDate = null;
-    
+
     // Only set expiration for published guides
     if (status === 'published') {
       if (expiration_date) {
-        // Use provided expiration date
-        const expDate = new Date(expiration_date);
-        if (isNaN(expDate.getTime())) {
+        // Use provided expiration date (parsed from frontend)
+        const expDate = parseFrontendDate(expiration_date);
+        if (!expDate) {
           return res.status(400).json({
             success: false,
             message: 'Invalid expiration date format',
             errors: [{ path: 'expiration_date', msg: 'Invalid date format' }]
           });
         }
-        // Validate expiration date is not in the past and not more than 24 hours
+        // Validate expiration date using timezone-aware utilities
         const now = new Date();
         const maxExpiration = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         if (expDate <= now) {
@@ -571,7 +590,7 @@ router.post('/text-only', authenticateToken, eventValidation, async (req, res) =
         }
         defaultExpirationDate = expDate;
       } else if (expiration_hours) {
-        // Use custom hours (1-24 hour range)
+        // Use custom hours (1-24 hour range) from current time
         const hours = Math.max(1, Math.min(24, expiration_hours));
         defaultExpirationDate = new Date(Date.now() + hours * 60 * 60 * 1000);
       } else {
@@ -580,6 +599,45 @@ router.post('/text-only', authenticateToken, eventValidation, async (req, res) =
       }
     }
     // For draft status, defaultExpirationDate remains null (no expiration)
+
+    // Set activation date based on user input or default to now (using timezone utilities)
+    let defaultActivationDate = null;
+
+    if (status === 'published' || status === 'scheduled') {
+      if (activation_date) {
+        // Use provided activation date (parsed from frontend)
+        const activationDate = parseFrontendDate(activation_date);
+        if (!activationDate) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid activation date format',
+            errors: [{ path: 'activation_date', msg: 'Invalid date format' }]
+          });
+        }
+
+        // Validate date range using timezone utilities
+        const validation = validateDateRange(activationDate, defaultExpirationDate);
+        if (!validation.isValid) {
+          return res.status(400).json({
+            success: false,
+            message: validation.errors[0],
+            errors: [{ path: 'activation_date', msg: validation.errors[0] }]
+          });
+        }
+
+        defaultActivationDate = activationDate;
+        logWithTimezone('Activation date set', {
+          activationDate: activationDate.toISOString(),
+          expirationDate: defaultExpirationDate?.toISOString()
+        });
+      } else {
+        // Default to current time for immediate activation
+        defaultActivationDate = new Date();
+      }
+    } else {
+      // For draft status, set activation_date to current time (will be updated when published)
+      defaultActivationDate = new Date();
+    }
 
     // Build metadata object (no image initially)
     const metadata = {};
@@ -619,14 +677,15 @@ router.post('/text-only', authenticateToken, eventValidation, async (req, res) =
       
       // Insert event with comprehensive error handling
       const result = await client.query(`
-        INSERT INTO events (organizer_id, event_name, slug, metadata, expiration_date, status)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING 
+        INSERT INTO events (organizer_id, event_name, slug, metadata, expiration_date, activation_date, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING
           id,
           event_name,
           slug,
           status,
           expiration_date,
+          activation_date,
           clicks_count,
           unique_visitors_count,
           completion_count,
@@ -634,7 +693,7 @@ router.post('/text-only', authenticateToken, eventValidation, async (req, res) =
           is_featured,
           created_at,
           updated_at
-      `, [req.user.id, trimmedEventName, finalSlug, JSON.stringify(metadata), defaultExpirationDate, status || 'draft']);
+      `, [req.user.id, trimmedEventName, finalSlug, JSON.stringify(metadata), defaultExpirationDate, defaultActivationDate, status || 'draft']);
 
       if (result.rows.length === 0) {
         throw new Error('Event creation failed - no data returned');
@@ -1265,8 +1324,8 @@ router.put('/:id', authenticateToken, [...uuidValidation, ...eventUpdateValidati
     // Get current status or use provided status
     const currentStatus = updates.status !== undefined ? updates.status : existingEventResult.rows[0].status;
     
-    // Handle expiration when status changes or when expiration fields are explicitly provided
-    if (updates.status !== undefined || updates.expiration_date !== undefined || updates.expiration_hours !== undefined) {
+    // Handle expiration and activation when status changes or when timing fields are explicitly provided
+    if (updates.status !== undefined || updates.expiration_date !== undefined || updates.expiration_hours !== undefined || updates.activation_date !== undefined) {
       let expirationDate = null;
       
       // Only set expiration for published guides
@@ -1303,8 +1362,56 @@ router.put('/:id', authenticateToken, [...uuidValidation, ...eventUpdateValidati
       updateFields.push(`expiration_date = $${paramCount}`);
       updateValues.push(expirationDate);
       paramCount++;
-      
-      console.log(`Status update: ${currentStatus}, Expiration set to: ${expirationDate}`);
+
+      // Handle activation date logic
+      let activationDate = null;
+
+      if (currentStatus === 'published' || currentStatus === 'scheduled') {
+        if (updates.activation_date) {
+          // Use provided activation date
+          const activDate = new Date(updates.activation_date);
+          if (isNaN(activDate.getTime())) {
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid activation date format',
+              errors: [{ path: 'activation_date', msg: 'Invalid date format' }]
+            });
+          }
+
+          // Validate activation date is not more than 30 days in the future
+          const now = new Date();
+          const maxActivation = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          if (activDate > maxActivation) {
+            return res.status(400).json({
+              success: false,
+              message: 'Activation date cannot be more than 30 days in the future',
+              errors: [{ path: 'activation_date', msg: 'Maximum activation is 30 days' }]
+            });
+          }
+
+          // Validate activation date is before expiration date (if expiration is set)
+          if (expirationDate && activDate >= expirationDate) {
+            return res.status(400).json({
+              success: false,
+              message: 'Activation date must be before expiration date',
+              errors: [{ path: 'activation_date', msg: 'Activation must be before expiration' }]
+            });
+          }
+
+          activationDate = activDate;
+        } else if (updates.status === 'published' || updates.status === 'scheduled') {
+          // Default to current time for immediate activation when publishing
+          activationDate = new Date();
+        }
+
+        if (activationDate) {
+          updateFields.push(`activation_date = $${paramCount}`);
+          updateValues.push(activationDate);
+          paramCount++;
+        }
+      }
+
+      console.log(`Status update: ${currentStatus}, Expiration set to: ${expirationDate}, Activation set to: ${activationDate}`);
     }
 
     if (updateFields.length === 0) {
@@ -1321,12 +1428,13 @@ router.put('/:id', authenticateToken, [...uuidValidation, ...eventUpdateValidati
       UPDATE events 
       SET ${updateFields.join(', ')}
       WHERE id = $${paramCount} AND organizer_id = $${paramCount + 1}
-      RETURNING 
+      RETURNING
         id,
         event_name,
         slug,
         status,
         expiration_date,
+        activation_date,
         clicks_count,
         unique_visitors_count,
         completion_count,

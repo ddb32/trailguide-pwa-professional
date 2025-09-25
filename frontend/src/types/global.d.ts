@@ -181,12 +181,14 @@ export interface FormattedEvent {
   id: string;
   name: string;
   slug?: string;
-  status: 'active' | 'expired' | 'draft' | 'published';
+  status: 'active' | 'expired' | 'draft' | 'published' | 'scheduled';
   views: number;
   completion_count: number;
   created: string;
+  created_at?: string; // Raw ISO timestamp for components to parse dates
   expires: string | null;
   expiration_date?: string;
+  activation_date?: string; // Added for scheduled activation support
   stepsCount: number;
   metadata: Record<string, any>;
   description?: string; // Extracted from metadata

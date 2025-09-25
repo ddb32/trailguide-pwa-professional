@@ -73,12 +73,13 @@ router.get('/overview', timeRangeValidation, async (req, res) => {
 
     const client = await getClient();
     try {
-      // Get overall statistics
+      // Get overall statistics with separated feedback and view analytics
       const overviewResult = await client.query(`
         SELECT
           COUNT(DISTINCT e.id) as total_guides,
           COUNT(DISTINCT e.id) FILTER (WHERE e.status = 'published') as published_guides,
           COUNT(DISTINCT e.id) FILTER (WHERE e.status = 'draft') as draft_guides,
+          -- View statistics (time-filtered)
           COUNT(DISTINCT ev.id) as total_views,
           COUNT(DISTINCT ev.visitor_id) FILTER (WHERE ev.visitor_id IS NOT NULL) as unique_visitors,
           COUNT(DISTINCT ev.id) FILTER (WHERE ev.completed = true) as completed_views,
@@ -86,9 +87,35 @@ router.get('/overview', timeRangeValidation, async (req, res) => {
             COUNT(DISTINCT ev.id) FILTER (WHERE ev.completed = true)::numeric /
             NULLIF(COUNT(DISTINCT ev.id), 0) * 100, 2
           ) as completion_rate,
-          COUNT(DISTINCT ev.device_type) as device_types_count
+          COUNT(DISTINCT ev.device_type) as device_types_count,
+          -- Feedback statistics (NOT dependent on time-filtered views)
+          COUNT(DISTINCT ef.id) as total_feedback,
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide') as guide_feedback_count,
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'founder') as founder_feedback_count,
+          -- Guide feedback: helpful/not helpful
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.helpful = true) as helpful_count,
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.helpful = false) as not_helpful_count,
+          -- Concept feedback: liked/disliked
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked = true) as positive_feedback,
+          COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked = false) as negative_feedback,
+          -- Calculate percentages
+          ROUND(
+            COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.helpful = true)::numeric /
+            NULLIF(COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.helpful IS NOT NULL), 0) * 100, 2
+          ) as helpful_rate,
+          ROUND(
+            COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked = true)::numeric /
+            NULLIF(COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked IS NOT NULL), 0) * 100, 2
+          ) as positive_feedback_rate,
+          ROUND(
+            COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked = false)::numeric /
+            NULLIF(COUNT(DISTINCT ef.id) FILTER (WHERE ef.feedback_type = 'guide' AND ef.liked IS NOT NULL), 0) * 100, 2
+          ) as negative_feedback_rate
         FROM events e
+        -- Time-filtered views for view analytics
         LEFT JOIN event_views ev ON e.id = ev.event_id ${timeCondition}
+        -- Direct feedback join (independent of view time filtering)
+        LEFT JOIN event_feedback ef ON e.id = ef.event_id
         WHERE e.organizer_id = $1 AND e.deleted_at IS NULL
       `, [userId]);
 

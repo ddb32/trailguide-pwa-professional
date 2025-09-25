@@ -177,10 +177,10 @@ const createRateLimiter = (windowMs, max, message, skipSuccessfulRequests = fals
   });
 };
 
-// Global API rate limiter - more restrictive
+// Global API rate limiter - environment-aware configuration
 const globalLimiter = createRateLimiter(
   15 * 60 * 1000, // 15 minutes
-  50, // Reduced from 100 to 50 requests per 15 minutes
+  process.env.NODE_ENV === 'development' ? 500 : 50, // Higher limit for development
   (req, res) => req.t ? req.t('common:rateLimiting.tooManyRequests') : 'Too many requests, please try again later'
 );
 

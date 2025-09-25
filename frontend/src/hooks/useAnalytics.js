@@ -29,8 +29,16 @@ export function useAnalytics(initialTimeRange = '30d') {
         setError(result.error);
       }
     } catch (err) {
-      setError('Failed to fetch analytics overview');
-      console.error('Overview fetch error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to fetch analytics overview';
+      setError(errorMessage);
+
+      // Only log detailed errors in development
+      if (import.meta.env?.DEV) {
+        console.error('Overview fetch error:', err);
+      } else {
+        // In production, log only essential error info
+        console.error('Analytics overview failed:', errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -54,8 +62,16 @@ export function useAnalytics(initialTimeRange = '30d') {
         setError(result.error);
       }
     } catch (err) {
-      setError('Failed to fetch guide analytics');
-      console.error('Guides fetch error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to fetch guide analytics';
+      setError(errorMessage);
+
+      // Only log detailed errors in development
+      if (import.meta.env?.DEV) {
+        console.error('Guides fetch error:', err);
+      } else {
+        // In production, log only essential error info
+        console.error('Analytics guides failed:', errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -79,7 +95,10 @@ export function useAnalytics(initialTimeRange = '30d') {
   // Set up auto-refresh interval (every 5 minutes)
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log('🔄 Auto-refreshing analytics data...');
+      // Only log in development mode
+      if (import.meta.env?.DEV) {
+        console.log('🔄 Auto-refreshing analytics data...');
+      }
       fetchOverview();
       fetchGuides();
     }, 5 * 60 * 1000); // 5 minutes

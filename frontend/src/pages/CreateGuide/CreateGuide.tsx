@@ -17,7 +17,7 @@ import { FormCard } from '../../components/desktop/FormCard';
 import StepEditor from '../../components/desktop/StepEditor/StepEditor';
 import FormPreview from '../../components/desktop/FormPreview/FormPreview';
 import FormValidation, { useFormValidation } from '../../components/desktop/FormValidation/FormValidation';
-import ExpirationSettings from '../../components/GuideCreation/ExpirationSettings';
+import TimingSettings from '../../components/GuideCreation/TimingSettings';
 
 // Types and Interfaces
 interface FormData {
@@ -54,6 +54,7 @@ interface SubmitData {
   location: string;
   status: 'draft' | 'published';
   expiration_hours: number;
+  activation_date?: Date | null;
   coverImage?: File | null;
   hasExistingCoverImage: boolean;
   existingCoverImageUrl?: string | null;
@@ -78,6 +79,7 @@ interface GuideLoadResponse {
     };
     cover_image_url?: string;
     expiration_date?: string;
+    activation_date?: string;
     created_at: string;
     steps?: {
       id: string;
@@ -774,6 +776,7 @@ const CreateGuide: React.FC = () => {
   const [isLoadingGuide, setIsLoadingGuide] = useState(false);
   const [existingCoverImage, setExistingCoverImage] = useState<string | null>(null);
   const [expirationHours, setExpirationHours] = useState(24);
+  const [activationDate, setActivationDate] = useState<Date | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   
@@ -1307,6 +1310,35 @@ const CreateGuide: React.FC = () => {
           setExistingCoverImage(guideData.cover_image_url);
           console.log('🖼️ Cover image loaded:', guideData.cover_image_url);
         }
+
+        // Process activation date
+        if (guideData.activation_date) {
+          const activationDateTime = new Date(guideData.activation_date);
+          setActivationDate(activationDateTime);
+          console.log('📅 Activation date loaded:', activationDateTime.toISOString());
+        }
+
+        // Process expiration date
+        if (guideData.expiration_date) {
+          const expirationDateTime = new Date(guideData.expiration_date);
+          // Calculate hours from activation date (or creation date if no activation)
+          const startTime = guideData.activation_date
+            ? new Date(guideData.activation_date)
+            : new Date(guideData.created_at);
+          const diffMs = expirationDateTime.getTime() - startTime.getTime();
+          const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+          // Ensure reasonable bounds (1-24 hours)
+          const clampedHours = Math.max(1, Math.min(24, diffHours));
+          setExpirationHours(clampedHours);
+
+          console.log('⏰ Expiration date processed:', {
+            expirationDate: expirationDateTime.toISOString(),
+            startTime: startTime.toISOString(),
+            diffHours,
+            clampedHours
+          });
+        }
         
         if (guideData.steps && guideData.steps.length > 0) {
           const processedSteps: StepData[] = guideData.steps.map((step, index) => ({
@@ -1408,6 +1440,7 @@ const CreateGuide: React.FC = () => {
         location: data.location?.trim() || '',
         status: data.status,
         expiration_hours: expirationHours,
+        activation_date: activationDate,
         coverImage: imageFile,
         hasExistingCoverImage: !!existingCoverImage,
         existingCoverImageUrl: existingCoverImage,
@@ -1942,14 +1975,15 @@ const CreateGuide: React.FC = () => {
               </FormCard>
             </div>
 
-            {/* Enhanced Expiration Settings */}
-            <div className="bg-white rounded-xl shadow-desktop border border-gray-100 overflow-hidden animate-fade-in animate-stagger-2">
-              <ExpirationSettings
-                value={expirationHours}
-                onChange={setExpirationHours}
+            {/* Unified Timing Settings */}
+            <div className="animate-fade-in animate-stagger-2 mb-6">
+              <TimingSettings
+                activationDate={activationDate}
+                expirationHours={expirationHours}
+                onActivationChange={setActivationDate}
+                onExpirationChange={setExpirationHours}
                 disabled={isSubmitting}
-                className="p-6"
-                showPreview={true}
+                className=""
               />
             </div>
 

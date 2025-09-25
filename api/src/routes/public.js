@@ -40,8 +40,27 @@ async function recordEventView(client, eventId, req) {
     let duplicateFound = false;
     let existingView = null;
 
-    // Layer 1: Strict session-based deduplication (same session within 30 minutes)
+    // Layer 0: Ultra-strict rapid request deduplication (same session within 30 seconds)
+    // This catches frontend double-loading issues like React Strict Mode
     if (sessionId) {
+      const rapidCheck = await client.query(`
+        SELECT id, viewed_at, 'rapid' as match_type
+        FROM event_views
+        WHERE event_id = $1
+          AND session_id = $2
+          AND viewed_at > NOW() - INTERVAL '30 seconds'
+        ORDER BY viewed_at DESC
+        LIMIT 1
+      `, [eventId, sessionId]);
+
+      if (rapidCheck.rows.length > 0) {
+        duplicateFound = true;
+        existingView = rapidCheck.rows[0];
+      }
+    }
+
+    // Layer 1: Strict session-based deduplication (same session within 30 minutes)
+    if (!duplicateFound && sessionId) {
       const sessionCheck = await client.query(`
         SELECT id, viewed_at, 'session' as match_type
         FROM event_views
@@ -138,11 +157,10 @@ async function recordEventView(client, eventId, req) {
       isReturning
     ]);
 
-    // Increment clicks count on event and calculate unique visitors more accurately
+    // Update unique visitors count (clicks_count is automatically handled by database trigger)
     await client.query(`
       UPDATE events
-      SET clicks_count = clicks_count + 1,
-          unique_visitors_count = (
+      SET unique_visitors_count = (
             SELECT COUNT(DISTINCT visitor_id)
             FROM event_views
             WHERE event_id = $1 AND visitor_id IS NOT NULL
