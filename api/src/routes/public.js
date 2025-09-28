@@ -261,7 +261,7 @@ router.get('/events/:id', uuidValidation, async (req, res) => {
 
       // Get event details - check both active and expired published events
       const eventResult = await client.query(`
-        SELECT 
+        SELECT
           id,
           event_name,
           slug,
@@ -270,10 +270,13 @@ router.get('/events/:id', uuidValidation, async (req, res) => {
           metadata,
           cover_image_url,
           cover_image_alt,
+          clicks_count,
+          unique_visitors_count,
+          completion_count,
           created_at,
-          CASE 
-            WHEN expiration_date IS NOT NULL AND expiration_date <= NOW() THEN true 
-            ELSE false 
+          CASE
+            WHEN expiration_date IS NOT NULL AND expiration_date <= NOW() THEN true
+            ELSE false
           END as is_expired
         FROM events
         WHERE id = $1 AND status = 'published'
@@ -373,7 +376,7 @@ router.get('/events/slug/:slug', slugValidation, async (req, res) => {
 
       // Get event details by slug - check both active and expired published events
       const eventResult = await client.query(`
-        SELECT 
+        SELECT
           id,
           event_name,
           slug,
@@ -382,10 +385,13 @@ router.get('/events/slug/:slug', slugValidation, async (req, res) => {
           metadata,
           cover_image_url,
           cover_image_alt,
+          clicks_count,
+          unique_visitors_count,
+          completion_count,
           created_at,
-          CASE 
-            WHEN expiration_date IS NOT NULL AND expiration_date <= NOW() THEN true 
-            ELSE false 
+          CASE
+            WHEN expiration_date IS NOT NULL AND expiration_date <= NOW() THEN true
+            ELSE false
           END as is_expired
         FROM events
         WHERE slug = $1 AND status = 'published'

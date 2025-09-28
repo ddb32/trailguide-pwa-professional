@@ -26,7 +26,28 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 # Build the application for production
-RUN npx vite build
+ENV NODE_ENV=production
+
+# Build arguments for environment variables
+ARG VITE_API_URL
+ARG VITE_APP_NAME
+ARG VITE_APP_VERSION
+ARG VITE_NODE_ENV
+ARG VITE_DEBUG
+ARG VITE_ENABLE_ANALYTICS
+ARG VITE_ENABLE_PWA
+
+# Set environment variables for Vite build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
+ENV VITE_NODE_ENV=${VITE_NODE_ENV}
+ENV VITE_DEBUG=${VITE_DEBUG}
+ENV VITE_ENABLE_ANALYTICS=${VITE_ENABLE_ANALYTICS}
+ENV VITE_ENABLE_PWA=${VITE_ENABLE_PWA}
+
+# Build the application
+RUN npx vite build --mode production
 
 # Production stage with nginx
 FROM nginx:1.25-alpine AS production

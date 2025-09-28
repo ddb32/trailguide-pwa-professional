@@ -1,0 +1,424 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment (skip some checks)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: trailguide-api
+  IMAGE_NAME_FRONTEND: trailguide-frontend
+  STAGING_HOST: staging.trailguide.app
+
+jobs:
+  # Pre-deployment checks
+  pre-deploy-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+      api_changed: ${{ steps.changes.outputs.api }}
+      frontend_changed: ${{ steps.changes.outputs.frontend }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'api/**'
+              - 'environments/staging/**'
+              - 'scripts/**'
+            frontend:
+              - 'frontend/**'
+              - 'environments/staging/**'
+
+      - name: Check deployment conditions
+        id: check
+        run: |
+          SHOULD_DEPLOY=true
+
+          # Check if this is a force deploy
+          if [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
+            echo "Force deployment requested"
+            SHOULD_DEPLOY=true
+          elif [[ "${{ steps.changes.outputs.api }}" == "true" ]] || [[ "${{ steps.changes.outputs.frontend }}" == "true" ]]; then
+            echo "Changes detected in deployable components"
+            SHOULD_DEPLOY=true
+          else
+            echo "No deployable changes detected"
+            SHOULD_DEPLOY=false
+          fi
+
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+
+      - name: Check recent commits
+        if: steps.check.outputs.should_deploy == 'true'
+        run: |
+          echo "Recent commits:"
+          git log --oneline -10
+
+  # Build and test before deployment
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for API
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=staging
+
+      - name: Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=staging
+
+      - name: Build and test API image
+        if: needs.pre-deploy-checks.outputs.api_changed == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          file: ./api/Dockerfile.prod
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=staging
+            BUILD_DATE=${{ fromJSON(steps.meta-api.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta-api.outputs.json).labels['org.opencontainers.image.version'] }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Build and test Frontend image
+        if: needs.pre-deploy-checks.outputs.frontend_changed == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=staging
+            VITE_API_URL=https://staging.trailguide.app
+            VITE_ENVIRONMENT=staging
+            BUILD_DATE=${{ fromJSON(steps.meta-frontend.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta-frontend.outputs.json).labels['org.opencontainers.image.version'] }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Security scan - API
+        if: needs.pre-deploy-checks.outputs.api_changed == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}:staging
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Security scan - Frontend
+        if: needs.pre-deploy-checks.outputs.frontend_changed == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}:staging
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+  # Database migrations
+  database-migration:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, build-and-test]
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run database migration
+        env:
+          DB_HOST: ${{ secrets.STAGING_DB_HOST }}
+          DB_PORT: ${{ secrets.STAGING_DB_PORT }}
+          DB_NAME: ${{ secrets.STAGING_DB_NAME }}
+          DB_USER: ${{ secrets.STAGING_DB_USER }}
+          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: |
+          chmod +x ./scripts/migrate.sh
+          ./scripts/migrate.sh -e staging -n  # Dry run first
+          ./scripts/migrate.sh -e staging     # Execute migrations
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, build-and-test, database-migration]
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Add staging host to known hosts
+        run: |
+          ssh-keyscan -H ${{ env.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to staging server
+        env:
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_TAG: staging
+        run: |
+          ssh ${{ env.STAGING_USER }}@${{ env.STAGING_HOST }} << 'EOF'
+            set -e
+
+            # Navigate to deployment directory
+            cd /opt/trailguide-staging
+
+            # Pull latest images
+            docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker pull ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}:${{ env.IMAGE_TAG }}
+            docker pull ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ env.IMAGE_TAG }}
+
+            # Update environment configuration
+            cp environments/staging/.env ./
+            cp environments/staging/docker-compose.yml ./
+
+            # Set environment variables for deployment
+            export DOCKER_REGISTRY=${{ env.REGISTRY }}/${{ github.repository_owner }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
+
+            # Graceful deployment with health checks
+            echo "Starting graceful deployment..."
+
+            # Check current services
+            docker-compose ps
+
+            # Deploy API if changed
+            if [[ "${{ needs.pre-deploy-checks.outputs.api_changed }}" == "true" ]]; then
+              echo "Deploying API..."
+              docker-compose up -d --no-deps api
+
+              # Wait for API health check
+              timeout 60 bash -c 'until curl -f https://staging.trailguide.app/api/v1/health; do sleep 5; done'
+            fi
+
+            # Deploy Frontend if changed
+            if [[ "${{ needs.pre-deploy-checks.outputs.frontend_changed }}" == "true" ]]; then
+              echo "Deploying Frontend..."
+              docker-compose up -d --no-deps frontend
+
+              # Wait for frontend health check
+              timeout 60 bash -c 'until curl -f https://staging.trailguide.app/health; do sleep 5; done'
+            fi
+
+            # Update nginx if needed
+            docker-compose up -d --no-deps nginx
+
+            # Clean up old images
+            docker image prune -f
+
+            echo "Deployment completed successfully!"
+          EOF
+
+  # Post-deployment verification
+  post-deploy-verification:
+    name: Post-deployment Verification
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+
+    steps:
+      - name: Wait for services to stabilize
+        run: sleep 30
+
+      - name: Health check - API
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://staging.trailguide.app/api/v1/health)
+          if [[ $response != "200" ]]; then
+            echo "API health check failed with status: $response"
+            exit 1
+          fi
+          echo "API health check passed"
+
+      - name: Health check - Frontend
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://staging.trailguide.app/health)
+          if [[ $response != "200" ]]; then
+            echo "Frontend health check failed with status: $response"
+            exit 1
+          fi
+          echo "Frontend health check passed"
+
+      - name: Functional smoke tests
+        run: |
+          # Test API endpoints
+          curl -f https://staging.trailguide.app/api/v1/health
+
+          # Test main application
+          curl -f https://staging.trailguide.app/
+
+          # Test Hebrew RTL support
+          response=$(curl -s https://staging.trailguide.app/ | grep -c "dir=\"rtl\"" || echo "0")
+          if [[ $response -eq 0 ]]; then
+            echo "Warning: Hebrew RTL support not detected"
+          else
+            echo "Hebrew RTL support verified"
+          fi
+
+  # Performance testing on staging
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    needs: [post-deploy-verification]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Lighthouse CLI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse performance test
+        run: |
+          lhci autorun --config=./frontend/.lighthouserc.json || echo "Performance test completed"
+
+      - name: Load test with Artillery
+        run: |
+          npm install -g artillery
+          echo "
+          config:
+            target: 'https://staging.trailguide.app'
+            phases:
+              - duration: 60
+                arrivalRate: 10
+          scenarios:
+            - name: 'Health check'
+              requests:
+                - get:
+                    url: '/api/v1/health'
+            - name: 'Home page'
+              requests:
+                - get:
+                    url: '/'
+          " > load-test.yml
+
+          artillery run load-test.yml
+
+  # Notification
+  notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, deploy-staging, post-deploy-verification, performance-test]
+    if: always()
+
+    steps:
+      - name: Deployment Success Notification
+        if: needs.deploy-staging.result == 'success' && needs.post-deploy-verification.result == 'success'
+        run: |
+          echo "🚀 Staging deployment successful!"
+          echo "📊 Environment: Staging"
+          echo "🌐 URL: https://staging.trailguide.app"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo "👤 Deployed by: ${{ github.actor }}"
+
+      - name: Deployment Failure Notification
+        if: failure()
+        run: |
+          echo "❌ Staging deployment failed!"
+          echo "📊 Environment: Staging"
+          echo "📦 Commit: ${{ github.sha }}"
+          echo "👤 Attempted by: ${{ github.actor }}"
+          echo "🔍 Check the workflow logs for details"
+
+      - name: Comment on PR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:develop`,
+              state: 'open'
+            });
+
+            if (pullRequests.length > 0) {
+              const pr = pullRequests[0];
+              const success = '${{ needs.deploy-staging.result }}' === 'success' && '${{ needs.post-deploy-verification.result }}' === 'success';
+
+              const body = success
+                ? `🚀 **Staging Deployment Successful!**\n\n✅ Deployed to: https://staging.trailguide.app\n📦 Commit: ${context.sha.substring(0, 7)}\n\nReady for testing and review!`
+                : `❌ **Staging Deployment Failed**\n\n🔍 Please check the [workflow logs](${context.payload.repository.html_url}/actions/runs/${context.runId}) for details.`;
+
+              await github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }

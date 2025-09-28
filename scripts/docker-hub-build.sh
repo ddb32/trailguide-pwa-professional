@@ -18,8 +18,8 @@ GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 VERSION=${1:-"latest"}
 
 # Docker Hub configuration
-DOCKER_HUB_USERNAME=${DOCKER_HUB_USERNAME:-""}
-REGISTRY_PREFIX=${DOCKER_HUB_USERNAME:-"trailguide"}
+DOCKER_HUB_USERNAME=${DOCKER_HUB_USERNAME:-"horenalon"}
+REGISTRY_PREFIX=${DOCKER_HUB_USERNAME:-"horenalon"}
 
 # Image names
 API_IMAGE="${REGISTRY_PREFIX}/trailguide-api"
@@ -112,22 +112,6 @@ build_api() {
 
     cd "$PROJECT_DIR"
 
-    # Build arguments
-    BUILD_ARGS="--build-arg BUILD_DATE=$BUILD_DATE"
-    BUILD_ARGS="$BUILD_ARGS --build-arg GIT_COMMIT=$GIT_COMMIT"
-    BUILD_ARGS="$BUILD_ARGS --build-arg GIT_BRANCH=$GIT_BRANCH"
-    BUILD_ARGS="$BUILD_ARGS --build-arg VERSION=$VERSION"
-
-    # Labels for metadata
-    LABELS="--label org.opencontainers.image.created=$BUILD_DATE"
-    LABELS="$LABELS --label org.opencontainers.image.source=https://github.com/trailguide/trailguide-pwa"
-    LABELS="$LABELS --label org.opencontainers.image.version=$VERSION"
-    LABELS="$LABELS --label org.opencontainers.image.revision=$GIT_COMMIT"
-    LABELS="$LABELS --label org.opencontainers.image.title=TrailGuide API"
-    LABELS="$LABELS --label org.opencontainers.image.description=TrailGuide PWA API backend with Hebrew RTL support"
-    LABELS="$LABELS --label org.opencontainers.image.vendor=TrailGuide Team"
-    LABELS="$LABELS --label org.opencontainers.image.licenses=MIT"
-
     # Build multi-architecture image
     docker buildx build \
         --platform "$PLATFORMS" \
@@ -135,11 +119,21 @@ build_api() {
         --tag "$API_IMAGE:$VERSION" \
         --tag "$API_IMAGE:latest" \
         --tag "$API_IMAGE:$GIT_COMMIT" \
-        $BUILD_ARGS \
-        $LABELS \
+        --build-arg BUILD_DATE="$BUILD_DATE" \
+        --build-arg GIT_COMMIT="$GIT_COMMIT" \
+        --build-arg GIT_BRANCH="$GIT_BRANCH" \
+        --build-arg VERSION="$VERSION" \
+        --label org.opencontainers.image.created="$BUILD_DATE" \
+        --label org.opencontainers.image.source=https://github.com/trailguide/trailguide-pwa \
+        --label org.opencontainers.image.version="$VERSION" \
+        --label org.opencontainers.image.revision="$GIT_COMMIT" \
+        --label org.opencontainers.image.title="TrailGuide API" \
+        --label org.opencontainers.image.description="TrailGuide PWA API backend with Hebrew RTL support" \
+        --label org.opencontainers.image.vendor="TrailGuide Team" \
+        --label org.opencontainers.image.licenses=MIT \
         --cache-from type=registry,ref="$API_IMAGE:cache" \
         --cache-to type=registry,ref="$API_IMAGE:cache,mode=max" \
-        --load \
+        --push \
         ./api
 
     print_success "API image built successfully"
@@ -151,24 +145,6 @@ build_frontend() {
 
     cd "$PROJECT_DIR"
 
-    # Build arguments for frontend
-    BUILD_ARGS="--build-arg BUILD_DATE=$BUILD_DATE"
-    BUILD_ARGS="$BUILD_ARGS --build-arg GIT_COMMIT=$GIT_COMMIT"
-    BUILD_ARGS="$BUILD_ARGS --build-arg GIT_BRANCH=$GIT_BRANCH"
-    BUILD_ARGS="$BUILD_ARGS --build-arg VERSION=$VERSION"
-    BUILD_ARGS="$BUILD_ARGS --build-arg VITE_API_URL=/api"
-    BUILD_ARGS="$BUILD_ARGS --build-arg VITE_PUBLIC_URL=/"
-
-    # Labels for metadata
-    LABELS="--label org.opencontainers.image.created=$BUILD_DATE"
-    LABELS="$LABELS --label org.opencontainers.image.source=https://github.com/trailguide/trailguide-pwa"
-    LABELS="$LABELS --label org.opencontainers.image.version=$VERSION"
-    LABELS="$LABELS --label org.opencontainers.image.revision=$GIT_COMMIT"
-    LABELS="$LABELS --label org.opencontainers.image.title=TrailGuide Frontend"
-    LABELS="$LABELS --label org.opencontainers.image.description=TrailGuide PWA React frontend with Hebrew RTL support"
-    LABELS="$LABELS --label org.opencontainers.image.vendor=TrailGuide Team"
-    LABELS="$LABELS --label org.opencontainers.image.licenses=MIT"
-
     # Build multi-architecture image
     docker buildx build \
         --platform "$PLATFORMS" \
@@ -176,11 +152,23 @@ build_frontend() {
         --tag "$FRONTEND_IMAGE:$VERSION" \
         --tag "$FRONTEND_IMAGE:latest" \
         --tag "$FRONTEND_IMAGE:$GIT_COMMIT" \
-        $BUILD_ARGS \
-        $LABELS \
+        --build-arg BUILD_DATE="$BUILD_DATE" \
+        --build-arg GIT_COMMIT="$GIT_COMMIT" \
+        --build-arg GIT_BRANCH="$GIT_BRANCH" \
+        --build-arg VERSION="$VERSION" \
+        --build-arg VITE_API_URL=/api \
+        --build-arg VITE_PUBLIC_URL=/ \
+        --label org.opencontainers.image.created="$BUILD_DATE" \
+        --label org.opencontainers.image.source=https://github.com/trailguide/trailguide-pwa \
+        --label org.opencontainers.image.version="$VERSION" \
+        --label org.opencontainers.image.revision="$GIT_COMMIT" \
+        --label org.opencontainers.image.title="TrailGuide Frontend" \
+        --label org.opencontainers.image.description="TrailGuide PWA React frontend with Hebrew RTL support" \
+        --label org.opencontainers.image.vendor="TrailGuide Team" \
+        --label org.opencontainers.image.licenses=MIT \
         --cache-from type=registry,ref="$FRONTEND_IMAGE:cache" \
         --cache-to type=registry,ref="$FRONTEND_IMAGE:cache,mode=max" \
-        --load \
+        --push \
         ./frontend
 
     print_success "Frontend image built successfully"
@@ -266,7 +254,8 @@ main() {
     setup_buildx
     build_api
     build_frontend
-    verify_images
+    # Skip local verification since images are pushed directly to registry
+    # verify_images
     show_summary
 }
 

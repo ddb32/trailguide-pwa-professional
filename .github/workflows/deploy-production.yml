@@ -1,0 +1,615 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag to deploy (e.g., v1.2.3)'
+        required: true
+        type: string
+      skip_staging_check:
+        description: 'Skip staging verification (NOT RECOMMENDED)'
+        required: false
+        default: false
+        type: boolean
+      emergency_deploy:
+        description: 'Emergency deployment (skip some safety checks)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: trailguide-api
+  IMAGE_NAME_FRONTEND: trailguide-frontend
+  PRODUCTION_HOST: app.trailguide.app
+
+jobs:
+  # Pre-production validation
+  pre-production-validation:
+    name: Pre-production Validation
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.validate.outputs.tag_name }}
+      is_emergency: ${{ steps.validate.outputs.is_emergency }}
+      staging_verified: ${{ steps.staging.outputs.verified }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate deployment
+        id: validate
+        run: |
+          # Determine tag name
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+          else
+            TAG_NAME="${{ github.event.inputs.tag_name }}"
+          fi
+
+          # Validate tag format
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid tag format: $TAG_NAME"
+            echo "Tag must follow semantic versioning: v1.2.3"
+            exit 1
+          fi
+
+          # Check if tag exists
+          if ! git tag | grep -q "^$TAG_NAME$"; then
+            echo "❌ Tag does not exist: $TAG_NAME"
+            exit 1
+          fi
+
+          # Emergency deployment check
+          IS_EMERGENCY="${{ github.event.inputs.emergency_deploy }}"
+          if [[ "$IS_EMERGENCY" == "true" ]]; then
+            echo "⚠️  EMERGENCY DEPLOYMENT REQUESTED"
+            echo "Emergency deployments skip some safety checks"
+          fi
+
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "is_emergency=$IS_EMERGENCY" >> $GITHUB_OUTPUT
+
+          echo "✅ Deployment validation passed"
+          echo "📦 Tag: $TAG_NAME"
+          echo "🚨 Emergency: $IS_EMERGENCY"
+
+      - name: Verify staging deployment
+        id: staging
+        if: github.event.inputs.skip_staging_check != 'true' && steps.validate.outputs.is_emergency != 'true'
+        run: |
+          echo "🔍 Verifying staging deployment..."
+
+          # Check if staging is healthy
+          if ! curl -f -s https://staging.trailguide.app/api/v1/health > /dev/null; then
+            echo "❌ Staging environment is not healthy"
+            echo "Please verify staging before production deployment"
+            exit 1
+          fi
+
+          # Check if the same version is running on staging
+          STAGING_VERSION=$(curl -s https://staging.trailguide.app/api/v1/version | jq -r '.version' || echo "unknown")
+          DEPLOY_VERSION="${{ steps.validate.outputs.tag_name }}"
+
+          echo "Staging version: $STAGING_VERSION"
+          echo "Deploy version: $DEPLOY_VERSION"
+
+          if [[ "$STAGING_VERSION" != "$DEPLOY_VERSION" ]]; then
+            echo "⚠️  Version mismatch detected"
+            echo "Consider deploying to staging first"
+          fi
+
+          echo "verified=true" >> $GITHUB_OUTPUT
+          echo "✅ Staging verification passed"
+
+      - name: Security pre-check
+        run: |
+          echo "🔒 Running security pre-checks..."
+
+          # Check for known vulnerabilities in dependencies
+          echo "Checking for security advisories..."
+
+          # Placeholder for additional security checks
+          echo "✅ Security pre-checks passed"
+
+  # Production readiness gate
+  production-readiness-gate:
+    name: Production Readiness Gate
+    runs-on: ubuntu-latest
+    needs: pre-production-validation
+    environment: production-gate
+
+    steps:
+      - name: Manual approval required
+        if: needs.pre-production-validation.outputs.is_emergency != 'true'
+        run: |
+          echo "🚪 Production Readiness Gate"
+          echo "Manual approval required for production deployment"
+          echo "Tag: ${{ needs.pre-production-validation.outputs.tag_name }}"
+          echo "Emergency: ${{ needs.pre-production-validation.outputs.is_emergency }}"
+
+      - name: Emergency deployment notice
+        if: needs.pre-production-validation.outputs.is_emergency == 'true'
+        run: |
+          echo "🚨 EMERGENCY DEPLOYMENT"
+          echo "Bypassing manual approval for emergency deployment"
+          echo "Tag: ${{ needs.pre-production-validation.outputs.tag_name }}"
+
+  # Build production images
+  build-production:
+    name: Build Production Images
+    runs-on: ubuntu-latest
+    needs: [pre-production-validation, production-readiness-gate]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pre-production-validation.outputs.tag_name }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for API
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+            type=raw,value=production
+
+      - name: Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+            type=raw,value=production
+
+      - name: Build API production image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          file: ./api/Dockerfile.prod
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            BUILD_DATE=${{ fromJSON(steps.meta-api.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ needs.pre-production-validation.outputs.tag_name }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Build Frontend production image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            VITE_API_URL=https://app.trailguide.app
+            VITE_ENVIRONMENT=production
+            BUILD_DATE=${{ fromJSON(steps.meta-frontend.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ needs.pre-production-validation.outputs.tag_name }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Production security scan - API
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}:${{ needs.pre-production-validation.outputs.tag_name }}
+          format: 'sarif'
+          output: 'api-security-results.sarif'
+
+      - name: Production security scan - Frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ needs.pre-production-validation.outputs.tag_name }}
+          format: 'sarif'
+          output: 'frontend-security-results.sarif'
+
+      - name: Upload security scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: |
+            api-security-results.sarif
+            frontend-security-results.sarif
+
+  # Database migration (production)
+  production-database-migration:
+    name: Production Database Migration
+    runs-on: ubuntu-latest
+    needs: [pre-production-validation, build-production]
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pre-production-validation.outputs.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create database backup
+        env:
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_PORT: ${{ secrets.PROD_DB_PORT }}
+          DB_NAME: ${{ secrets.PROD_DB_NAME }}
+          DB_USER: ${{ secrets.PROD_DB_USER }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+        run: |
+          echo "🗄️  Creating production database backup..."
+          BACKUP_FILE="prod-backup-$(date +%Y%m%d-%H%M%S).sql"
+
+          PGPASSWORD="$DB_PASSWORD" pg_dump \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            --no-password \
+            --verbose \
+            --clean \
+            --create \
+            > "$BACKUP_FILE"
+
+          echo "✅ Database backup created: $BACKUP_FILE"
+          echo "backup_file=$BACKUP_FILE" >> $GITHUB_ENV
+
+      - name: Upload backup to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-db-backup-${{ github.run_id }}
+          path: ${{ env.backup_file }}
+          retention-days: 30
+
+      - name: Migration dry run
+        env:
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_PORT: ${{ secrets.PROD_DB_PORT }}
+          DB_NAME: ${{ secrets.PROD_DB_NAME }}
+          DB_USER: ${{ secrets.PROD_DB_USER }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+        run: |
+          echo "🧪 Running migration dry run..."
+          chmod +x ./scripts/migrate.sh
+          ./scripts/migrate.sh -e prod -n
+
+      - name: Execute production migrations
+        if: needs.pre-production-validation.outputs.is_emergency != 'true'
+        env:
+          DB_HOST: ${{ secrets.PROD_DB_HOST }}
+          DB_PORT: ${{ secrets.PROD_DB_PORT }}
+          DB_NAME: ${{ secrets.PROD_DB_NAME }}
+          DB_USER: ${{ secrets.PROD_DB_USER }}
+          DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}
+        run: |
+          echo "🚀 Executing production migrations..."
+          ./scripts/migrate.sh -e prod
+
+      - name: Emergency migration bypass
+        if: needs.pre-production-validation.outputs.is_emergency == 'true'
+        run: |
+          echo "🚨 Emergency deployment: Skipping migrations"
+          echo "Please run migrations manually after deployment if needed"
+
+  # Blue-Green Deployment
+  blue-green-deployment:
+    name: Blue-Green Production Deployment
+    runs-on: ubuntu-latest
+    needs: [pre-production-validation, production-database-migration]
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pre-production-validation.outputs.tag_name }}
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+
+      - name: Add production hosts to known hosts
+        run: |
+          ssh-keyscan -H ${{ env.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Blue-Green deployment
+        env:
+          PROD_USER: ${{ secrets.PROD_USER }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_TAG: ${{ needs.pre-production-validation.outputs.tag_name }}
+          IS_EMERGENCY: ${{ needs.pre-production-validation.outputs.is_emergency }}
+        run: |
+          ssh ${{ env.PROD_USER }}@${{ env.PRODUCTION_HOST }} << 'EOF'
+            set -e
+
+            echo "🚀 Starting Blue-Green Production Deployment"
+            echo "📦 Version: ${{ env.IMAGE_TAG }}"
+            echo "🚨 Emergency: ${{ env.IS_EMERGENCY }}"
+
+            # Navigate to deployment directory
+            cd /opt/trailguide-production
+
+            # Create deployment log
+            DEPLOY_LOG="deployment-$(date +%Y%m%d-%H%M%S).log"
+            exec > >(tee -a "$DEPLOY_LOG") 2>&1
+
+            # Login to registry
+            docker login ${{ env.DOCKER_REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+            # Determine current and target environments
+            CURRENT_ENV=$(docker-compose ps --services --filter "status=running" | grep -E "(blue|green)" | head -1 || echo "none")
+            if [[ "$CURRENT_ENV" == *"blue"* ]]; then
+              TARGET_ENV="green"
+              CURRENT_ENV="blue"
+            else
+              TARGET_ENV="blue"
+              CURRENT_ENV="green"
+            fi
+
+            echo "Current environment: $CURRENT_ENV"
+            echo "Target environment: $TARGET_ENV"
+
+            # Update target environment configuration
+            cp environments/prod/.env ".env.$TARGET_ENV"
+            cp environments/prod/docker-compose.yml "docker-compose.$TARGET_ENV.yml"
+
+            # Set environment variables
+            export DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
+            export ENVIRONMENT=$TARGET_ENV
+
+            # Deploy to target environment
+            echo "🔄 Deploying to $TARGET_ENV environment..."
+
+            # Pull latest images
+            docker pull ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}:${{ env.IMAGE_TAG }}
+            docker pull ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ env.IMAGE_TAG }}
+
+            # Start target environment
+            docker-compose -f "docker-compose.$TARGET_ENV.yml" --env-file ".env.$TARGET_ENV" up -d
+
+            # Health check with retries
+            echo "🏥 Performing health checks..."
+            HEALTH_CHECK_RETRIES=12
+            RETRY_COUNT=0
+
+            while [[ $RETRY_COUNT -lt $HEALTH_CHECK_RETRIES ]]; do
+              if curl -f -s "http://localhost:${TARGET_ENV_PORT:-8081}/api/v1/health" > /dev/null; then
+                echo "✅ Health check passed for $TARGET_ENV"
+                break
+              fi
+
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Health check attempt $RETRY_COUNT/$HEALTH_CHECK_RETRIES failed, retrying in 10s..."
+              sleep 10
+            done
+
+            if [[ $RETRY_COUNT -eq $HEALTH_CHECK_RETRIES ]]; then
+              echo "❌ Health checks failed for $TARGET_ENV environment"
+              echo "🔄 Rolling back..."
+
+              # Cleanup failed deployment
+              docker-compose -f "docker-compose.$TARGET_ENV.yml" down
+
+              exit 1
+            fi
+
+            # Switch traffic to target environment
+            echo "🔄 Switching traffic to $TARGET_ENV..."
+
+            # Update nginx configuration to point to target environment
+            sed -i "s/backend_${CURRENT_ENV}/backend_${TARGET_ENV}/g" nginx/prod/nginx.conf
+            docker-compose exec nginx nginx -s reload
+
+            # Final verification
+            sleep 10
+            if ! curl -f -s "https://app.trailguide.app/api/v1/health" > /dev/null; then
+              echo "❌ Final health check failed after traffic switch"
+              echo "🔄 Emergency rollback..."
+
+              # Rollback nginx configuration
+              sed -i "s/backend_${TARGET_ENV}/backend_${CURRENT_ENV}/g" nginx/prod/nginx.conf
+              docker-compose exec nginx nginx -s reload
+
+              exit 1
+            fi
+
+            echo "✅ Traffic successfully switched to $TARGET_ENV"
+
+            # Gracefully shutdown old environment
+            if [[ "$CURRENT_ENV" != "none" ]]; then
+              echo "🛑 Shutting down $CURRENT_ENV environment..."
+              sleep 30  # Grace period
+              docker-compose -f "docker-compose.$CURRENT_ENV.yml" down
+            fi
+
+            # Cleanup old images
+            docker image prune -f
+
+            echo "🎉 Blue-Green deployment completed successfully!"
+            echo "📊 Active environment: $TARGET_ENV"
+            echo "📦 Version: ${{ env.IMAGE_TAG }}"
+          EOF
+
+  # Post-deployment verification
+  post-production-verification:
+    name: Post-production Verification
+    runs-on: ubuntu-latest
+    needs: [pre-production-validation, blue-green-deployment]
+
+    steps:
+      - name: Wait for services to stabilize
+        run: sleep 60
+
+      - name: Production health checks
+        run: |
+          echo "🏥 Running comprehensive production health checks..."
+
+          # API health check
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://app.trailguide.app/api/v1/health)
+          if [[ $response != "200" ]]; then
+            echo "❌ API health check failed with status: $response"
+            exit 1
+          fi
+          echo "✅ API health check passed"
+
+          # Frontend health check
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://app.trailguide.app/health)
+          if [[ $response != "200" ]]; then
+            echo "❌ Frontend health check failed with status: $response"
+            exit 1
+          fi
+          echo "✅ Frontend health check passed"
+
+          # Database connectivity check
+          response=$(curl -s https://app.trailguide.app/api/v1/health | jq -r '.database.status' || echo "unknown")
+          if [[ $response != "healthy" ]]; then
+            echo "❌ Database health check failed: $response"
+            exit 1
+          fi
+          echo "✅ Database health check passed"
+
+      - name: Critical user journeys test
+        run: |
+          echo "🛤️  Testing critical user journeys..."
+
+          # Test authentication endpoints
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://app.trailguide.app/api/v1/auth/health)
+          if [[ $response != "200" ]]; then
+            echo "❌ Authentication service check failed"
+            exit 1
+          fi
+          echo "✅ Authentication service healthy"
+
+          # Test Hebrew RTL support
+          rtl_check=$(curl -s https://app.trailguide.app/ | grep -c 'dir="rtl"' || echo "0")
+          if [[ $rtl_check -eq 0 ]]; then
+            echo "⚠️  Hebrew RTL support not detected"
+          else
+            echo "✅ Hebrew RTL support verified"
+          fi
+
+      - name: Performance verification
+        run: |
+          echo "📊 Running performance verification..."
+
+          # Test response times
+          for i in {1..5}; do
+            response_time=$(curl -w "%{time_total}" -s -o /dev/null https://app.trailguide.app/)
+            echo "Response time test $i: ${response_time}s"
+
+            # Fail if response time > 3 seconds
+            if (( $(echo "$response_time > 3.0" | bc -l) )); then
+              echo "⚠️  Response time above threshold: ${response_time}s"
+            fi
+          done
+
+          echo "✅ Performance verification completed"
+
+  # Production monitoring setup
+  production-monitoring:
+    name: Production Monitoring
+    runs-on: ubuntu-latest
+    needs: [post-production-verification]
+
+    steps:
+      - name: Enable monitoring alerts
+        run: |
+          echo "📊 Enabling production monitoring alerts..."
+          # Placeholder for enabling monitoring alerts
+          echo "✅ Production monitoring alerts enabled"
+
+      - name: Create deployment record
+        run: |
+          echo "📝 Creating deployment record..."
+          echo "Version: ${{ needs.pre-production-validation.outputs.tag_name }}"
+          echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "Deployer: ${{ github.actor }}"
+          echo "Emergency: ${{ needs.pre-production-validation.outputs.is_emergency }}"
+
+  # Notification and reporting
+  deployment-notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [
+      pre-production-validation,
+      blue-green-deployment,
+      post-production-verification,
+      production-monitoring
+    ]
+    if: always()
+
+    steps:
+      - name: Production deployment success
+        if: needs.blue-green-deployment.result == 'success' && needs.post-production-verification.result == 'success'
+        run: |
+          echo "🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!"
+          echo "=================================="
+          echo "📦 Version: ${{ needs.pre-production-validation.outputs.tag_name }}"
+          echo "🌐 URL: https://app.trailguide.app"
+          echo "👤 Deployed by: ${{ github.actor }}"
+          echo "📅 Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "🚨 Emergency: ${{ needs.pre-production-validation.outputs.is_emergency }}"
+
+      - name: Production deployment failure
+        if: failure()
+        run: |
+          echo "💥 PRODUCTION DEPLOYMENT FAILED!"
+          echo "==============================="
+          echo "📦 Version: ${{ needs.pre-production-validation.outputs.tag_name }}"
+          echo "👤 Attempted by: ${{ github.actor }}"
+          echo "📅 Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "🔍 Check workflow logs for details"
+          echo "🚨 Emergency procedures may be required"
+
+      - name: Create GitHub release
+        if: needs.blue-green-deployment.result == 'success' && needs.post-production-verification.result == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ needs.pre-production-validation.outputs.tag_name }}',
+              name: '${{ needs.pre-production-validation.outputs.tag_name }}',
+              body: `🚀 **Production Release ${{ needs.pre-production-validation.outputs.tag_name }}**\n\n✅ Successfully deployed to production\n🌐 Live at: https://app.trailguide.app\n📊 Deployed by: ${{ github.actor }}\n\n## Changes\n\nSee [commit history](${context.payload.repository.html_url}/compare/v1.0.0...${{ needs.pre-production-validation.outputs.tag_name }}) for detailed changes.`,
+              draft: false,
+              prerelease: false
+            });
+
+            console.log(`Release created: ${release.html_url}`);

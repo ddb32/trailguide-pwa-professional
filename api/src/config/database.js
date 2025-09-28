@@ -34,8 +34,8 @@ const dbConfig = {
   connectionTimeoutMillis: 15000,
   acquireTimeoutMillis: 15000,
   application_name: 'trailguide-api',
-  // Security: Enable SSL in production
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Security: Enable SSL based on environment variable (respects DB_SSL_ENABLED)
+  ssl: process.env.DB_SSL_ENABLED === 'true' ? { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' } : false,
 };
 
 // Log configuration (without password)

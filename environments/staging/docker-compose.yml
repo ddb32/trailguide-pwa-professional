@@ -1,0 +1,233 @@
+version: '3.8'
+
+# TrailGuide Staging Environment
+# Production-like environment for testing and validation
+
+services:
+  # API Backend - Staging
+  api:
+    image: ${DOCKER_REGISTRY}/${API_IMAGE_NAME}:${IMAGE_TAG:-staging}
+    container_name: trailguide-api-staging
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=staging
+      - ENVIRONMENT=staging
+    volumes:
+      - api_staging_uploads:/app/uploads
+      - api_staging_logs:/app/logs
+      - ../../monitoring:/app/monitoring
+    networks:
+      - trailguide-staging
+      - monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend - Staging
+  frontend:
+    image: ${DOCKER_REGISTRY}/${FRONTEND_IMAGE_NAME}:${IMAGE_TAG:-staging}
+    container_name: trailguide-frontend-staging
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=staging
+      - ENVIRONMENT=staging
+    networks:
+      - trailguide-staging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # NGINX Reverse Proxy - Staging
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: trailguide-nginx-staging
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl:ro
+      - nginx_staging_logs:/var/log/nginx
+      - nginx_staging_cache:/var/cache/nginx
+    networks:
+      - trailguide-staging
+    depends_on:
+      api:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost/api/v1/health", "-k"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: trailguide-prometheus-staging
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ../../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_staging_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    profiles:
+      - monitoring
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: trailguide-grafana-staging
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_DOMAIN=staging.trailguide.app
+      - GF_SERVER_ROOT_URL=https://staging.trailguide.app/grafana/
+    volumes:
+      - grafana_staging_data:/var/lib/grafana
+      - ../../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    profiles:
+      - monitoring
+    depends_on:
+      - prometheus
+
+  # Log Aggregation - Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: trailguide-loki-staging
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_staging_data:/tmp/loki
+      - ../../monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring
+    profiles:
+      - monitoring
+
+  # Log Collection - Promtail
+  promtail:
+    image: grafana/promtail:latest
+    container_name: trailguide-promtail-staging
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ../../monitoring/promtail.yml:/etc/promtail/config.yml:ro
+    networks:
+      - monitoring
+    profiles:
+      - monitoring
+    depends_on:
+      - loki
+
+  # Database Backup Service
+  backup:
+    image: postgres:15-alpine
+    container_name: trailguide-backup-staging
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      - PGPASSWORD=${DB_PASSWORD}
+    volumes:
+      - ../../scripts/backup.sh:/backup.sh:ro
+      - backup_staging_data:/backups
+    command: /bin/sh -c "chmod +x /backup.sh && /backup.sh"
+    networks:
+      - trailguide-staging
+    profiles:
+      - backup
+
+volumes:
+  api_staging_uploads:
+    driver: local
+  api_staging_logs:
+    driver: local
+  nginx_staging_logs:
+    driver: local
+  nginx_staging_cache:
+    driver: local
+  prometheus_staging_data:
+    driver: local
+  grafana_staging_data:
+    driver: local
+  loki_staging_data:
+    driver: local
+  backup_staging_data:
+    driver: local
+
+networks:
+  trailguide-staging:
+    driver: bridge
+    name: trailguide-staging-network
+  monitoring:
+    driver: bridge
+    name: trailguide-monitoring-network
